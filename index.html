@@ -1,0 +1,4032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Into Glovebox Workflow</title>
+  <!-- Ant Design 4 样式：Steps / Button / Tag 等与 React 版视觉一致 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@4.24.16/dist/antd.min.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    #diagram-wrap {
+      width: 100%;
+      overflow: auto;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    #diagram-wrap svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    #diagram-wrap svg .svg-inkscape-button {
+      cursor: pointer;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      z-index: 2000;
+      max-width: min(92vw, 420px);
+      padding: 10px 16px;
+      background: #323232;
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.4;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    #modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.45);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #modal.open {
+      display: flex;
+    }
+
+    #modal-out {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.45);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #modal-out.open {
+      display: flex;
+    }
+
+    .flow-modal-panel {
+      position: relative;
+      width: 100%;
+      /* 左侧 Steps + 分割线 + 右侧表格（.flow-batch-inner ≥1080px）需一并容纳 */
+      max-width: min(98vw, 1580px);
+      max-height: min(92vh, 900px);
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12);
+      padding: 20px 24px 16px;
+    }
+
+    /* Out modal: narrow when only steps; full width when batch / loop strip is shown (stays wide for loop passes). */
+    #modal-out-inner.flow-modal-panel {
+      width: auto;
+      max-width: min(92vw, 560px);
+    }
+    #modal-out-inner.flow-modal-panel.modal-out-inner--wide {
+      width: 100%;
+      max-width: min(98vw, 1580px);
+    }
+
+    /* In modal：仅步骤时窄；出现右侧批量表后加宽，多轮 loop 期间保持宽直至 reset */
+    #modal-inner.flow-modal-panel {
+      width: auto;
+      max-width: min(92vw, 560px);
+    }
+    #modal-inner.flow-modal-panel.modal-inner--wide {
+      width: 100%;
+      max-width: min(98vw, 1580px);
+    }
+
+    .flow-modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-shrink: 0;
+      margin-bottom: 20px;
+    }
+    .flow-modal-header-main {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      min-width: 0;
+    }
+    .flow-modal-in-badge {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #e6f4ff;
+      color: #1677ff;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flow-modal-out-badge {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #fff2e8;
+      color: #d4380d;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flow-modal-titles h1 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.88);
+      line-height: 1.35;
+    }
+    .flow-modal-titles p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(0, 0, 0, 0.45);
+    }
+    .flow-modal-close {
+      flex-shrink: 0;
+      margin: -4px -6px 0 0;
+      padding: 6px;
+      border: none;
+      background: transparent;
+      color: rgba(0, 0, 0, 0.45);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .flow-modal-close:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: rgba(0, 0, 0, 0.88);
+    }
+
+    /* 主内容：左侧 Steps | 分割线 | 右侧批量表（步骤三） */
+    .flow-modal-body-split {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: 0;
+      margin-bottom: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding-bottom: 8px;
+      box-sizing: border-box;
+    }
+    .flow-modal-steps-col {
+      flex: 0 1 380px;
+      max-width: min(380px, 36%);
+      min-width: min(100%, 260px);
+    }
+    .flow-modal-batch-split {
+      display: flex;
+      flex: 1 1 0;
+      min-width: 0;
+      align-items: stretch;
+    }
+    .flow-modal-batch-split[hidden] {
+      display: none !important;
+    }
+    .flow-modal-split-rule {
+      flex-shrink: 0;
+      width: 1px;
+      align-self: stretch;
+      min-height: 80px;
+      background: #f0f0f0;
+      margin: 0 16px;
+    }
+    .flow-modal-side-inner {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .flow-modal-side-inner .flow-batch-table-wrap {
+      margin-top: 0;
+      margin-bottom: 8px;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    .flow-modal-side-inner .flow-step2-actions {
+      margin-top: 0;
+    }
+    @media (max-width: 768px) {
+      .flow-modal-body-split {
+        flex-direction: column;
+      }
+      .flow-modal-steps-col {
+        flex: 1 1 auto;
+        max-width: 100%;
+      }
+      .flow-modal-batch-split {
+        flex-direction: column;
+      }
+      .flow-modal-split-rule {
+        width: 100%;
+        height: 1px;
+        min-height: 0;
+        margin: 12px 0;
+      }
+    }
+
+    /* 垂直 Steps 区域：与 Ant Design Vertical Step 一致 */
+    .flow-ant-steps-wrap {
+      margin-bottom: 0;
+    }
+    .flow-ant-steps-wrap .ant-steps-vertical.ant-steps-small .ant-steps-item-container {
+      padding-bottom: 8px;
+    }
+    .flow-step-title-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .flow-step-title-text {
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.88);
+    }
+    .flow-step-desc-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(0, 0, 0, 0.45);
+    }
+    .flow-step-desc-list li {
+      margin-bottom: 4px;
+    }
+    .flow-step-desc-single {
+      margin: 8px 0 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(0, 0, 0, 0.45);
+    }
+    .flow-step-inline-actions {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .flow-step-inline-actions .ant-btn[disabled] {
+      cursor: not-allowed;
+    }
+    /* Step 1：换气策略（初始 disabled；Start 后为选中 active；仅展示不可点选） */
+    .flow-step1-vent-strategy {
+      margin-top: 12px;
+    }
+    .flow-step1-vent-radio.ant-radio-wrapper {
+      display: inline-flex;
+      align-items: flex-start;
+      margin-right: 0;
+      white-space: normal;
+      cursor: default;
+      pointer-events: none;
+      user-select: none;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+    }
+    .flow-step1-vent-radio .ant-radio {
+      top: 3px;
+    }
+    .flow-step1-vent-radio-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding-left: 2px;
+      max-width: 100%;
+    }
+    .flow-step1-vent-radio-title {
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(0, 0, 0, 0.88);
+    }
+    .flow-step1-vent-radio-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: normal;
+      color: rgba(0, 0, 0, 0.45);
+    }
+    /* Start 完成后：选中项不透明蓝底 + 外框 */
+    .flow-step1-vent-radio.flow-step1-vent-option-highlight {
+      padding: 12px 14px;
+      border: 1px solid #0958d9;
+      border-radius: 8px;
+      background: #1677ff;
+    }
+    .flow-step1-vent-radio.flow-step1-vent-option-highlight .flow-step1-vent-radio-title {
+      color: #ffffff;
+    }
+    .flow-step1-vent-radio.flow-step1-vent-option-highlight .flow-step1-vent-radio-desc {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .flow-step1-vent-radio.flow-step1-vent-option-highlight .ant-radio-checked .ant-radio-inner {
+      border-color: #ffffff !important;
+      background-color: #ffffff !important;
+    }
+    .flow-step1-vent-radio.flow-step1-vent-option-highlight .ant-radio-checked .ant-radio-inner::after {
+      background-color: #1677ff;
+    }
+    /* Step 1：环境读数表格（仅步骤一 Confirm 点击后出现） */
+    .flow-step2-metrics-wrap[hidden] {
+      display: none !important;
+    }
+    .flow-step2-metrics-wrap {
+      margin-top: 12px;
+      overflow-x: auto;
+      max-width: 100%;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+    .flow-step4-inner-purge-metrics {
+      margin-top: 12px;
+      /* Match step 1 metrics: cancel ol padding so width and left edge align with #flow-step2-metrics-wrap */
+      margin-left: -18px;
+      width: calc(100% + 18px);
+      max-width: none;
+      box-sizing: border-box;
+    }
+    /* Into glovebox: identical column grid for step 1 and step 4 metrics tables */
+    #into-flow-steps .flow-step2-metrics-table {
+      table-layout: fixed;
+    }
+    #into-flow-steps .flow-step2-metrics-table th:nth-child(1),
+    #into-flow-steps .flow-step2-metrics-table td:nth-child(1) {
+      width: 26%;
+    }
+    #into-flow-steps .flow-step2-metrics-table th:nth-child(2),
+    #into-flow-steps .flow-step2-metrics-table td:nth-child(2) {
+      width: 22%;
+    }
+    #into-flow-steps .flow-step2-metrics-table th:nth-child(3),
+    #into-flow-steps .flow-step2-metrics-table td:nth-child(3) {
+      width: 22%;
+    }
+    #into-flow-steps .flow-step2-metrics-table th:nth-child(4),
+    #into-flow-steps .flow-step2-metrics-table td:nth-child(4) {
+      width: 30%;
+    }
+    .flow-step2-metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .flow-step2-metrics-table th,
+    .flow-step2-metrics-table td {
+      padding: 8px 12px;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .flow-step2-metrics-table thead th {
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.65);
+      background: #fff;
+    }
+    .flow-step2-metrics-table tbody td {
+      color: rgba(0, 0, 0, 0.85);
+    }
+    .flow-step2-purge-cycle-cell {
+      font-variant-numeric: tabular-nums;
+      vertical-align: middle;
+    }
+    .flow-step2-purge-cycle-inner {
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .flow-step2-purge-cycle-num {
+      display: inline-block;
+      min-width: 0.65em;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+    .flow-step2-purge-cycle-suffix {
+      display: inline-block;
+      user-select: none;
+      font-weight: 400;
+    }
+    @keyframes flow-step2-purge-tick {
+      0% {
+        transform: translateY(35%);
+        opacity: 0.25;
+      }
+      55% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .flow-step2-purge-cycle-num.is-ticking {
+      animation: flow-step2-purge-tick 0.42s ease-out;
+    }
+    .flow-step2-actions {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .flow-step2-refresh-btn.ant-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      min-width: 32px;
+      height: 32px;
+      padding: 0;
+    }
+    .flow-step2-refresh-btn .anticon {
+      line-height: 0;
+    }
+    .flow-step2-refresh-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    .flow-step2-actions .ant-btn[disabled] {
+      cursor: not-allowed;
+    }
+
+    /* Step 2：批量录入表（进入手动步骤后显示） */
+    .flow-batch-table-wrap {
+      margin-top: 12px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      max-width: 100%;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+    .flow-batch-table-wrap[hidden] {
+      display: none !important;
+    }
+    .flow-batch-table-wrap.flow-batch-submitted {
+      border-color: #b7eb8f;
+      background: #f6ffed;
+    }
+    .flow-batch-submitted-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #d9f7be;
+      background: #f6ffed;
+    }
+    .flow-batch-submitted-bar[hidden] {
+      display: none !important;
+    }
+    .out-batch-cycle-bar {
+      border-bottom-color: #91d5ff;
+      background: #e6f7ff;
+    }
+    /* Outbound tray row tint + English legend */
+    .out-batch-tray-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fafafa;
+      font-size: 12px;
+      line-height: 1.45;
+      color: rgba(0, 0, 0, 0.75);
+    }
+    .out-batch-tray-legend-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .out-batch-tray-legend-swatch {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      margin-top: 2px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .out-batch-tray-legend-empty .out-batch-tray-legend-swatch {
+      background: #f6ffed;
+      border-color: #b7eb8f;
+    }
+    .out-batch-tray-legend-stock .out-batch-tray-legend-swatch {
+      background: #e6f7ff;
+      border-color: #91d5ff;
+    }
+    .out-batch-tray-legend-item strong {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.88);
+    }
+    .out-batch-tray-legend-desc {
+      display: block;
+      color: rgba(0, 0, 0, 0.55);
+    }
+    #out-flow-step4-batch-table-wrap tbody tr[data-out-tray='empty'] td {
+      background: #f6ffed;
+    }
+    #out-flow-step4-batch-table-wrap tbody tr[data-out-tray='consumable'] td {
+      background: #e6f7ff;
+    }
+    #out-flow-step4-batch-table-wrap.flow-batch-submitted tbody tr[data-out-tray='empty'] td {
+      background: #f6ffed !important;
+    }
+    #out-flow-step4-batch-table-wrap.flow-batch-submitted tbody tr[data-out-tray='consumable'] td {
+      background: #e6f7ff !important;
+    }
+    .flow-batch-submitted-hint {
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.55);
+    }
+    .flow-batch-table-wrap.flow-batch-submitted tbody td {
+      background: #fafafa;
+    }
+    .flow-batch-table-wrap.flow-batch-submitted .ant-input[disabled],
+    .flow-batch-table-wrap.flow-batch-submitted select.flow-batch-select:disabled {
+      color: rgba(0, 0, 0, 0.65);
+      background: #f5f5f5 !important;
+      border-color: #d9d9d9 !important;
+      cursor: not-allowed;
+      opacity: 1;
+    }
+    .flow-batch-table-wrap.flow-batch-submitted .flow-batch-detail-btn:disabled {
+      color: rgba(0, 0, 0, 0.25);
+      cursor: not-allowed;
+    }
+    .flow-batch-table-wrap .flow-batch-inner {
+      min-width: 1080px;
+      padding: 0;
+    }
+    #out-flow-step4-batch-table-wrap .flow-batch-inner {
+      min-width: 1160px;
+    }
+    /* 出料表：仅复选框可点；条码/架型/耗材/数量为只读展示 */
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody input.ant-input[id^='out-batch-barcode-'],
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody input.ant-input[id^='out-batch-qty-'] {
+      cursor: default;
+      color: rgba(0, 0, 0, 0.85);
+      background: #f5f5f5;
+    }
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody select.flow-batch-select:disabled {
+      color: rgba(0, 0, 0, 0.85);
+      background: #f5f5f5 !important;
+      border-color: #d9d9d9 !important;
+      cursor: not-allowed;
+      opacity: 1;
+    }
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly .flow-batch-detail-btn:disabled {
+      color: rgba(0, 0, 0, 0.25);
+      cursor: not-allowed;
+    }
+    /* Readonly fields: tint to match row (empty / stock) */
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='empty'] td input.ant-input[id^='out-batch-barcode-'],
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='empty'] td input.ant-input[id^='out-batch-qty-'] {
+      background: #ecf9ee !important;
+      border-color: #c8e6c9 !important;
+    }
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='consumable'] td input.ant-input[id^='out-batch-barcode-'],
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='consumable'] td input.ant-input[id^='out-batch-qty-'] {
+      background: #e3f2fd !important;
+      border-color: #b5d9f5 !important;
+    }
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='empty'] td select.flow-batch-select:disabled {
+      background: #ecf9ee !important;
+      border-color: #c8e6c9 !important;
+    }
+    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='consumable'] td select.flow-batch-select:disabled {
+      background: #e3f2fd !important;
+      border-color: #b5d9f5 !important;
+    }
+    #out-flow-step4-batch-table-wrap tbody tr.out-batch-row-peeled {
+      display: none !important;
+    }
+    .flow-batch-position-label {
+      display: inline-block;
+      min-width: 2.5em;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.88);
+    }
+    .flow-batch-checkbox-th,
+    .flow-batch-checkbox-cell {
+      width: 44px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .flow-batch-checkbox-th {
+      padding-left: 8px;
+      padding-right: 8px;
+      vertical-align: middle;
+    }
+    .flow-batch-rack-checkbox {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #1677ff;
+    }
+    .flow-batch-table-wrap.flow-batch-submitted .flow-batch-rack-checkbox:disabled {
+      cursor: not-allowed;
+      opacity: 1;
+    }
+    .flow-batch-table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .flow-batch-table-wrap thead th {
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.88);
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      white-space: nowrap;
+    }
+    .flow-batch-table-wrap tbody td {
+      padding: 10px 12px;
+      vertical-align: middle;
+      border-bottom: none;
+      background: #fff;
+    }
+    .flow-batch-table-wrap tbody tr + tr td {
+      border-top: 1px solid #f0f0f0;
+    }
+    .flow-batch-table-wrap .ant-input,
+    .flow-batch-table-wrap select.flow-batch-select {
+      width: 100%;
+      min-width: 120px;
+      font-size: 14px;
+    }
+    .flow-batch-table-wrap select.flow-batch-select {
+      height: 32px;
+      padding: 4px 11px;
+      color: rgba(0, 0, 0, 0.88);
+      background: #fafafa;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .flow-batch-table-wrap select.flow-batch-select:hover {
+      border-color: #4096ff;
+    }
+    .flow-batch-detail-cell {
+      text-align: center;
+      vertical-align: middle;
+    }
+    .flow-batch-detail-btn {
+      border: none;
+      background: none;
+      padding: 4px 8px;
+      margin: 0;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .flow-batch-detail-btn:hover {
+      color: #1677ff;
+    }
+
+    /* 与 anticon-spin 配套的加载圈（不依赖 @ant-design/icons 字体） */
+    .flow-ad-spin {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      vertical-align: -0.125em;
+    }
+    .flow-ad-spin svg {
+      width: 16px;
+      height: 16px;
+      animation: flowAdRotate 0.8s linear infinite;
+    }
+    @keyframes flowAdRotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* 底部一行：左侧 Terminate（始终），右侧 Confirm（流程结束后显示） */
+    .flow-modal-footer-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 18px;
+      border-top: 1px solid #f0f0f0;
+      background: #ffffff;
+    }
+    #modal-footer-close {
+      margin-left: auto;
+    }
+    #modal-footer-close:not(.visible) {
+      display: none;
+    }
+    #modal-out-footer-close {
+      margin-left: auto;
+    }
+    #modal-out-footer-close:not(.visible) {
+      display: none;
+    }
+
+    #flow-modal-start.ant-btn,
+    #out-flow-modal-start.ant-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #flow-modal-start .flow-btn-start-icon,
+    #out-flow-modal-start .flow-btn-start-icon {
+      display: inline-flex;
+      line-height: 0;
+    }
+    #flow-modal-start .flow-btn-start-icon svg,
+    #out-flow-modal-start .flow-btn-start-icon svg {
+      width: 16px;
+      height: 16px;
+      vertical-align: -0.125em;
+    }
+
+    /* Terminate 二次确认（叠在主弹窗之上） */
+    #terminate-confirm-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: rgba(0, 0, 0, 0.55);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #terminate-confirm-modal.open {
+      display: flex;
+    }
+    .terminate-confirm-panel {
+      width: 100%;
+      max-width: 432px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+        0 9px 28px 8px rgba(0, 0, 0, 0.05);
+      padding: 20px 24px 16px;
+    }
+    .terminate-confirm-panel h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.88);
+      line-height: 1.35;
+    }
+    .terminate-confirm-panel .terminate-confirm-body {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(0, 0, 0, 0.65);
+    }
+    .terminate-confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 13px;
+      text-align: center;
+      padding: 8px;
+    }
+    .into-flow-config-panel {
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .into-flow-config-panel.is-done {
+      opacity: 0.72;
+    }
+    .into-flow-config-panel .into-flow-config-title {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.88);
+    }
+    .into-flow-config-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      align-items: flex-end;
+      margin-bottom: 10px;
+    }
+    .into-flow-config-field label {
+      display: block;
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.55);
+      margin-bottom: 4px;
+    }
+    .into-flow-config-field input {
+      width: 88px;
+    }
+  </style>
+</head>
+<body>
+  <div id="diagram-wrap" aria-busy="true"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="flow-modal-title">
+    <div id="modal-inner" class="flow-modal-panel">
+      <header class="flow-modal-header">
+        <div class="flow-modal-header-main">
+          <div class="flow-modal-in-badge" aria-hidden="true">IN</div>
+          <div class="flow-modal-titles">
+            <h1 id="flow-modal-title">Into Glovebox</h1>
+            <p>Airlock exchange-shelf transfer</p>
+          </div>
+        </div>
+        <button type="button" class="flow-modal-close" id="modal-close" aria-label="Close">&times;</button>
+      </header>
+
+      <div class="flow-modal-body-split">
+        <div class="flow-modal-steps-col">
+
+      <div id="into-flow-config-panel" class="into-flow-config-panel">
+        <p class="into-flow-config-title">Load configuration</p>
+        <div class="into-flow-config-grid">
+          <div class="into-flow-config-field">
+            <label for="into-config-tray-count">Tray number</label>
+            <input type="number" class="ant-input" id="into-config-tray-count" min="1" max="10" value="10" inputmode="numeric" />
+          </div>
+          <div class="into-flow-config-field">
+            <label for="into-config-loop-count">Full loop</label>
+            <input type="number" class="ant-input" id="into-config-loop-count" min="1" max="5" value="2" inputmode="numeric" />
+          </div>
+        </div>
+        <button type="button" class="ant-btn ant-btn-primary" id="into-config-apply">Apply</button>
+      </div>
+
+      <div class="flow-ant-steps-wrap">
+        <div class="ant-steps ant-steps-vertical ant-steps-small" id="into-flow-steps">
+          <!-- Step 1: Confirm after purge -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-1" data-flow-step="1">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon">
+                <span class="ant-steps-icon" id="antd-step-1-icon"></span>
+              </div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Outer-door purge</span>
+                    <span class="ant-tag ant-tag-success" id="into-step-1-mode-tag">Auto</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Purge to meet interlock before opening the outer door.</p>
+                  <div class="flow-step1-vent-strategy" role="radiogroup" aria-label="Ventilation mode">
+                    <label
+                      id="flow-step1-vent-radio-wrap"
+                      class="ant-radio-wrapper ant-radio-wrapper-checked ant-radio-wrapper-disabled flow-step1-vent-radio"
+                      aria-labelledby="flow-step1-vent-title"
+                      aria-describedby="flow-step1-vent-desc"
+                    >
+                      <span class="ant-radio ant-radio-checked ant-radio-disabled">
+                        <input
+                          type="radio"
+                          class="ant-radio-input"
+                          name="flow-step1-vent-strategy"
+                          value="standard"
+                          checked
+                          disabled
+                          tabindex="-1"
+                          aria-labelledby="flow-step1-vent-title"
+                          aria-describedby="flow-step1-vent-desc"
+                        />
+                        <span class="ant-radio-inner"></span>
+                      </span>
+                      <span class="flow-step1-vent-radio-label">
+                        <span id="flow-step1-vent-title" class="flow-step1-vent-radio-title">Standard vacuum ↔ fill (repeat)</span>
+                        <span id="flow-step1-vent-desc" class="flow-step1-vent-radio-desc">General consumables preset.</span>
+                      </span>
+                    </label>
+                  </div>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="flow-step1-confirm" disabled>
+                      Confirm
+                    </button>
+                  </div>
+                  <div id="flow-step2-metrics-wrap" class="flow-step2-metrics-wrap" hidden>
+                    <table class="flow-step2-metrics-table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Air Pressure</th>
+                          <th scope="col">H<sub>2</sub>O</th>
+                          <th scope="col">O<sub>2</sub></th>
+                          <th scope="col">Purge Cycle</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>4.5mbar</td>
+                          <td>0.1ppm</td>
+                          <td>0.6ppm</td>
+                          <td id="into-step2-purge-cycle-wrap" class="flow-step2-purge-cycle-cell">
+                            <span class="flow-step2-purge-cycle-inner">
+                              <span id="into-step2-purge-cycle-num" class="flow-step2-purge-cycle-num">1</span><span class="flow-step2-purge-cycle-suffix">/5</span>
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Confirm to open outer door -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-2" data-flow-step="2">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon">
+                <span class="ant-steps-icon" id="antd-step-2-icon"></span>
+              </div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Open outer door</span>
+                    <span class="ant-tag ant-tag-success" id="into-step-2-mode-tag">Auto</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Confirm when interlocks allow opening the outer door.</p>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="flow-step2-door-confirm" disabled>
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Manual — Confirm 后进入 Step 4 -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-3" data-flow-step="3">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon">
+                <span class="ant-steps-icon" id="antd-step-3-icon"></span>
+              </div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Airlock shelf load</span>
+                    <span class="ant-tag ant-tag-warning">Manual</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Enter rack data in the table, then confirm.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Auto — after manual confirm -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-4" data-flow-step="4">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon">
+                <span class="ant-steps-icon" id="antd-step-4-icon"></span>
+              </div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Close, purge, transfer in</span>
+                    <span class="ant-tag ant-tag-success" id="into-step-4-mode-tag">Auto</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <ol class="flow-step-desc-list">
+                    <li>
+                      Close outer door.
+                      <div class="flow-step-inline-actions">
+                        <button type="button" class="ant-btn ant-btn-primary" id="flow-step4-close-door-confirm" disabled>
+                          Confirm
+                        </button>
+                      </div>
+                    </li>
+                    <li>
+                      Purge to inner-door interlock.
+                      <div
+                        id="flow-step4-inner-metrics-wrap"
+                        class="flow-step2-metrics-wrap flow-step4-inner-purge-metrics"
+                        hidden
+                        aria-label="Inner interlock purge readings"
+                      >
+                        <table class="flow-step2-metrics-table">
+                          <thead>
+                            <tr>
+                              <th scope="col">Air Pressure</th>
+                              <th scope="col">H<sub>2</sub>O</th>
+                              <th scope="col">O<sub>2</sub></th>
+                              <th scope="col">Purge Cycle</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>4.5mbar</td>
+                              <td>0.1ppm</td>
+                              <td>0.6ppm</td>
+                          <td id="into-step4-purge-cycle-wrap" class="flow-step2-purge-cycle-cell">
+                                <span class="flow-step2-purge-cycle-inner">
+                                  <span id="into-step4-purge-cycle-num" class="flow-step2-purge-cycle-num">1</span><span class="flow-step2-purge-cycle-suffix">/5</span>
+                                </span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </li>
+                    <li>Inner door opens; rack transfers into glovebox.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        </div>
+
+      <div id="flow-modal-batch-split" class="flow-modal-batch-split" hidden>
+        <div class="flow-modal-split-rule" aria-hidden="true"></div>
+        <div class="flow-modal-side-inner">
+                  <div id="flow-step2-batch-table-wrap" class="flow-batch-table-wrap">
+                    <div id="flow-batch-submitted-bar" class="flow-batch-submitted-bar" hidden>
+                      <span class="ant-tag ant-tag-success">Submitted</span>
+                      <span class="flow-batch-submitted-hint">Submitted. Step 4 proceeds automatically.</span>
+                    </div>
+                    <div class="flow-batch-inner">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Position</th>
+                            <th>Rack Barcode</th>
+                            <th>Rack</th>
+                            <th>Consumables Type</th>
+                            <th>Consumable Quantity</th>
+                            <th>Detail</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><span class="flow-batch-position-label">B-1</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-1" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-1" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-1" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-1" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td><span class="flow-batch-position-label">B-2</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-2" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-2" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-2" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-2" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td><span class="flow-batch-position-label">B-3</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-3" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-3" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-3" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-3" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td><span class="flow-batch-position-label">B-4</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-4" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-4" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-4" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-4" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td><span class="flow-batch-position-label">A-1</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-5" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-5" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-5" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-5" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td><span class="flow-batch-position-label">A-2</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-6" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-6" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-6" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-6" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td><span class="flow-batch-position-label">A-3</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-7" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-7" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-7" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-7" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td><span class="flow-batch-position-label">A-4</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-8" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-8" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-8" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-8" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td><span class="flow-batch-position-label">A-5</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-9" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-9" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-9" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-9" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td><span class="flow-batch-position-label">A-6</span></td>
+                            <td><input type="text" class="ant-input" id="flow-batch-barcode-10" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-rack-10" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="flow-batch-consumable-type-10" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="flow-batch-qty-10" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="flow-step2-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="flow-step2-confirm" disabled>
+                      Confirm
+                    </button>
+                    <button
+                      type="button"
+                      class="ant-btn ant-btn-default flow-step2-refresh-btn"
+                      id="flow-step2-refresh"
+                      aria-label="Refresh"
+                      title="Refresh"
+                    >
+                      <!-- @ant-design/icons: ReloadOutlined (icons-svg 4.x) -->
+                      <span class="anticon anticon-reload" aria-hidden="true">
+                        <svg viewBox="64 64 896 896" focusable="false" fill="currentColor">
+                          <path
+                            d="M909.1 209.3l-56.4 44.1C775.8 155.1 656.2 92 521.9 92 290 92 102.3 279.5 102 511.5 101.7 743.7 289.8 932 521.9 932c181.3 0 335.8-115 394.6-276.1 1.5-4.2-.7-8.9-4.9-10.3l-56.7-19.5a8 8 0 00-10.1 4.8c-1.8 5-3.8 10-5.9 14.9-17.3 41-42.1 77.8-73.7 109.4A344.77 344.77 0 01655.9 829c-42.3 17.9-87.4 27-133.8 27-46.5 0-91.5-9.1-133.8-27A341.5 341.5 0 01279 755.2a342.16 342.16 0 01-73.7-109.4c-17.9-42.4-27-87.4-27-133.9s9.1-91.5 27-133.9c17.3-41 42.1-77.8 73.7-109.4 31.6-31.6 68.4-56.4 109.3-73.8 42.3-17.9 87.4-27 133.8-27 46.5 0 91.5 9.1 133.8 27a341.5 341.5 0 01109.3 73.8c9.9 9.9 19.2 20.4 27.8 31.4l-60.2 47a8 8 0 003 14.1l175.6 43c5 1.2 9.9-2.6 9.9-7.7l.8-180.9c-.1-6.6-7.8-10.3-13-6.2z"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+        </div>
+      </div>
+      </div>
+
+      <footer class="flow-modal-footer-row" id="flow-modal-footer">
+        <button type="button" class="ant-btn ant-btn-danger" id="flow-modal-terminate">
+          Terminate
+        </button>
+        <button type="button" class="ant-btn ant-btn-primary" id="flow-modal-start" disabled>
+          <span class="flow-btn-start-icon anticon" aria-hidden="true">
+            <svg viewBox="0 0 1024 1024" focusable="false" fill="currentColor">
+              <path d="M192 96v832L928 512 192 96z" />
+            </svg>
+          </span>
+          Start
+        </button>
+        <button type="button" class="ant-btn ant-btn-primary" id="modal-footer-close">Confirm</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="modal-out" role="dialog" aria-modal="true" aria-labelledby="flow-modal-out-title">
+    <div id="modal-out-inner" class="flow-modal-panel">
+      <header class="flow-modal-header">
+        <div class="flow-modal-header-main">
+          <div class="flow-modal-out-badge" aria-hidden="true">OUT</div>
+          <div class="flow-modal-titles">
+            <h1 id="flow-modal-out-title">Out of Glovebox</h1>
+            <p>Consumables &amp; well-seal chemicals</p>
+          </div>
+        </div>
+        <button type="button" class="flow-modal-close" id="modal-out-close" aria-label="Close">&times;</button>
+      </header>
+
+      <div class="flow-modal-body-split">
+        <div class="flow-modal-steps-col">
+
+      <div class="flow-ant-steps-wrap">
+        <div class="ant-steps ant-steps-vertical ant-steps-small" id="out-flow-steps">
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-out-step-1" data-flow-step="1">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-1-icon"></span></div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Select racks</span>
+                    <span class="ant-tag ant-tag-warning">Manual</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Press footer Start to begin. Choose racks in the table on the right, then click Proceed.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-out-step-2" data-flow-step="2">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-2-icon"></span></div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Inner purge &amp; transfer out</span>
+                    <span class="ant-tag ant-tag-success" id="out-step-2-mode-tag">Auto</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Purge before inner door; inner door opens; racks transfer to airlock.</p>
+                  <div id="out-step2-inner-panel" class="flow-step1-vent-strategy" role="radiogroup" aria-label="Inner purge mode" hidden>
+                    <label id="out-step2-vent-radio-wrap" class="ant-radio-wrapper ant-radio-wrapper-checked ant-radio-wrapper-disabled flow-step1-vent-radio" aria-labelledby="out-step2-vent-title" aria-describedby="out-step2-vent-desc">
+                      <span class="ant-radio ant-radio-checked ant-radio-disabled">
+                        <input type="radio" class="ant-radio-input" name="out-step2-vent" value="standard" checked disabled tabindex="-1" />
+                        <span class="ant-radio-inner"></span>
+                      </span>
+                      <span class="flow-step1-vent-radio-label">
+                        <span id="out-step2-vent-title" class="flow-step1-vent-radio-title">Standard vacuum ↔ fill (repeat)</span>
+                        <span id="out-step2-vent-desc" class="flow-step1-vent-radio-desc">Inner-door sequence preset.</span>
+                      </span>
+                    </label>
+                  </div>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="out-step2-confirm" disabled>Confirm</button>
+                  </div>
+                  <div id="out-step2-metrics-wrap" class="flow-step2-metrics-wrap" hidden>
+                    <table class="flow-step2-metrics-table">
+                      <thead><tr>
+                        <th scope="col">Air Pressure</th>
+                        <th scope="col">H<sub>2</sub>O</th>
+                        <th scope="col">O<sub>2</sub></th>
+                        <th scope="col">Purge Cycle</th>
+                      </tr></thead>
+                      <tbody><tr><td>4.5mbar</td><td>0.1ppm</td><td>0.6ppm</td><td id="out-step2-purge-cycle-wrap" class="flow-step2-purge-cycle-cell"><span class="flow-step2-purge-cycle-inner"><span id="out-step2-purge-cycle-num" class="flow-step2-purge-cycle-num">1</span><span class="flow-step2-purge-cycle-suffix">/5</span></span></td></tr></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-out-step-3" data-flow-step="3">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-3-icon"></span></div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Outer purge &amp; open outer door</span>
+                    <span class="ant-tag ant-tag-success" id="out-step-3-mode-tag">Auto</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Gas exchange prior to outer door; confirm when prompted.</p>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="out-step3-confirm" disabled>Confirm</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-out-step-4" data-flow-step="4">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-4-icon"></span></div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Batch unload</span>
+                    <span class="ant-tag ant-tag-warning">Manual</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Confirm unload data, then proceed.</p>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="out-flow-step4-confirm" disabled>
+                      Confirm Batch Unload
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-out-step-5" data-flow-step="5">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-5-icon"></span></div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Close outer door</span>
+                    <span class="ant-tag ant-tag-success" id="out-step-5-mode-tag">Auto</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <ol class="flow-step-desc-list">
+                    <li>Complete physical unload.</li>
+                    <li>
+                      Confirm outer door closed.
+                      <div class="flow-step-inline-actions">
+                        <button type="button" class="ant-btn ant-btn-primary" id="out-step5-close-door-confirm" disabled>
+                          Confirm
+                        </button>
+                      </div>
+                    </li>
+                    <li>System completes purge / lockout as configured.</li>
+                  </ol>
+                  <div id="out-step5-final-confirm-wrap" class="flow-step-inline-actions" hidden>
+                    <button type="button" class="ant-btn ant-btn-primary" id="out-step5-final-confirm" disabled>
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        </div>
+
+      <div id="out-flow-modal-batch-split" class="flow-modal-batch-split" hidden>
+        <div class="flow-modal-split-rule" aria-hidden="true"></div>
+        <div class="flow-modal-side-inner">
+          <div id="out-flow-step4-batch-table-wrap" class="flow-batch-table-wrap out-batch-data-readonly">
+                    <div id="out-batch-cycle-bar" class="flow-batch-submitted-bar out-batch-cycle-bar" hidden>
+                      <span class="ant-tag ant-tag-processing">
+                        loop <span id="out-batch-cycle-num">3</span><span id="out-batch-cycle-suffix">/3</span>
+                      </span>
+                    </div>
+                    <div id="out-flow-batch-table-main">
+                    <div id="out-batch-submitted-bar" class="flow-batch-submitted-bar" hidden>
+                      <span class="ant-tag ant-tag-success">Submitted</span>
+                    </div>
+                    <div id="out-batch-tray-legend" class="out-batch-tray-legend" aria-label="Tray row color legend">
+                      <div class="out-batch-tray-legend-item out-batch-tray-legend-empty">
+                        <span class="out-batch-tray-legend-swatch" aria-hidden="true"></span>
+                        <div>
+                          <strong>Empty</strong>
+                          <span class="out-batch-tray-legend-desc">Empty rack: in this preview, no consumables to unload from this slot—often used as a placeholder you may want to clear first.</span>
+                        </div>
+                      </div>
+                      <div class="out-batch-tray-legend-item out-batch-tray-legend-stock">
+                        <span class="out-batch-tray-legend-swatch" aria-hidden="true"></span>
+                        <div>
+                          <strong>Stock</strong>
+                          <span class="out-batch-tray-legend-desc">In stock: this tray carries consumables; choose whether to include it in this unload run.</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flow-batch-inner">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th scope="col" class="flow-batch-checkbox-th" title="Select all racks">
+                              <input type="checkbox" id="out-batch-select-all" class="flow-batch-rack-checkbox flow-batch-select-all" aria-label="Select all racks" />
+                            </th>
+                            <th>Position</th>
+                            <th>Rack Barcode</th>
+                            <th>Rack</th>
+                            <th>Consumables Type</th>
+                            <th>Consumable Quantity</th>
+                            <th>Detail</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-1" aria-label="Select rack L5A-1" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5A-1</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-1" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-1" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-1" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-1" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-2" aria-label="Select rack L5A-2" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5A-2</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-2" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-2" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-2" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-2" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-3" aria-label="Select rack L5A-3" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5A-3</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-3" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-3" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-3" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-3" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-4" aria-label="Select rack L5A-4" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5A-4</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-4" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-4" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-4" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-4" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-5" aria-label="Select rack L5A-5" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5A-5</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-5" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-5" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-5" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-5" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-6" aria-label="Select rack L5A-6" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5A-6</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-6" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-6" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-6" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-6" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-7" aria-label="Select rack L5A-7" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5A-7</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-7" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-7" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-7" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-7" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-8" aria-label="Select rack L5A-8" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5A-8</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-8" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-8" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-8" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-8" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-9" aria-label="Select rack L5B-1" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5B-1</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-9" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-9" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-9" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-9" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-10" aria-label="Select rack L5B-2" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5B-2</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-10" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-10" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-10" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-10" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-11" aria-label="Select rack L5B-3" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5B-3</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-11" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-11" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-11" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-11" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-12" aria-label="Select rack L5B-4" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5B-4</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-12" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-12" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-12" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-12" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-13" aria-label="Select rack L5B-5" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5B-5</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-13" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-13" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-13" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-13" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-14" aria-label="Select rack L5B-6" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5B-6</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-14" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-14" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-14" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-14" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-15" aria-label="Select rack L5B-7" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5B-7</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-15" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-15" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-15" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-15" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-16" aria-label="Select rack L5B-8" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L5B-8</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-16" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-16" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-16" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-16" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-17" aria-label="Select rack L1C-1" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L1C-1</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-17" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-17" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-17" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-17" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-18" aria-label="Select rack L1C-2" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L1C-2</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-18" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-18" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-18" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-18" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-19" aria-label="Select rack L1C-3" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L1C-3</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-19" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-19" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-19" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-19" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-20" aria-label="Select rack L1C-4" />
+                            </td>
+                            <td><span class="flow-batch-position-label">L1C-4</span></td>
+                            <td><input type="text" class="ant-input" id="out-batch-barcode-20" placeholder="" autocomplete="off" /></td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-rack-20" aria-label="Rack">
+                                <option value="">Please select</option>
+                                <option value="1000">1mL_TIP_Rack</option>
+                                <option value="1001">50uL_TIP_Rack</option>
+                                <option value="1100">Spatula_Rack</option>
+                                <option value="1200">Reactor_Gaskets_Rack</option>
+                                <option value="2000">Inner_Flash_Filter_Rack</option>
+                                <option value="2001">Outer_Flash_Filter_Rack</option>
+                                <option value="2100">Hopper_Rack</option>
+                                <option value="5001">1mL_Ceramic_Rack</option>
+                                <option value="5021">1mL_Tube_Rack</option>
+                                <option value="5200">A1_Rack</option>
+                                <option value="5201">D1_Rack</option>
+                                <option value="5202">A1_Rack_4X4</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="flow-batch-select" id="out-batch-consumable-type-20" aria-label="Consumables Type">
+                                <option value="">Please select</option>
+                                <option value="5210">HRA1</option>
+                                <option value="5211">D1</option>
+                                <option value="2110">30mL_Hopper_Container</option>
+                                <option value="5212">HRD1</option>
+                              </select>
+                            </td>
+                            <td><input type="text" class="ant-input" id="out-batch-qty-20" placeholder="" inputmode="numeric" autocomplete="off" /></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  </div>
+
+                  <div id="out-flow-step1-actions" class="flow-step2-actions" hidden>
+                    <button type="button" class="ant-btn ant-btn-primary" id="out-step1-confirm" disabled>Proceed</button>
+                    <button type="button" class="ant-btn ant-btn-default flow-step2-refresh-btn" id="out-flow-step1-refresh" aria-label="Refresh" title="Refresh">
+                      <span class="anticon anticon-reload" aria-hidden="true">
+                        <svg viewBox="64 64 896 896" focusable="false" fill="currentColor">
+                          <path d="M909.1 209.3l-56.4 44.1C775.8 155.1 656.2 92 521.9 92 290 92 102.3 279.5 102 511.5 101.7 743.7 289.8 932 521.9 932c181.3 0 335.8-115 394.6-276.1 1.5-4.2-.7-8.9-4.9-10.3l-56.7-19.5a8 8 0 00-10.1 4.8c-1.8 5-3.8 10-5.9 14.9-17.3 41-42.1 77.8-73.7 109.4A344.77 344.77 0 01655.9 829c-42.3 17.9-87.4 27-133.8 27-46.5 0-91.5-9.1-133.8-27A341.5 341.5 0 01279 755.2a342.16 342.16 0 01-73.7-109.4c-17.9-42.4-27-87.4-27-133.9s9.1-91.5 27-133.9c17.3-41 42.1-77.8 73.7-109.4 31.6-31.6 68.4-56.4 109.3-73.8 42.3-17.9 87.4-27 133.8-27 46.5 0 91.5 9.1 133.8 27a341.5 341.5 0 01109.3 73.8c9.9 9.9 19.2 20.4 27.8 31.4l-60.2 47a8 8 0 003 14.1l175.6 43c5 1.2 9.9-2.6 9.9-7.7l.8-180.9c-.1-6.6-7.8-10.3-13-6.2z" />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+
+        </div>
+      </div>
+      </div>
+
+      <footer class="flow-modal-footer-row" id="out-flow-modal-footer">
+        <button type="button" class="ant-btn ant-btn-danger" id="out-flow-modal-terminate">Terminate</button>
+        <button type="button" class="ant-btn ant-btn-primary" id="out-flow-modal-start" disabled>
+          <span class="flow-btn-start-icon anticon" aria-hidden="true">
+            <svg viewBox="0 0 1024 1024" focusable="false" fill="currentColor">
+              <path d="M192 96v832L928 512 192 96z" />
+            </svg>
+          </span>
+          Start
+        </button>
+        <button type="button" class="ant-btn ant-btn-primary" id="modal-out-footer-close">Confirm</button>
+      </footer>
+    </div>
+  </div>
+
+
+  <!-- Secondary confirm before Terminate takes effect -->
+  <div
+    id="terminate-confirm-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="terminate-confirm-title"
+    aria-describedby="terminate-confirm-desc"
+  >
+    <div class="terminate-confirm-panel">
+      <h2 id="terminate-confirm-title">Terminate this flow?</h2>
+      <p id="terminate-confirm-desc" class="terminate-confirm-body">
+        Ends the current entry sequence. A new entry requires <strong>device initialization</strong> first.
+      </p>
+      <div class="terminate-confirm-actions">
+        <button type="button" class="ant-btn" id="terminate-confirm-cancel">Cancel</button>
+        <button type="button" class="ant-btn ant-btn-danger" id="terminate-confirm-ok">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="storage_system.browser.plugin.js"></script>
+  <script>
+    (function () {
+      var STEP_AUTO_MS = 2000;
+      /** Outbound loop 2/3 & 1/3: Step 1 stays loading this long, all rack checkboxes on, Proceed hidden, then auto-enters Step 2. */
+      var OUT_STEP1_LOOP_BRIDGE_MS = 3000;
+
+      var wrap = document.getElementById('diagram-wrap');
+      var modal = document.getElementById('modal');
+      var closeBtn = document.getElementById('modal-close');
+      var footerClose = document.getElementById('modal-footer-close');
+      var terminateBtn = document.getElementById('flow-modal-terminate');
+      var terminateConfirmModal = document.getElementById('terminate-confirm-modal');
+      var terminateConfirmCancel = document.getElementById('terminate-confirm-cancel');
+      var terminateConfirmOk = document.getElementById('terminate-confirm-ok');
+      var startBtn = document.getElementById('flow-modal-start');
+      var step1Confirm = document.getElementById('flow-step1-confirm');
+      var step2DoorConfirm = document.getElementById('flow-step2-door-confirm');
+      var step2Confirm = document.getElementById('flow-step2-confirm');
+      var step4CloseDoorConfirm = document.getElementById('flow-step4-close-door-confirm');
+      var batchSplit = document.getElementById('flow-modal-batch-split');
+      var modalOut = document.getElementById('modal-out');
+      var closeOutBtn = document.getElementById('modal-out-close');
+      var footerCloseOut = document.getElementById('modal-out-footer-close');
+      var terminateBtnOut = document.getElementById('out-flow-modal-terminate');
+      var outStep1Confirm = document.getElementById('out-step1-confirm');
+      var outStep2Confirm = document.getElementById('out-step2-confirm');
+      var outStep3Confirm = document.getElementById('out-step3-confirm');
+      var outStep4BatchConfirm = document.getElementById('out-flow-step4-confirm');
+      var outFlowModalStart = document.getElementById('out-flow-modal-start');
+      var toastEl = document.getElementById('toast');
+      var toastTimer = null;
+      var flowTimers = { t2: null, tStep1Prep: null, tStep2Prep: null, purgeCycleIv: null, purgeCycleIvStep4: null };
+      var intoConfigApplied = false;
+      var intoConfigTrayCount = 10;
+      var intoAppliedTrayCount = 10;
+      var intoLoadCycleTotal = 2;
+      var intoLoadCycleRemaining = 2;
+      /** After footer Start: step title tags show loop N/M instead of "Auto". */
+      var intoStepTagsShowLoop = false;
+      var outFlowTimers = { t2: null, tStep1Prep: null, tStep2Prep: null, tStep3Prep: null, purgeCycleIv: null };
+      var outUnloadCycleTotal = 3;
+      var outUnloadCycleRemaining = 3;
+      /** Last macro pass: full steps 1–5 repeat this many times; matches configured loop count. */
+      var outUnloadFinalPassSequencesRemaining = 0;
+      var outConfigTrayCount = 20;
+      var outAppliedTrayCount = 20;
+      /** After footer Start: outbound step Auto tags show loop N/M. */
+      var outStepTagsShowLoop = false;
+      /** Step 5 auto finished: wait for footer Confirm (loop 1/2 cases) before advancing. */
+      var outAwaitingFooterAfterStep5Auto = false;
+      /** loop 1/3 (total 3): first Step 5 on last macro pass — footer Confirm then close modal only. */
+      var outAwaitingFooterAfterFirstOneOfThreeStep5 = false;
+      var terminateTargetIsOut = false;
+
+      var spinSvg =
+        '<span class="flow-ad-spin" aria-hidden="true">' +
+        '<svg viewBox="0 0 1024 1024" focusable="false">' +
+        '<path fill="currentColor" d="M988 548c-19.9 0-36-16.1-36-36 0-59.4-11.6-117-34.6-171.3a440.45 440.45 0 00-94.3-139.9 437.71 437.71 0 00-139.9-94.3C629 83.6 571.4 72 512 72c-19.9 0-36-16.1-36-36s16.1-36 36-36c69.1 0 136.2 13.5 199.3 40.3C772.3 66 827 103 874 150c47 47 83.9 101.8 109.7 162.7 26.7 63.1 40.2 130.2 40.2 199.3.1 19.9-16 36-35.9 36z"></path>' +
+        '</svg></span>';
+
+      function iconDot(num) {
+        return String(num);
+      }
+
+      function iconLoading() {
+        return spinSvg;
+      }
+
+      function iconFinish() {
+        return (
+          '<span role="img" aria-label="check" class="anticon anticon-check">' +
+          '<svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">' +
+          '<path d="M912 190h-69.9c-9.8 0-19.1 4.5-25.1 12.2L404.7 724.5 207 474a32 32 0 00-25.1-12.2H112c-6.7 0-10.4 7.7-6.3 12.6l273.9 347c12.8 16.2 37.4 16.2 50.3 0l488.4-618.9c4.1-5.1.4-12.6-6.3-12.6z"></path>' +
+          '</svg></span>'
+        );
+      }
+
+      /** 进料弹窗宽度：与出料一致；出现右侧批量表后加宽，多轮 load 期间保持直至 resetFlowUi / beginIntoFlow。 */
+      function setIntoModalInnerWide(wide) {
+        var el = document.getElementById('modal-inner');
+        if (!el) return;
+        if (wide) el.classList.add('modal-inner--wide');
+        else el.classList.remove('modal-inner--wide');
+      }
+
+      function setStepItemState(stepNum, state) {
+        var item = document.getElementById('antd-step-' + stepNum);
+        var iconEl = document.getElementById('antd-step-' + stepNum + '-icon');
+        if (!item || !iconEl) return;
+
+        item.classList.remove(
+          'ant-steps-item-wait',
+          'ant-steps-item-process',
+          'ant-steps-item-finish',
+          'ant-steps-item-active'
+        );
+
+        if (state === 'wait') {
+          item.classList.add('ant-steps-item-wait');
+          iconEl.innerHTML = iconDot(stepNum);
+        } else if (state === 'process-loading') {
+          item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
+          iconEl.innerHTML = iconLoading();
+        } else if (state === 'process-manual') {
+          item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
+          iconEl.innerHTML = iconDot(stepNum);
+        } else if (state === 'finish') {
+          item.classList.add('ant-steps-item-finish');
+          iconEl.innerHTML = iconFinish();
+        }
+      }
+
+      function clearFlowTimers() {
+        ['t2', 'tStep1Prep', 'tStep2Prep', 'purgeCycleIv', 'purgeCycleIvStep4'].forEach(function (k) {
+          if (flowTimers[k]) {
+            if (k === 'purgeCycleIv' || k === 'purgeCycleIvStep4') clearInterval(flowTimers[k]);
+            else clearTimeout(flowTimers[k]);
+            flowTimers[k] = null;
+          }
+        });
+      }
+
+      function stopIntoStep2PurgeCycleAnim() {
+        if (flowTimers.purgeCycleIv) {
+          clearInterval(flowTimers.purgeCycleIv);
+          flowTimers.purgeCycleIv = null;
+        }
+      }
+
+      function stopIntoStep4PurgeCycleAnim() {
+        if (flowTimers.purgeCycleIvStep4) {
+          clearInterval(flowTimers.purgeCycleIvStep4);
+          flowTimers.purgeCycleIvStep4 = null;
+        }
+      }
+
+      /** 进料步骤四内嵌指标：与步骤一相同的 Purge Cycle 1→5 分子滚动 */
+      function startIntoStep4PurgeCycleAnim() {
+        stopIntoStep4PurgeCycleAnim();
+        var numEl = document.getElementById('into-step4-purge-cycle-num');
+        if (!numEl) return;
+        var totalMs = 3000;
+        var max = 5;
+        var intervalMs = totalMs / (max - 1);
+        var current = 1;
+        numEl.textContent = '1';
+        numEl.classList.remove('is-ticking');
+        void numEl.offsetWidth;
+        numEl.classList.add('is-ticking');
+        flowTimers.purgeCycleIvStep4 = setInterval(function () {
+          if (current >= max) {
+            stopIntoStep4PurgeCycleAnim();
+            numEl.classList.remove('is-ticking');
+            return;
+          }
+          current++;
+          numEl.textContent = String(current);
+          numEl.classList.remove('is-ticking');
+          void numEl.offsetWidth;
+          numEl.classList.add('is-ticking');
+          if (current === max) {
+            stopIntoStep4PurgeCycleAnim();
+          }
+        }, intervalMs);
+      }
+
+      function resetIntoStep4PurgeCycleDisplay() {
+        stopIntoStep4PurgeCycleAnim();
+        var numEl = document.getElementById('into-step4-purge-cycle-num');
+        if (numEl) {
+          numEl.textContent = '1';
+          numEl.classList.remove('is-ticking');
+        }
+      }
+
+      /** 进料步骤一指标区：Purge Cycle 分子 1→5 滚动，「/5」固定（与出料同效果） */
+      function startIntoStep2PurgeCycleAnim() {
+        stopIntoStep2PurgeCycleAnim();
+        var numEl = document.getElementById('into-step2-purge-cycle-num');
+        if (!numEl) return;
+        var totalMs = 3000;
+        var max = 5;
+        var intervalMs = totalMs / (max - 1);
+        var current = 1;
+        numEl.textContent = '1';
+        numEl.classList.remove('is-ticking');
+        void numEl.offsetWidth;
+        numEl.classList.add('is-ticking');
+        flowTimers.purgeCycleIv = setInterval(function () {
+          if (current >= max) {
+            stopIntoStep2PurgeCycleAnim();
+            numEl.classList.remove('is-ticking');
+            return;
+          }
+          current++;
+          numEl.textContent = String(current);
+          numEl.classList.remove('is-ticking');
+          void numEl.offsetWidth;
+          numEl.classList.add('is-ticking');
+          if (current === max) {
+            stopIntoStep2PurgeCycleAnim();
+          }
+        }, intervalMs);
+      }
+
+      function resetIntoStep2PurgeCycleDisplay() {
+        stopIntoStep2PurgeCycleAnim();
+        var numEl = document.getElementById('into-step2-purge-cycle-num');
+        if (numEl) {
+          numEl.textContent = '1';
+          numEl.classList.remove('is-ticking');
+        }
+        resetIntoStep4PurgeCycleDisplay();
+      }
+
+      function clampInt(n, min, max) {
+        var x = parseInt(n, 10);
+        if (isNaN(x)) x = min;
+        return Math.max(min, Math.min(max, x));
+      }
+
+      function readIntoConfigFromUi() {
+        var tc = document.getElementById('into-config-tray-count');
+        var lc = document.getElementById('into-config-loop-count');
+        intoConfigTrayCount = clampInt(tc && tc.value, 1, 10);
+        intoLoadCycleTotal = clampInt(lc && lc.value, 1, 5);
+        if (tc) tc.value = String(intoConfigTrayCount);
+        if (lc) lc.value = String(intoLoadCycleTotal);
+      }
+
+      function readOutConfigFromUi() {
+        var tc = document.getElementById('out-config-tray-count');
+        var lc = document.getElementById('out-config-loop-count');
+        if (tc) {
+          outConfigTrayCount = clampInt(tc.value, 1, 20);
+          tc.value = String(outConfigTrayCount);
+        }
+        if (lc) {
+          outUnloadCycleTotal = clampInt(lc.value, 1, 5);
+          lc.value = String(outUnloadCycleTotal);
+        }
+      }
+
+      function updateIntoCycleBarNumbers() {
+        if (intoStepTagsShowLoop) {
+          syncIntoStepLoopTags();
+        }
+        syncIntoBatchTableLoop2RowVisibility();
+      }
+
+      /** When load loop is 2× (total=2), always hide A-5/A-6 rows (loop 2/2 and 1/2). First pass keeps values in hidden fields; second pass clears them with seed. */
+      function syncIntoBatchTableLoop2RowVisibility() {
+        var wrap = document.getElementById('flow-step2-batch-table-wrap');
+        if (!wrap) return;
+        var rows = wrap.querySelectorAll('tbody tr');
+        for (var i = 0; i < rows.length; i++) {
+          rows[i].hidden = false;
+        }
+        if (intoLoadCycleTotal === 2 && rows.length >= 10) {
+          rows[8].hidden = true;
+          rows[9].hidden = true;
+        }
+      }
+
+      function syncIntoStepLoopTags() {
+        var text = 'loop ' + intoLoadCycleRemaining + '/' + intoLoadCycleTotal;
+        ['1', '2', '4'].forEach(function (s) {
+          var el = document.getElementById('into-step-' + s + '-mode-tag');
+          if (!el) return;
+          el.classList.remove('ant-tag-success');
+          el.classList.add('ant-tag-processing');
+          el.textContent = text;
+        });
+      }
+
+      function resetIntoStepModeTags() {
+        intoStepTagsShowLoop = false;
+        ['1', '2', '4'].forEach(function (s) {
+          var el = document.getElementById('into-step-' + s + '-mode-tag');
+          if (!el) return;
+          el.classList.remove('ant-tag-processing');
+          el.classList.add('ant-tag-success');
+          el.textContent = 'Auto';
+        });
+      }
+
+      function resetIntoLoadCycleBarState() {
+        readIntoConfigFromUi();
+        intoLoadCycleRemaining = intoLoadCycleTotal;
+        updateIntoCycleBarNumbers();
+      }
+
+      function restartIntoAfterFullCycle() {
+        clearFlowTimers();
+        resetIntoStep2PurgeCycleDisplay();
+        resetIntoStep4PurgeCycleDisplay();
+        footerClose.classList.remove('visible');
+        var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
+        if (batchWrap) clearBatchTableSubmittedState();
+        if (batchSplit) batchSplit.hidden = true;
+        var metricsWrap = document.getElementById('flow-step2-metrics-wrap');
+        if (metricsWrap) metricsWrap.hidden = true;
+        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
+        if (step4InnerMetrics) step4InnerMetrics.hidden = true;
+        setStep1VentRadioDisabled(true);
+        setStepItemState(1, 'process-loading');
+        setStepItemState(2, 'wait');
+        setStepItemState(3, 'wait');
+        setStepItemState(4, 'wait');
+        if (step1Confirm) step1Confirm.disabled = true;
+        if (step2DoorConfirm) step2DoorConfirm.disabled = true;
+        step2Confirm.disabled = true;
+        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
+
+        flowTimers.tStep1Prep = setTimeout(function () {
+          flowTimers.tStep1Prep = null;
+          setStepItemState(1, 'process-manual');
+          setStep1VentRadioDisabled(false);
+          if (step1Confirm) step1Confirm.disabled = false;
+        }, STEP_AUTO_MS);
+      }
+
+      /** false = 蓝色选中 active + 蓝底卡片；true = Ant Design disabled 灰态 */
+      function setStep1VentRadioDisabled(disabled) {
+        var label = document.getElementById('flow-step1-vent-radio-wrap');
+        if (!label) return;
+        var span = label.querySelector('.ant-radio');
+        var input = label.querySelector('.ant-radio-input');
+        if (!span || !input) return;
+        if (disabled) {
+          label.classList.remove('flow-step1-vent-option-highlight');
+          label.classList.add('ant-radio-wrapper-disabled');
+          span.classList.add('ant-radio-disabled');
+          input.disabled = true;
+        } else {
+          label.classList.remove('ant-radio-wrapper-disabled');
+          span.classList.remove('ant-radio-disabled');
+          input.disabled = false;
+          label.classList.add('flow-step1-vent-option-highlight');
+        }
+      }
+
+      function clearOutFlowTimers() {
+        ['t2', 'tStep1Prep', 'tStep2Prep', 'tStep3Prep', 'purgeCycleIv'].forEach(function (k) {
+          if (outFlowTimers[k]) {
+            if (k === 'purgeCycleIv') clearInterval(outFlowTimers[k]);
+            else clearTimeout(outFlowTimers[k]);
+            outFlowTimers[k] = null;
+          }
+        });
+      }
+
+      function shouldOutAutoSkipStep1ForLoopBridge() {
+        return outUnloadCycleRemaining === 2 || outUnloadCycleRemaining === 1;
+      }
+
+      function setOutStep1ProceedVisible(visible) {
+        if (!outStep1Confirm) return;
+        outStep1Confirm.hidden = !visible;
+        if (!visible) outStep1Confirm.disabled = true;
+      }
+
+      function ensureOutBatchAllCheckboxesCheckedAndSynced() {
+        var wrap = document.getElementById('out-flow-step4-batch-table-wrap');
+        if (!wrap) return;
+        wrap.querySelectorAll('.flow-batch-rack-checkbox').forEach(function (el) {
+          el.disabled = false;
+          el.checked = true;
+        });
+        var allCb = document.getElementById('out-batch-select-all');
+        if (allCb) {
+          allCb.indeterminate = false;
+        }
+        syncOutBatchSelectAllState();
+      }
+
+      /** First transition off Step 1 (Proceed click or loop 2/3|1/3 auto): step tags switch Auto → loop N/M. */
+      function runOutStep1CompletionIntoStep2() {
+        if (!outStepTagsShowLoop) {
+          outStepTagsShowLoop = true;
+        }
+        updateOutUnloadCycleBarNumbers();
+        setOutRightPanelMode('cyclePersist');
+        setOutStepItemState(1, 'finish');
+        setOutStepItemState(2, 'process-loading');
+        if (outStep2Confirm) outStep2Confirm.disabled = true;
+        resetOutStep2PurgeCycleDisplay();
+        var innerPanel = document.getElementById('out-step2-inner-panel');
+        if (innerPanel) innerPanel.hidden = false;
+        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        if (mw2) mw2.hidden = true;
+        outFlowTimers.tStep2Prep = setTimeout(function () {
+          outFlowTimers.tStep2Prep = null;
+          setOutStepItemState(2, 'process-manual');
+          setOutVentRadioDisabled('out-step2-vent-radio-wrap', false);
+          if (outStep2Confirm) outStep2Confirm.disabled = false;
+        }, STEP_AUTO_MS);
+      }
+
+      /** After partial/final-pass restart: Step 1 manual + Proceed, or loop 2/3|1/3 auto (3s, all checkboxes, no Proceed). */
+      function scheduleOutStep1AfterOutRestart() {
+        if (shouldOutAutoSkipStep1ForLoopBridge()) {
+          setOutStep1ProceedVisible(false);
+          ensureOutBatchAllCheckboxesCheckedAndSynced();
+          outFlowTimers.tStep1Prep = setTimeout(function () {
+            outFlowTimers.tStep1Prep = null;
+            setOutRightPanelMode('step1WithCycle');
+            seedOutBatchTableDemoRows();
+            ensureOutBatchAllCheckboxesCheckedAndSynced();
+            runOutStep1CompletionIntoStep2();
+            setOutStep1ProceedVisible(true);
+          }, OUT_STEP1_LOOP_BRIDGE_MS);
+          return;
+        }
+        outFlowTimers.tStep1Prep = setTimeout(function () {
+          outFlowTimers.tStep1Prep = null;
+          setOutStepItemState(1, 'process-manual');
+          setOutRightPanelMode('step1WithCycle');
+          seedOutBatchTableDemoRows();
+          setOutStep1ProceedVisible(true);
+          if (outStep1Confirm) outStep1Confirm.disabled = false;
+        }, STEP_AUTO_MS);
+      }
+
+      function stopOutStep2PurgeCycleAnim() {
+        if (outFlowTimers.purgeCycleIv) {
+          clearInterval(outFlowTimers.purgeCycleIv);
+          outFlowTimers.purgeCycleIv = null;
+        }
+      }
+
+      /** Purge Cycle：3s 内分子 1→5 滚动动画，「/5」固定不滚动 */
+      function startOutStep2PurgeCycleAnim() {
+        stopOutStep2PurgeCycleAnim();
+        var numEl = document.getElementById('out-step2-purge-cycle-num');
+        if (!numEl) return;
+        var totalMs = 3000;
+        var max = 5;
+        var intervalMs = totalMs / (max - 1);
+        var current = 1;
+        numEl.textContent = '1';
+        numEl.classList.remove('is-ticking');
+        void numEl.offsetWidth;
+        numEl.classList.add('is-ticking');
+        outFlowTimers.purgeCycleIv = setInterval(function () {
+          if (current >= max) {
+            stopOutStep2PurgeCycleAnim();
+            numEl.classList.remove('is-ticking');
+            return;
+          }
+          current++;
+          numEl.textContent = String(current);
+          numEl.classList.remove('is-ticking');
+          void numEl.offsetWidth;
+          numEl.classList.add('is-ticking');
+          if (current === max) {
+            stopOutStep2PurgeCycleAnim();
+          }
+        }, intervalMs);
+      }
+
+      function resetOutStep2PurgeCycleDisplay() {
+        stopOutStep2PurgeCycleAnim();
+        var numEl = document.getElementById('out-step2-purge-cycle-num');
+        if (numEl) {
+          numEl.textContent = '1';
+          numEl.classList.remove('is-ticking');
+        }
+      }
+
+      function setOutStepItemState(stepNum, state) {
+        var item = document.getElementById('antd-out-step-' + stepNum);
+        var iconEl = document.getElementById('antd-out-step-' + stepNum + '-icon');
+        if (!item || !iconEl) return;
+        item.classList.remove(
+          'ant-steps-item-wait',
+          'ant-steps-item-process',
+          'ant-steps-item-finish',
+          'ant-steps-item-active'
+        );
+        if (state === 'wait') {
+          item.classList.add('ant-steps-item-wait');
+          iconEl.innerHTML = iconDot(stepNum);
+        } else if (state === 'process-loading') {
+          item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
+          iconEl.innerHTML = iconLoading();
+        } else if (state === 'process-manual') {
+          item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
+          iconEl.innerHTML = iconDot(stepNum);
+        } else if (state === 'finish') {
+          item.classList.add('ant-steps-item-finish');
+          iconEl.innerHTML = iconFinish();
+        }
+      }
+
+      function setOutVentRadioDisabled(wrapId, disabled) {
+        var label = document.getElementById(wrapId);
+        if (!label) return;
+        var span = label.querySelector('.ant-radio');
+        var input = label.querySelector('.ant-radio-input');
+        if (!span || !input) return;
+        if (disabled) {
+          label.classList.remove('flow-step1-vent-option-highlight');
+          label.classList.add('ant-radio-wrapper-disabled');
+          span.classList.add('ant-radio-disabled');
+          input.disabled = true;
+        } else {
+          label.classList.remove('ant-radio-wrapper-disabled');
+          span.classList.remove('ant-radio-disabled');
+          input.disabled = false;
+          label.classList.add('flow-step1-vent-option-highlight');
+        }
+      }
+
+      function resetOutBatchRowPeelState() {
+        var tbody = document.querySelector('#out-flow-step4-batch-table-wrap tbody');
+        if (!tbody) return;
+        tbody.querySelectorAll('tr.out-batch-row-peeled').forEach(function (tr) {
+          tr.classList.remove('out-batch-row-peeled');
+        });
+      }
+
+      /** Hide the next 8 still-visible outbound batch rows (L5A/L5B/L1C peel passes). */
+      function hideOutBatchNextEightVisibleRows() {
+        var tbody = document.querySelector('#out-flow-step4-batch-table-wrap tbody');
+        if (!tbody) return;
+        var rows = tbody.querySelectorAll('tr');
+        var n = 0;
+        rows.forEach(function (tr) {
+          if (tr.classList.contains('out-batch-row-peeled')) return;
+          if (n < 8) {
+            tr.classList.add('out-batch-row-peeled');
+            n++;
+          }
+        });
+      }
+
+      function syncOutBatchSelectAllState() {
+        var wrap = document.getElementById('out-flow-step4-batch-table-wrap');
+        var allCb = document.getElementById('out-batch-select-all');
+        if (!wrap || !allCb || allCb.disabled) return;
+        var rows = wrap.querySelectorAll('tbody tr:not(.out-batch-row-peeled) .flow-batch-rack-checkbox');
+        var n = rows.length;
+        if (n === 0) return;
+        var c = 0;
+        rows.forEach(function (cb) {
+          if (cb.checked) c++;
+        });
+        allCb.indeterminate = c > 0 && c < n;
+        allCb.checked = c === n;
+      }
+
+      /** 出料 20 行表：条码 / Rack / 耗材类型 / 数量 / Detail 锁定；仅复选框与全选可交互。 */
+      function applyOutBatchTableDataFieldsLocked() {
+        var batchWrap = document.getElementById('out-flow-step4-batch-table-wrap');
+        if (!batchWrap) return;
+        var n;
+        for (n = 1; n <= 20; n++) {
+          var bc = document.getElementById('out-batch-barcode-' + n);
+          var rackEl = document.getElementById('out-batch-rack-' + n);
+          var ct = document.getElementById('out-batch-consumable-type-' + n);
+          var qty = document.getElementById('out-batch-qty-' + n);
+          if (bc) {
+            bc.readOnly = true;
+            bc.disabled = false;
+            bc.tabIndex = -1;
+          }
+          if (rackEl) rackEl.disabled = true;
+          if (ct) ct.disabled = true;
+          if (qty) {
+            qty.readOnly = true;
+            qty.disabled = false;
+            qty.tabIndex = -1;
+          }
+          var rowCb = document.getElementById('out-batch-select-' + n);
+          var tr = rowCb ? rowCb.closest('tr') : null;
+          if (tr) {
+            var detailBtn = tr.querySelector('.flow-batch-detail-btn');
+            if (detailBtn) detailBtn.disabled = true;
+          }
+        }
+        batchWrap.querySelectorAll('.flow-batch-rack-checkbox').forEach(function (el) {
+          el.disabled = false;
+        });
+        var selectAll = document.getElementById('out-batch-select-all');
+        if (selectAll) selectAll.disabled = false;
+        var ref1 = document.getElementById('out-flow-step1-refresh');
+        if (ref1) ref1.disabled = false;
+      }
+
+      function clearOutBatchTableSubmittedState() {
+        var batchWrap = document.getElementById('out-flow-step4-batch-table-wrap');
+        if (!batchWrap) return;
+        batchWrap.classList.remove('flow-batch-submitted');
+        var bar = document.getElementById('out-batch-submitted-bar');
+        if (bar) bar.hidden = true;
+        applyOutBatchTableDataFieldsLocked();
+      }
+
+      function updateOutUnloadCycleBarNumbers() {
+        var numEl = document.getElementById('out-batch-cycle-num');
+        var sufEl = document.getElementById('out-batch-cycle-suffix');
+        if (numEl) numEl.textContent = String(outUnloadCycleRemaining);
+        if (sufEl) sufEl.textContent = '/' + outUnloadCycleTotal;
+        if (outStepTagsShowLoop) {
+          syncOutStepLoopTags();
+        }
+      }
+
+      function syncOutStepLoopTags() {
+        var text = 'loop ' + outUnloadCycleRemaining + '/' + outUnloadCycleTotal;
+        ['2', '3', '5'].forEach(function (s) {
+          var el = document.getElementById('out-step-' + s + '-mode-tag');
+          if (!el) return;
+          el.classList.remove('ant-tag-success');
+          el.classList.add('ant-tag-processing');
+          el.textContent = text;
+        });
+      }
+
+      function resetOutStepModeTags() {
+        outStepTagsShowLoop = false;
+        ['2', '3', '5'].forEach(function (s) {
+          var el = document.getElementById('out-step-' + s + '-mode-tag');
+          if (!el) return;
+          el.classList.remove('ant-tag-processing');
+          el.classList.add('ant-tag-success');
+          el.textContent = 'Auto';
+        });
+      }
+
+      function resetOutUnloadCycleBarState() {
+        readOutConfigFromUi();
+        outUnloadCycleRemaining = outUnloadCycleTotal;
+        outUnloadFinalPassSequencesRemaining = 0;
+        hideOutStep5FinalConfirmUi();
+        var cycleBar = document.getElementById('out-batch-cycle-bar');
+        var mainBlock = document.getElementById('out-flow-batch-table-main');
+        if (cycleBar) cycleBar.hidden = true;
+        if (mainBlock) mainBlock.hidden = false;
+        resetOutBatchRowPeelState();
+        updateOutUnloadCycleBarNumbers();
+      }
+
+      /** Right split DOM when idle (same as mode "hidden"); used on flow completion so `setOutRightPanelMode('hidden')` stays single-call-site (reset only). */
+      function applyOutRightPanelHiddenDom() {
+        var split = document.getElementById('out-flow-modal-batch-split');
+        var act1 = document.getElementById('out-flow-step1-actions');
+        var cycleBar = document.getElementById('out-batch-cycle-bar');
+        var mainBlock = document.getElementById('out-flow-batch-table-main');
+        if (!split) return;
+        split.hidden = true;
+        if (act1) act1.hidden = true;
+        if (cycleBar) cycleBar.hidden = true;
+        if (mainBlock) mainBlock.hidden = false;
+      }
+
+      /** Outbound right column: step1 | step1+loop+table | cyclePersist | hidden. Call setOutRightPanelMode('hidden') only from resetOutFlowUi; completion uses applyOutRightPanelHiddenDom + modal width instead. */
+      function setOutRightPanelMode(mode) {
+        var split = document.getElementById('out-flow-modal-batch-split');
+        var act1 = document.getElementById('out-flow-step1-actions');
+        var cycleBar = document.getElementById('out-batch-cycle-bar');
+        var mainBlock = document.getElementById('out-flow-batch-table-main');
+        if (!split) return;
+
+        if (mode === 'hidden') {
+          applyOutRightPanelHiddenDom();
+        } else if (mode === 'step1') {
+          split.hidden = false;
+          if (act1) act1.hidden = false;
+          if (cycleBar) cycleBar.hidden = true;
+          if (mainBlock) mainBlock.hidden = false;
+        } else if (mode === 'step1WithCycle') {
+          split.hidden = false;
+          if (act1) act1.hidden = false;
+          if (cycleBar) cycleBar.hidden = false;
+          if (mainBlock) mainBlock.hidden = false;
+        } else if (mode === 'cyclePersist') {
+          split.hidden = false;
+          if (act1) act1.hidden = true;
+          if (cycleBar) cycleBar.hidden = false;
+          if (mainBlock) mainBlock.hidden = true;
+        }
+
+        var outInner = document.getElementById('modal-out-inner');
+        if (outInner) {
+          if (mode === 'hidden') outInner.classList.remove('modal-out-inner--wide');
+          else outInner.classList.add('modal-out-inner--wide');
+        }
+      }
+
+      function hideOutStep5FinalConfirmUi() {
+        var wrap = document.getElementById('out-step5-final-confirm-wrap');
+        var btn = document.getElementById('out-step5-final-confirm');
+        if (wrap) wrap.hidden = true;
+        if (btn) {
+          btn.disabled = true;
+        }
+        var closeDoorBtn = document.getElementById('out-step5-close-door-confirm');
+        if (closeDoorBtn) closeDoorBtn.disabled = true;
+      }
+
+      function showOutStep5FinalConfirmUi() {
+        var wrap = document.getElementById('out-step5-final-confirm-wrap');
+        var btn = document.getElementById('out-step5-final-confirm');
+        if (wrap) wrap.hidden = true;
+        if (btn) btn.disabled = true;
+        var closeDoorBtn = document.getElementById('out-step5-close-door-confirm');
+        if (closeDoorBtn) closeDoorBtn.disabled = false;
+      }
+
+      /** Macro loop 1/2 + auto Step 5: pause for footer Confirm (not the in-step final-pass Confirm). */
+      function shouldPauseOutStep5ForLoopOneOfTwoFooter() {
+        if (outUnloadCycleRemaining !== 1 || outUnloadCycleTotal !== 2) return false;
+        if (outUnloadFinalPassSequencesRemaining === 1) return false;
+        return (
+          outUnloadFinalPassSequencesRemaining === 0 ||
+          outUnloadFinalPassSequencesRemaining === outUnloadCycleTotal
+        );
+      }
+
+      /** Step 5: auto timer, in-step Confirm for last final-pass cycle, pause + footer for first 1/3 Step 5, or footer after loop 1/2 auto. */
+      function scheduleOutStep5AfterStep4() {
+        hideOutStep5FinalConfirmUi();
+        if (
+          outUnloadCycleTotal === 3 &&
+          outUnloadCycleRemaining === 1 &&
+          outUnloadFinalPassSequencesRemaining === outUnloadCycleTotal
+        ) {
+          setOutStepItemState(5, 'process-manual');
+          if (footerCloseOut) {
+            footerCloseOut.classList.add('visible');
+            footerCloseOut.focus();
+          }
+          outAwaitingFooterAfterFirstOneOfThreeStep5 = true;
+          return;
+        }
+        if (outUnloadCycleRemaining === 1 && outUnloadFinalPassSequencesRemaining === 1) {
+          setOutStepItemState(5, 'process-manual');
+          showOutStep5FinalConfirmUi();
+          return;
+        }
+        setOutStepItemState(5, 'process-manual');
+        var closeDoorBtnAuto = document.getElementById('out-step5-close-door-confirm');
+        if (closeDoorBtnAuto) closeDoorBtnAuto.disabled = false;
+      }
+
+      function runOutStep5AutoTimerAfterCloseDoor() {
+        outFlowTimers.t2 = setTimeout(function () {
+          outFlowTimers.t2 = null;
+          setOutStepItemState(5, 'finish');
+          if (shouldPauseOutStep5ForLoopOneOfTwoFooter()) {
+            outAwaitingFooterAfterStep5Auto = true;
+            if (footerCloseOut) {
+              footerCloseOut.classList.add('visible');
+              footerCloseOut.focus();
+            }
+            return;
+          }
+          outUnloadCycleOnStep5Complete();
+        }, STEP_AUTO_MS);
+      }
+
+      function onOutStep5CloseDoorConfirmed() {
+        var btn = document.getElementById('out-step5-close-door-confirm');
+        if (!btn || btn.disabled) return;
+        btn.disabled = true;
+        if (outUnloadCycleRemaining === 1 && outUnloadFinalPassSequencesRemaining === 1) {
+          hideOutStep5FinalConfirmUi();
+          setOutStepItemState(5, 'finish');
+          outUnloadCycleOnStep5Complete();
+          return;
+        }
+        setOutStepItemState(5, 'process-loading');
+        runOutStep5AutoTimerAfterCloseDoor();
+      }
+
+      function outUnloadCycleOnStep5Complete(opts) {
+        opts = opts || {};
+        var cycleBar = document.getElementById('out-batch-cycle-bar');
+        if (!cycleBar || cycleBar.hidden) return false;
+
+        if (outUnloadFinalPassSequencesRemaining > 0) {
+          outUnloadFinalPassSequencesRemaining--;
+          if (outUnloadFinalPassSequencesRemaining > 0) {
+            restartOutUnloadAfterFinalPassStep5();
+            return false;
+          }
+          outUnloadFinalPassSequencesRemaining = 0;
+        }
+
+        if (outUnloadCycleRemaining > 1) {
+          outUnloadCycleRemaining--;
+          updateOutUnloadCycleBarNumbers();
+          restartOutUnloadAfterPartialStep4();
+          return false;
+        }
+
+        outUnloadCycleRemaining--;
+        if (outUnloadCycleRemaining <= 0) {
+          outUnloadCycleRemaining = outUnloadCycleTotal;
+          updateOutUnloadCycleBarNumbers();
+          resetOutBatchRowPeelState();
+          applyOutRightPanelHiddenDom();
+          var outInnerComplete = document.getElementById('modal-out-inner');
+          if (outInnerComplete) outInnerComplete.classList.remove('modal-out-inner--wide');
+          hideOutStep5FinalConfirmUi();
+          setOutStepItemState(5, 'finish');
+          if (!opts.skipCompletionFooter && footerCloseOut) {
+            footerCloseOut.classList.add('visible');
+            footerCloseOut.focus();
+          }
+          return true;
+        }
+        updateOutUnloadCycleBarNumbers();
+        return false;
+      }
+
+      function seedOutBatchTableDemoRows() {
+        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        if (!bout) return;
+        /**
+         * 20 行完整演示数据 [kind, barcode, rackValue, consumableValue, qty]。
+         * kind: empty = 空架（默认勾选，Consumable Quantity 固定为 0）；consumable = 带耗材（默认不勾选）。
+         */
+        var specs = [
+          ['empty', 'T1M20260511L5A01', '1000', '', '96'],
+          ['empty', 'T5U20260511L5A02', '1001', '', '96'],
+          ['empty', 'T2M20260511L5A03', '1100', '', '24'],
+          ['consumable', 'A1R20260511L5A04', '5200', '5210', '96'],
+          ['consumable', 'D1R20260511L5A05', '5201', '5211', '48'],
+          ['empty', 'T3U20260511L5A06', '2000', '', '8'],
+          ['empty', 'T4M20260511L5A07', '1200', '', '16'],
+          ['consumable', 'A1R20260511L5A08', '5202', '5210', '12'],
+          ['consumable', 'A1R20260511L5B01', '2100', '2110', '12'],
+          ['empty', 'T6U20260511L5B02', '2001', '', '4'],
+          ['consumable', 'A1R20260511L5B03', '5200', '5210', '72'],
+          ['empty', 'T7M20260511L5B04', '5001', '', '48'],
+          ['empty', 'T8U20260511L5B05', '5021', '', '24'],
+          ['consumable', 'D2R20260511L5B06', '5201', '5211', '24'],
+          ['empty', 'T9M20260511L5B07', '1000', '', '96'],
+          ['consumable', 'A2R20260511L5B08', '2100', '2110', '6'],
+          ['empty', 'T10U20260511L1C01', '1001', '', '96'],
+          ['consumable', 'L1CR20260511L1C02', '5202', '5210', '48'],
+          ['empty', 'T11M20260511L1C03', '1100', '', '24'],
+          ['consumable', 'L1CR20260511L1C04', '5200', '5212', '36']
+        ];
+        for (var i = 0; i < 20; i++) {
+          var n = i + 1;
+          var cb = document.getElementById('out-batch-select-' + n);
+          var bc = document.getElementById('out-batch-barcode-' + n);
+          var rackEl = document.getElementById('out-batch-rack-' + n);
+          var ct = document.getElementById('out-batch-consumable-type-' + n);
+          var qty = document.getElementById('out-batch-qty-' + n);
+          var rowEl = cb ? cb.closest('tr') : null;
+          var s = specs[i];
+          var trayKind = s[0] === 'empty' ? 'empty' : 'consumable';
+          if (rowEl) rowEl.setAttribute('data-out-tray', trayKind);
+          if (bc) bc.value = s[1];
+          if (rackEl) rackEl.value = s[2];
+          if (ct) ct.value = s[3];
+          if (qty) qty.value = trayKind === 'empty' ? '0' : s[4];
+          if (cb) cb.checked = s[0] === 'empty';
+        }
+        syncOutBatchSelectAllState();
+        applyOutBatchTableDataFieldsLocked();
+      }
+
+      /** @param {string} idPrefix "flow-batch-" | "out-batch-" */
+      function seedBatchTableDemoRowsWithPrefix(idPrefix, barcodes) {
+        var demo = [
+          { rack: '1000', consumable: '', qty: '96' },
+          { rack: '1001', consumable: '', qty: '96' },
+          { rack: '5200', consumable: '5210', qty: '96' },
+          { rack: '5201', consumable: '5211', qty: '96' },
+          { rack: '5202', consumable: '5210', qty: '48' },
+          { rack: '2100', consumable: '2110', qty: '12' },
+          { rack: '1100', consumable: '', qty: '24' },
+          { rack: '2000', consumable: '', qty: '8' }
+        ];
+        for (var i = 0; i < barcodes.length; i++) {
+          var row = demo[i % demo.length];
+          var n = i + 1;
+          var bc = document.getElementById(idPrefix + 'barcode-' + n);
+          var rackEl = document.getElementById(idPrefix + 'rack-' + n);
+          var ct = document.getElementById(idPrefix + 'consumable-type-' + n);
+          var qty = document.getElementById(idPrefix + 'qty-' + n);
+          if (bc) bc.value = barcodes[i] || '';
+          if (rackEl) rackEl.value = row.rack;
+          if (ct) ct.value = row.consumable;
+          if (qty) qty.value = row.qty;
+        }
+      }
+
+      function resetOutFlowUi() {
+        clearOutFlowTimers();
+        outAwaitingFooterAfterStep5Auto = false;
+        outAwaitingFooterAfterFirstOneOfThreeStep5 = false;
+        hideOutStep5FinalConfirmUi();
+        resetOutStep2PurgeCycleDisplay();
+        outUnloadCycleTotal = 3;
+        outConfigTrayCount = 20;
+        outAppliedTrayCount = 20;
+        if (outFlowModalStart) outFlowModalStart.disabled = false;
+        for (var os = 1; os <= 5; os++) setOutStepItemState(os, 'wait');
+        if (outStep1Confirm) outStep1Confirm.disabled = true;
+        setOutStep1ProceedVisible(true);
+        if (outStep2Confirm) outStep2Confirm.disabled = true;
+        if (outStep3Confirm) outStep3Confirm.disabled = true;
+        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = true;
+        if (footerCloseOut) footerCloseOut.classList.remove('visible');
+        var innerPanel = document.getElementById('out-step2-inner-panel');
+        if (innerPanel) innerPanel.hidden = true;
+        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        if (mw2) mw2.hidden = true;
+        setOutVentRadioDisabled('out-step2-vent-radio-wrap', true);
+        setOutRightPanelMode('hidden');
+        resetOutStepModeTags();
+        resetOutUnloadCycleBarState();
+        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        if (bout) {
+          clearOutBatchTableSubmittedState();
+          bout.querySelectorAll('input.ant-input').forEach(function (el) {
+            el.value = '';
+          });
+          bout.querySelectorAll('select.flow-batch-select').forEach(function (el) {
+            el.selectedIndex = 0;
+          });
+          bout.querySelectorAll('.flow-batch-rack-checkbox').forEach(function (el) {
+            el.checked = false;
+            el.disabled = false;
+          });
+          var selectAll = document.getElementById('out-batch-select-all');
+          if (selectAll) {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+            selectAll.disabled = false;
+          }
+          applyOutBatchTableDataFieldsLocked();
+        }
+      }
+
+      function beginOutFlow() {
+        clearOutFlowTimers();
+        hideOutStep5FinalConfirmUi();
+        resetOutStep2PurgeCycleDisplay();
+        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        if (bout) clearOutBatchTableSubmittedState();
+        resetOutUnloadCycleBarState();
+        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        if (mw2) mw2.hidden = true;
+        var innerPanel = document.getElementById('out-step2-inner-panel');
+        if (innerPanel) innerPanel.hidden = true;
+        setOutVentRadioDisabled('out-step2-vent-radio-wrap', true);
+        setOutStepItemState(1, 'process-loading');
+        for (var j = 2; j <= 5; j++) setOutStepItemState(j, 'wait');
+        if (outStep1Confirm) outStep1Confirm.disabled = true;
+        if (outStep2Confirm) outStep2Confirm.disabled = true;
+        if (outStep3Confirm) outStep3Confirm.disabled = true;
+        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = true;
+        if (footerCloseOut) footerCloseOut.classList.remove('visible');
+
+        outFlowTimers.tStep1Prep = setTimeout(function () {
+          outFlowTimers.tStep1Prep = null;
+          setOutStepItemState(1, 'process-manual');
+          setOutRightPanelMode('step1');
+          seedOutBatchTableDemoRows();
+          setOutStep1ProceedVisible(true);
+          if (outStep1Confirm) outStep1Confirm.disabled = false;
+        }, STEP_AUTO_MS);
+      }
+
+      function onOutStep1Confirmed() {
+        if (!outStep1Confirm || outStep1Confirm.disabled) return;
+        outStep1Confirm.disabled = true;
+        runOutStep1CompletionIntoStep2();
+      }
+
+      function onOutStep2Confirmed() {
+        if (!outStep2Confirm || outStep2Confirm.disabled) return;
+        outStep2Confirm.disabled = true;
+        var mw2Confirm = document.getElementById('out-step2-metrics-wrap');
+        if (mw2Confirm) mw2Confirm.hidden = false;
+        startOutStep2PurgeCycleAnim();
+        setOutStepItemState(2, 'finish');
+        setOutStepItemState(3, 'process-loading');
+        if (outStep3Confirm) outStep3Confirm.disabled = true;
+        outFlowTimers.tStep3Prep = setTimeout(function () {
+          outFlowTimers.tStep3Prep = null;
+          setOutStepItemState(3, 'process-manual');
+          if (outStep3Confirm) outStep3Confirm.disabled = false;
+        }, STEP_AUTO_MS);
+      }
+
+      function onOutStep3Confirmed() {
+        if (!outStep3Confirm || outStep3Confirm.disabled) return;
+        outStep3Confirm.disabled = true;
+        setOutStepItemState(3, 'finish');
+        setOutStepItemState(4, 'process-manual');
+        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = false;
+      }
+
+      /** After step 5 during the final (3rd) unload pass: repeat full 1–5 without peeling rows or changing loop 1/3. */
+      function restartOutUnloadAfterFinalPassStep5() {
+        clearOutFlowTimers();
+        hideOutStep5FinalConfirmUi();
+        resetOutStep2PurgeCycleDisplay();
+        var innerPanel = document.getElementById('out-step2-inner-panel');
+        if (innerPanel) innerPanel.hidden = true;
+        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        if (mw2) mw2.hidden = true;
+        setOutVentRadioDisabled('out-step2-vent-radio-wrap', true);
+        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        if (bout) clearOutBatchTableSubmittedState();
+        setOutRightPanelMode('step1WithCycle');
+        seedOutBatchTableDemoRows();
+        for (var j = 2; j <= 5; j++) setOutStepItemState(j, 'wait');
+        setOutStepItemState(1, 'process-loading');
+        if (outStep1Confirm) outStep1Confirm.disabled = true;
+        if (outStep2Confirm) outStep2Confirm.disabled = true;
+        if (outStep3Confirm) outStep3Confirm.disabled = true;
+        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = true;
+        if (footerCloseOut) footerCloseOut.classList.remove('visible');
+
+        scheduleOutStep1AfterOutRestart();
+      }
+
+      /** After step 5 when macro passes 1–2 remain (3→2, 2→1): peel next 8 rows and return to step 1 with loop bar + table. */
+      function restartOutUnloadAfterPartialStep4() {
+        clearOutFlowTimers();
+        hideOutStep5FinalConfirmUi();
+        resetOutStep2PurgeCycleDisplay();
+        hideOutBatchNextEightVisibleRows();
+        var innerPanel = document.getElementById('out-step2-inner-panel');
+        if (innerPanel) innerPanel.hidden = true;
+        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        if (mw2) mw2.hidden = true;
+        setOutVentRadioDisabled('out-step2-vent-radio-wrap', true);
+        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        if (bout) clearOutBatchTableSubmittedState();
+        setOutRightPanelMode('step1WithCycle');
+        seedOutBatchTableDemoRows();
+        for (var j = 2; j <= 5; j++) setOutStepItemState(j, 'wait');
+        setOutStepItemState(1, 'process-loading');
+        if (outStep1Confirm) outStep1Confirm.disabled = true;
+        if (outStep2Confirm) outStep2Confirm.disabled = true;
+        if (outStep3Confirm) outStep3Confirm.disabled = true;
+        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = true;
+        if (footerCloseOut) footerCloseOut.classList.remove('visible');
+
+        scheduleOutStep1AfterOutRestart();
+      }
+
+      function onOutStep4BatchConfirmed() {
+        if (!outStep4BatchConfirm || outStep4BatchConfirm.disabled) return;
+        outStep4BatchConfirm.disabled = true;
+        setOutStepItemState(4, 'finish');
+
+        if (outUnloadCycleRemaining === 1 && outUnloadFinalPassSequencesRemaining === 0) {
+          outUnloadFinalPassSequencesRemaining = outUnloadCycleTotal;
+        }
+        scheduleOutStep5AfterStep4();
+      }
+
+      function onOutStep5FinalConfirmClicked() {
+        onOutStep5CloseDoorConfirmed();
+      }
+
+      function openModalOut() {
+        if (!modalOut) return;
+        modalOut.classList.add('open');
+        var outInner = document.getElementById('modal-out-inner');
+        if (outInner) outInner.classList.remove('modal-out-inner--wide');
+        resetOutFlowUi();
+        if (outFlowModalStart) outFlowModalStart.focus();
+      }
+
+      function closeModalOut() {
+        if (!modalOut) return;
+        var needReset = footerCloseOut && footerCloseOut.classList.contains('visible');
+        if (footerCloseOut) footerCloseOut.classList.remove('visible');
+        outAwaitingFooterAfterStep5Auto = false;
+        outAwaitingFooterAfterFirstOneOfThreeStep5 = false;
+        modalOut.classList.remove('open');
+        clearOutFlowTimers();
+        if (needReset) {
+          resetOutFlowUi();
+        }
+      }
+
+      function onOutFooterCloseClick() {
+        if (outAwaitingFooterAfterFirstOneOfThreeStep5) {
+          outAwaitingFooterAfterFirstOneOfThreeStep5 = false;
+          if (footerCloseOut) footerCloseOut.classList.remove('visible');
+          resetOutFlowUi();
+          modalOut.classList.remove('open');
+          clearOutFlowTimers();
+          return;
+        }
+        if (outAwaitingFooterAfterStep5Auto) {
+          outAwaitingFooterAfterStep5Auto = false;
+          if (footerCloseOut) footerCloseOut.classList.remove('visible');
+          var flowEnded = outUnloadCycleOnStep5Complete({ skipCompletionFooter: true });
+          if (flowEnded) {
+            resetOutFlowUi();
+            modalOut.classList.remove('open');
+            clearOutFlowTimers();
+          }
+          return;
+        }
+        closeModalOut();
+      }
+
+      function clearBatchTableSubmittedState() {
+        var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
+        if (!batchWrap) return;
+        batchWrap.classList.remove('flow-batch-submitted');
+        var bar = document.getElementById('flow-batch-submitted-bar');
+        if (bar) {
+          bar.hidden = true;
+          if (!bar.querySelector('.flow-batch-submitted-hint')) {
+            var hint = document.createElement('span');
+            hint.className = 'flow-batch-submitted-hint';
+            hint.textContent = 'Submitted. Step 4 proceeds automatically.';
+            bar.appendChild(hint);
+          }
+        }
+        batchWrap.querySelectorAll('input.ant-input, select.flow-batch-select').forEach(function (el) {
+          el.disabled = false;
+        });
+        batchWrap.querySelectorAll('.flow-batch-detail-btn').forEach(function (el) {
+          el.disabled = false;
+        });
+        var refBtn = document.getElementById('flow-step2-refresh');
+        if (refBtn) refBtn.disabled = false;
+      }
+
+      function applyBatchTableSubmittedState() {
+        var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
+        if (!batchWrap) return;
+        batchWrap.classList.add('flow-batch-submitted');
+        var bar = document.getElementById('flow-batch-submitted-bar');
+        if (bar) {
+          bar.hidden = false;
+          var hintEl = bar.querySelector('.flow-batch-submitted-hint');
+          if (hintEl) hintEl.remove();
+        }
+        batchWrap.querySelectorAll('input.ant-input, select.flow-batch-select').forEach(function (el) {
+          el.disabled = true;
+        });
+        batchWrap.querySelectorAll('.flow-batch-detail-btn').forEach(function (el) {
+          el.disabled = true;
+        });
+        var refBtn = document.getElementById('flow-step2-refresh');
+        if (refBtn) refBtn.disabled = true;
+      }
+
+      function resetFlowUi() {
+        clearFlowTimers();
+        setIntoModalInnerWide(false);
+        resetIntoStep2PurgeCycleDisplay();
+        resetIntoStep4PurgeCycleDisplay();
+        intoConfigApplied = false;
+        var cfgPan = document.getElementById('into-flow-config-panel');
+        if (cfgPan) cfgPan.classList.remove('is-done');
+        setStepItemState(1, 'wait');
+        setStepItemState(2, 'wait');
+        setStepItemState(3, 'wait');
+        setStepItemState(4, 'wait');
+        if (step1Confirm) step1Confirm.disabled = true;
+        if (step2DoorConfirm) step2DoorConfirm.disabled = true;
+        step2Confirm.disabled = true;
+        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
+        footerClose.classList.remove('visible');
+        startBtn.disabled = true;
+        var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
+        if (batchSplit) batchSplit.hidden = true;
+        var metricsWrap = document.getElementById('flow-step2-metrics-wrap');
+        if (metricsWrap) metricsWrap.hidden = true;
+        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
+        if (step4InnerMetrics) step4InnerMetrics.hidden = true;
+        setStep1VentRadioDisabled(true);
+        if (batchWrap) {
+          clearBatchTableSubmittedState();
+          batchWrap.querySelectorAll('input.ant-input').forEach(function (el) {
+            el.value = '';
+          });
+          batchWrap.querySelectorAll('select.flow-batch-select').forEach(function (el) {
+            el.selectedIndex = 0;
+          });
+        }
+        resetIntoStepModeTags();
+        resetIntoLoadCycleBarState();
+      }
+
+      /**
+       * Demo rows for B-1…B-4 and A-1…A-6 (barcode prefixes align with rackSuffixMap in storage_system (1).js).
+       * 2-loop ×2: fill 10 rows (A-5/A-6 data retained but rows hidden). Second pass (1/2): only B-1,B-2 filled.
+       */
+      function seedBatchTableDemoRows() {
+        var barcodes = [
+          'T1M20260511B01',
+          'T5U20260511B02',
+          'A1R20260511B03',
+          'D1R20260511B04',
+          'A1R20260511A01',
+          'A1R20260511A02',
+          'A1R20260511A03',
+          'A1R20260511A04',
+          'N1M20260511E09',
+          'N2U20260511E10'
+        ];
+        var demo = [
+          { rack: '1000', consumable: '', qty: '96' },
+          { rack: '1001', consumable: '', qty: '96' },
+          { rack: '5200', consumable: '5210', qty: '96' },
+          { rack: '5201', consumable: '5211', qty: '96' },
+          { rack: '5202', consumable: '5210', qty: '48' },
+          { rack: '2100', consumable: '2110', qty: '12' },
+          { rack: '1100', consumable: '', qty: '24' },
+          { rack: '2000', consumable: '', qty: '8' },
+          { rack: '5203', consumable: '5210', qty: '48' },
+          { rack: '2101', consumable: '2110', qty: '12' }
+        ];
+        var maxRows = 10;
+        var fillCount;
+        if (intoLoadCycleTotal === 2) {
+          if (intoLoadCycleRemaining === 2) {
+            fillCount = 10;
+          } else if (intoLoadCycleRemaining === 1) {
+            fillCount = 2;
+          } else {
+            fillCount = clampInt(intoAppliedTrayCount, 1, maxRows);
+          }
+        } else {
+          fillCount = clampInt(intoAppliedTrayCount, 1, maxRows);
+        }
+        for (var n = 1; n <= maxRows; n++) {
+          var bc = document.getElementById('flow-batch-barcode-' + n);
+          var rackEl = document.getElementById('flow-batch-rack-' + n);
+          var ct = document.getElementById('flow-batch-consumable-type-' + n);
+          var qty = document.getElementById('flow-batch-qty-' + n);
+          if (n > fillCount) {
+            if (bc) bc.value = '';
+            if (rackEl) rackEl.selectedIndex = 0;
+            if (ct) ct.selectedIndex = 0;
+            if (qty) qty.value = '';
+            continue;
+          }
+          var i = n - 1;
+          var row = demo[i];
+          if (bc) bc.value = barcodes[i] || '';
+          if (rackEl) rackEl.value = row.rack;
+          if (ct) ct.value = row.consumable;
+          if (qty) qty.value = row.qty;
+        }
+        syncIntoBatchTableLoop2RowVisibility();
+      }
+
+      /** 在用户点击 Start 之后执行：步骤 1 需 Confirm → 步骤 2 需 Confirm → 步骤 3 批量（不在此处重置 Start 按钮状态） */
+      function beginIntoFlow() {
+        clearFlowTimers();
+        setIntoModalInnerWide(false);
+        resetIntoStep2PurgeCycleDisplay();
+        resetIntoStep4PurgeCycleDisplay();
+        var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
+        if (batchWrap) {
+          clearBatchTableSubmittedState();
+        }
+        if (batchSplit) batchSplit.hidden = true;
+        var metricsWrap = document.getElementById('flow-step2-metrics-wrap');
+        if (metricsWrap) metricsWrap.hidden = true;
+        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
+        if (step4InnerMetrics) step4InnerMetrics.hidden = true;
+        setStep1VentRadioDisabled(true);
+        setStepItemState(1, 'process-loading');
+        setStepItemState(2, 'wait');
+        setStepItemState(3, 'wait');
+        setStepItemState(4, 'wait');
+        if (step1Confirm) step1Confirm.disabled = true;
+        if (step2DoorConfirm) step2DoorConfirm.disabled = true;
+        step2Confirm.disabled = true;
+        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
+        footerClose.classList.remove('visible');
+
+        flowTimers.tStep1Prep = setTimeout(function () {
+          flowTimers.tStep1Prep = null;
+          setStepItemState(1, 'process-manual');
+          setStep1VentRadioDisabled(false);
+          if (step1Confirm) step1Confirm.disabled = false;
+        }, STEP_AUTO_MS);
+      }
+
+      function onIntoConfigApply() {
+        readIntoConfigFromUi();
+        intoAppliedTrayCount = intoConfigTrayCount;
+        intoLoadCycleRemaining = intoLoadCycleTotal;
+        intoConfigApplied = true;
+        var pan = document.getElementById('into-flow-config-panel');
+        if (pan) pan.classList.add('is-done');
+        updateIntoCycleBarNumbers();
+        startBtn.disabled = false;
+        toast('Configuration applied. Press Start to begin.');
+      }
+
+      function onOutFlowStart() {
+        if (!outFlowModalStart || outFlowModalStart.disabled) return;
+        readOutConfigFromUi();
+        outAppliedTrayCount = outConfigTrayCount;
+        outUnloadCycleRemaining = outUnloadCycleTotal;
+        updateOutUnloadCycleBarNumbers();
+        outFlowModalStart.disabled = true;
+        beginOutFlow();
+      }
+
+      function onStep1Confirmed() {
+        if (!step1Confirm || step1Confirm.disabled) return;
+        step1Confirm.disabled = true;
+        var mwStep1 = document.getElementById('flow-step2-metrics-wrap');
+        if (mwStep1) mwStep1.hidden = false;
+        startIntoStep2PurgeCycleAnim();
+        setStepItemState(1, 'finish');
+        setStepItemState(2, 'process-loading');
+        if (step2DoorConfirm) step2DoorConfirm.disabled = true;
+        flowTimers.tStep2Prep = setTimeout(function () {
+          flowTimers.tStep2Prep = null;
+          setStepItemState(2, 'process-manual');
+          if (step2DoorConfirm) step2DoorConfirm.disabled = false;
+        }, STEP_AUTO_MS);
+      }
+
+      function onStep2DoorConfirmed() {
+        if (!step2DoorConfirm || step2DoorConfirm.disabled) return;
+        step2DoorConfirm.disabled = true;
+        setStepItemState(2, 'finish');
+        setStepItemState(3, 'process-manual');
+        step2Confirm.disabled = false;
+        var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
+        if (batchSplit) batchSplit.hidden = false;
+        if (batchWrap) {
+          seedBatchTableDemoRows();
+        }
+        setIntoModalInnerWide(true);
+      }
+
+      function onStartFlow() {
+        if (!intoConfigApplied) {
+          toast('Apply load configuration first.');
+          return;
+        }
+        if (startBtn.disabled) return;
+        readIntoConfigFromUi();
+        intoAppliedTrayCount = intoConfigTrayCount;
+        intoLoadCycleRemaining = intoLoadCycleTotal;
+        intoStepTagsShowLoop = true;
+        updateIntoCycleBarNumbers();
+        startBtn.disabled = true;
+        beginIntoFlow();
+      }
+
+      function onStep2Confirmed() {
+        if (step2Confirm.disabled) return;
+        step2Confirm.disabled = true;
+        applyBatchTableSubmittedState();
+        setStepItemState(3, 'finish');
+        setStepItemState(4, 'process-manual');
+        resetIntoStep4PurgeCycleDisplay();
+        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
+        if (step4InnerMetrics) step4InnerMetrics.hidden = true;
+        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = false;
+      }
+
+      function onStep4CloseDoorConfirmed() {
+        if (!step4CloseDoorConfirm || step4CloseDoorConfirm.disabled) return;
+        step4CloseDoorConfirm.disabled = true;
+        setStepItemState(4, 'process-loading');
+        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
+        if (step4InnerMetrics) step4InnerMetrics.hidden = false;
+        startIntoStep4PurgeCycleAnim();
+
+        flowTimers.t2 = setTimeout(function () {
+          flowTimers.t2 = null;
+          setStepItemState(4, 'finish');
+          if (intoLoadCycleRemaining > 1) {
+            intoLoadCycleRemaining--;
+            updateIntoCycleBarNumbers();
+            if (intoLoadCycleTotal === 2 && intoLoadCycleRemaining === 1) {
+              var bwMid = document.getElementById('flow-step2-batch-table-wrap');
+              if (bwMid) seedBatchTableDemoRows();
+            }
+            restartIntoAfterFullCycle();
+            return;
+          }
+          footerClose.classList.add('visible');
+        }, STEP_AUTO_MS);
+      }
+
+      function openModal() {
+        modal.classList.add('open');
+        resetFlowUi();
+        startBtn.focus();
+      }
+
+      function closeModal() {
+        modal.classList.remove('open');
+        clearFlowTimers();
+      }
+
+      function openTerminateConfirm() {
+        terminateConfirmModal.classList.add('open');
+        terminateConfirmCancel.focus();
+      }
+
+      function openTerminateConfirmFromInto() {
+        terminateTargetIsOut = false;
+        openTerminateConfirm();
+      }
+
+      function openTerminateConfirmFromOut() {
+        terminateTargetIsOut = true;
+        openTerminateConfirm();
+      }
+
+      function closeTerminateConfirm() {
+        terminateConfirmModal.classList.remove('open');
+      }
+
+      /** 用户二次确认后真正终止：停止计时、恢复步骤并关闭当前流程弹窗 */
+      function performTerminate() {
+        closeTerminateConfirm();
+        if (terminateTargetIsOut && modalOut) {
+          resetOutFlowUi();
+          modalOut.classList.remove('open');
+          terminateTargetIsOut = false;
+          toast('Terminated.');
+          return;
+        }
+        terminateTargetIsOut = false;
+        resetFlowUi();
+        modal.classList.remove('open');
+        toast('Terminated.');
+      }
+
+      function toast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toastEl.classList.remove('show');
+        }, 3200);
+      }
+
+      var plugin = new StorageSystemSvg.Plugin({
+        svgId: 'browser-demo',
+        hooks: {
+          toast: toast,
+          onIntoGeneral: function () {
+            openModal();
+            return Promise.resolve();
+          },
+          onOutGeneral: function () {
+            openModalOut();
+            return Promise.resolve();
+          }
+        }
+      });
+
+      closeBtn.addEventListener('click', closeModal);
+      footerClose.addEventListener('click', closeModal);
+      if (closeOutBtn) closeOutBtn.addEventListener('click', closeModalOut);
+      if (footerCloseOut) footerCloseOut.addEventListener('click', onOutFooterCloseClick);
+      terminateBtn.addEventListener('click', openTerminateConfirmFromInto);
+      if (terminateBtnOut) terminateBtnOut.addEventListener('click', openTerminateConfirmFromOut);
+      startBtn.addEventListener('click', onStartFlow);
+      if (outStep1Confirm) outStep1Confirm.addEventListener('click', onOutStep1Confirmed);
+      if (outStep2Confirm) outStep2Confirm.addEventListener('click', onOutStep2Confirmed);
+      if (outStep3Confirm) outStep3Confirm.addEventListener('click', onOutStep3Confirmed);
+      if (outStep4BatchConfirm) outStep4BatchConfirm.addEventListener('click', onOutStep4BatchConfirmed);
+      var outStep5FinalConfirmBtn = document.getElementById('out-step5-final-confirm');
+      if (outStep5FinalConfirmBtn) outStep5FinalConfirmBtn.addEventListener('click', onOutStep5FinalConfirmClicked);
+      var outStep5CloseDoorConfirmBtn = document.getElementById('out-step5-close-door-confirm');
+      if (outStep5CloseDoorConfirmBtn) outStep5CloseDoorConfirmBtn.addEventListener('click', onOutStep5CloseDoorConfirmed);
+      terminateConfirmCancel.addEventListener('click', closeTerminateConfirm);
+      terminateConfirmOk.addEventListener('click', performTerminate);
+      terminateConfirmModal.addEventListener('click', function (e) {
+        if (e.target === terminateConfirmModal) closeTerminateConfirm();
+      });
+      if (step1Confirm) step1Confirm.addEventListener('click', onStep1Confirmed);
+      if (step2DoorConfirm) step2DoorConfirm.addEventListener('click', onStep2DoorConfirmed);
+      step2Confirm.addEventListener('click', onStep2Confirmed);
+      if (step4CloseDoorConfirm) step4CloseDoorConfirm.addEventListener('click', onStep4CloseDoorConfirmed);
+      document.getElementById('flow-step2-batch-table-wrap').addEventListener('click', function (e) {
+        if (e.target.closest('.flow-batch-detail-btn')) {
+          toast('Detail view (preview)');
+        }
+      });
+      document.getElementById('flow-step2-refresh').addEventListener('click', function () {
+        if (this.disabled) return;
+        seedBatchTableDemoRows();
+        toast('Refreshed');
+      });
+      var intoCfgApply = document.getElementById('into-config-apply');
+      if (intoCfgApply) intoCfgApply.addEventListener('click', onIntoConfigApply);
+      if (outFlowModalStart) outFlowModalStart.addEventListener('click', onOutFlowStart);
+      var outBatchWrapEl = document.getElementById('out-flow-step4-batch-table-wrap');
+      if (outBatchWrapEl) {
+        outBatchWrapEl.addEventListener('change', function (e) {
+          var t = e.target;
+          if (t && t.id === 'out-batch-select-all') {
+            var on = t.checked;
+            outBatchWrapEl.querySelectorAll('tbody tr:not(.out-batch-row-peeled) .flow-batch-rack-checkbox').forEach(function (cb) {
+              cb.checked = on;
+            });
+            t.indeterminate = false;
+            return;
+          }
+          if (t && t.classList && t.classList.contains('flow-batch-rack-checkbox')) {
+            syncOutBatchSelectAllState();
+          }
+        });
+        outBatchWrapEl.addEventListener('click', function (e) {
+          if (e.target.closest('.flow-batch-detail-btn')) {
+            toast('Detail view (preview)');
+          }
+        });
+      }
+      var outStep1RefreshEl = document.getElementById('out-flow-step1-refresh');
+      if (outStep1RefreshEl) {
+        outStep1RefreshEl.addEventListener('click', function () {
+          if (this.disabled) return;
+          seedOutBatchTableDemoRows();
+          toast('Refreshed');
+        });
+      }
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+      if (modalOut) {
+        modalOut.addEventListener('click', function (e) {
+          if (e.target === modalOut) closeModalOut();
+        });
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (terminateConfirmModal.classList.contains('open')) {
+          e.preventDefault();
+          closeTerminateConfirm();
+          return;
+        }
+        if (modalOut && modalOut.classList.contains('open')) {
+          e.preventDefault();
+          closeModalOut();
+          return;
+        }
+        if (modal.classList.contains('open')) closeModal();
+      });
+
+      fetch(encodeURI('storage_system (1).svg'))
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.text();
+        })
+        .then(function (svgText) {
+          wrap.innerHTML = svgText;
+          var svg = wrap.querySelector('svg');
+          if (!svg) return;
+          StorageSystemSvg.bind(svg, plugin);
+        })
+        .catch(function () {
+          wrap.innerHTML =
+            '<p class="hint" style="color:#f88">Could not load storage_system (1).svg. Serve this page over HTTP (not file://).</p>';
+        })
+        .finally(function () {
+          wrap.removeAttribute('aria-busy');
+        });
+    })();
+  </script>
+</body>
+</html>
