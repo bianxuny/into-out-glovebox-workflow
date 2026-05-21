@@ -98,22 +98,9 @@
       padding: 20px 24px 16px;
     }
 
-    /* Out modal: narrow when only steps; full width when batch / loop strip is shown (stays wide for loop passes). */
+    /* In / Out modals: always wide (fits right-side batch table) */
+    #modal-inner.flow-modal-panel,
     #modal-out-inner.flow-modal-panel {
-      width: auto;
-      max-width: min(92vw, 560px);
-    }
-    #modal-out-inner.flow-modal-panel.modal-out-inner--wide {
-      width: 100%;
-      max-width: min(98vw, 1580px);
-    }
-
-    /* In modal：仅步骤时窄；出现右侧批量表后加宽，多轮 loop 期间保持宽直至 reset */
-    #modal-inner.flow-modal-panel {
-      width: auto;
-      max-width: min(92vw, 560px);
-    }
-    #modal-inner.flow-modal-panel.modal-inner--wide {
       width: 100%;
       max-width: min(98vw, 1580px);
     }
@@ -199,8 +186,7 @@
       width: 100%;
       min-height: 0;
       margin-bottom: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow: hidden;
       padding-bottom: 8px;
       box-sizing: border-box;
     }
@@ -208,12 +194,18 @@
       flex: 0 1 380px;
       max-width: min(380px, 36%);
       min-width: min(100%, 260px);
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .flow-modal-batch-split {
       display: flex;
       flex: 1 1 0;
       min-width: 0;
+      min-height: 0;
       align-items: stretch;
+      overflow: hidden;
     }
     .flow-modal-batch-split[hidden] {
       display: none !important;
@@ -229,14 +221,47 @@
     .flow-modal-side-inner {
       flex: 1 1 0;
       min-width: 0;
+      min-height: 0;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
     .flow-modal-side-inner .flow-batch-table-wrap {
       margin-top: 0;
       margin-bottom: 8px;
       flex: 1 1 auto;
       min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .flow-modal-side-inner .flow-batch-table-wrap > .flow-batch-submitted-bar,
+    .flow-modal-side-inner .flow-batch-table-wrap > .out-batch-cycle-bar {
+      flex-shrink: 0;
+    }
+    #out-flow-batch-table-main {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #out-flow-batch-table-main > .flow-batch-submitted-bar {
+      flex-shrink: 0;
+    }
+    #out-flow-batch-table-main > .flow-batch-inner {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    .flow-modal-side-inner .flow-batch-table-wrap > .flow-batch-inner {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .flow-modal-side-inner .flow-batch-table-wrap > .flow-step2-actions {
+      flex-shrink: 0;
     }
     .flow-modal-side-inner .flow-step2-actions {
       margin-top: 0;
@@ -360,6 +385,87 @@
     }
     .flow-step1-vent-radio.flow-step1-vent-option-highlight .ant-radio-checked .ant-radio-inner::after {
       background-color: #1677ff;
+    }
+    /* Out step 2: ventilation (Ant Design Form + Select + Collapse + InputNumber) */
+    .flow-step-vent-panel {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .flow-step-vent-panel.is-editable {
+      border-color: #0958d9;
+      background: #f0f7ff;
+    }
+    .flow-step-vent-panel-title {
+      margin: 0 0 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.88);
+      line-height: 1.5;
+    }
+    .flow-step-vent-form.ant-form-vertical .ant-form-item {
+      margin-bottom: 12px;
+    }
+    .flow-step-vent-form .ant-form-item-extra {
+      min-height: auto;
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(0, 0, 0, 0.45);
+    }
+    .flow-step-vent-form .ant-select {
+      position: relative;
+    }
+    .flow-step-vent-form .ant-select-selector {
+      position: relative;
+    }
+    .flow-step-vent-form .flow-ant-select-native {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 1;
+    }
+    .flow-step-vent-form .ant-select-disabled .flow-ant-select-native {
+      cursor: not-allowed;
+    }
+    .flow-step-vent-form .ant-select-selection-item {
+      pointer-events: none;
+    }
+    .flow-step-vent-advanced-collapse {
+      margin-top: 4px;
+    }
+    .flow-step-vent-advanced-collapse .ant-collapse-content[hidden] {
+      display: none !important;
+    }
+    .flow-step-vent-advanced-collapse .ant-collapse-header {
+      padding: 8px 0 !important;
+      color: rgba(0, 0, 0, 0.88);
+      font-size: 13px;
+    }
+    .flow-step-vent-advanced-collapse .ant-collapse-content-box {
+      padding: 0 0 4px !important;
+    }
+    .flow-step-vent-collapse-disabled .ant-collapse-header {
+      color: rgba(0, 0, 0, 0.25);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .flow-step-vent-advanced-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 16px;
+    }
+    .flow-step-vent-advanced-grid .ant-form-item {
+      margin-bottom: 0;
+    }
+    .flow-step-vent-advanced-grid .ant-input-number {
+      width: 100%;
     }
     /* Step 1：环境读数表格（仅步骤一 Confirm 点击后出现） */
     .flow-step2-metrics-wrap[hidden] {
@@ -490,11 +596,13 @@
     .flow-batch-table-wrap {
       margin-top: 12px;
       margin-bottom: 12px;
-      overflow-x: auto;
       max-width: 100%;
       border: 1px solid #f0f0f0;
       border-radius: 6px;
       background: #fafafa;
+    }
+    .flow-modal-side-inner .flow-batch-table-wrap {
+      overflow: hidden;
     }
     .flow-batch-table-wrap[hidden] {
       display: none !important;
@@ -519,61 +627,6 @@
       border-bottom-color: #91d5ff;
       background: #e6f7ff;
     }
-    /* Outbound tray row tint + English legend */
-    .out-batch-tray-legend {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 8px 12px;
-      border-bottom: 1px solid #f0f0f0;
-      background: #fafafa;
-      font-size: 12px;
-      line-height: 1.45;
-      color: rgba(0, 0, 0, 0.75);
-    }
-    .out-batch-tray-legend-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .out-batch-tray-legend-swatch {
-      flex-shrink: 0;
-      width: 14px;
-      height: 14px;
-      margin-top: 2px;
-      border-radius: 3px;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-    }
-    .out-batch-tray-legend-empty .out-batch-tray-legend-swatch {
-      background: #f6ffed;
-      border-color: #b7eb8f;
-    }
-    .out-batch-tray-legend-stock .out-batch-tray-legend-swatch {
-      background: #e6f7ff;
-      border-color: #91d5ff;
-    }
-    .out-batch-tray-legend-item strong {
-      display: block;
-      margin-bottom: 2px;
-      font-size: 12px;
-      color: rgba(0, 0, 0, 0.88);
-    }
-    .out-batch-tray-legend-desc {
-      display: block;
-      color: rgba(0, 0, 0, 0.55);
-    }
-    #out-flow-step4-batch-table-wrap tbody tr[data-out-tray='empty'] td {
-      background: #f6ffed;
-    }
-    #out-flow-step4-batch-table-wrap tbody tr[data-out-tray='consumable'] td {
-      background: #e6f7ff;
-    }
-    #out-flow-step4-batch-table-wrap.flow-batch-submitted tbody tr[data-out-tray='empty'] td {
-      background: #f6ffed !important;
-    }
-    #out-flow-step4-batch-table-wrap.flow-batch-submitted tbody tr[data-out-tray='consumable'] td {
-      background: #e6f7ff !important;
-    }
     .flow-batch-submitted-hint {
       font-size: 13px;
       color: rgba(0, 0, 0, 0.55);
@@ -597,47 +650,114 @@
       min-width: 1080px;
       padding: 0;
     }
-    #out-flow-step4-batch-table-wrap .flow-batch-inner {
+    #out-flow-step3-batch-table-wrap .flow-batch-inner {
       min-width: 1160px;
     }
-    /* 出料表：仅复选框可点；条码/架型/耗材/数量为只读展示 */
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody input.ant-input[id^='out-batch-barcode-'],
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody input.ant-input[id^='out-batch-qty-'] {
-      cursor: default;
-      color: rgba(0, 0, 0, 0.85);
-      background: #f5f5f5;
+    /* 出料表：数据列纯展示（非 disabled 表单控件） */
+    #out-flow-step3-batch-table-wrap .flow-batch-display-value {
+      display: inline-block;
+      max-width: 100%;
+      font-size: 14px;
+      line-height: 1.5715;
+      color: rgba(0, 0, 0, 0.88);
+      word-break: break-word;
     }
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody select.flow-batch-select:disabled {
-      color: rgba(0, 0, 0, 0.85);
-      background: #f5f5f5 !important;
-      border-color: #d9d9d9 !important;
-      cursor: not-allowed;
-      opacity: 1;
+    #out-flow-step3-batch-table-wrap tbody tr.out-batch-row-filter-hidden {
+      display: none !important;
     }
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly .flow-batch-detail-btn:disabled {
+    .flow-batch-th-filterable {
+      position: relative;
+      vertical-align: middle;
+    }
+    .flow-batch-th-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .flow-batch-filter-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: none;
+      border-radius: 2px;
+      background: transparent;
+      color: rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+    }
+    .flow-batch-filter-trigger:hover,
+    .flow-batch-filter-trigger[aria-expanded='true'] {
+      color: #1677ff;
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .flow-batch-filter-trigger.is-active {
+      color: #1677ff;
+    }
+    .flow-batch-filter-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      z-index: 20;
+      min-width: 220px;
+      max-width: 280px;
+      padding: 8px;
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08);
+    }
+    .flow-batch-filter-panel[hidden] {
+      display: none !important;
+    }
+    .flow-batch-filter-search {
+      width: 100%;
+      margin-bottom: 8px;
+      height: 28px;
+      padding: 2px 8px;
+      font-size: 13px;
+    }
+    .flow-batch-filter-options {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      max-height: 200px;
+      overflow: auto;
+    }
+    .flow-batch-filter-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.88);
+      cursor: pointer;
+    }
+    .flow-batch-filter-option input {
+      margin-top: 3px;
+      accent-color: #1677ff;
+    }
+    .flow-batch-filter-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .flow-batch-filter-actions .ant-btn-link {
+      padding: 0 4px;
+      height: auto;
+      font-size: 13px;
+    }
+    #out-flow-step3-batch-table-wrap.out-batch-data-readonly .flow-batch-detail-btn:disabled {
       color: rgba(0, 0, 0, 0.25);
       cursor: not-allowed;
     }
-    /* Readonly fields: tint to match row (empty / stock) */
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='empty'] td input.ant-input[id^='out-batch-barcode-'],
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='empty'] td input.ant-input[id^='out-batch-qty-'] {
-      background: #ecf9ee !important;
-      border-color: #c8e6c9 !important;
+    #out-flow-step3-batch-table-wrap .flow-batch-detail-btn:not(:disabled) {
+      color: #1677ff;
     }
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='consumable'] td input.ant-input[id^='out-batch-barcode-'],
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='consumable'] td input.ant-input[id^='out-batch-qty-'] {
-      background: #e3f2fd !important;
-      border-color: #b5d9f5 !important;
-    }
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='empty'] td select.flow-batch-select:disabled {
-      background: #ecf9ee !important;
-      border-color: #c8e6c9 !important;
-    }
-    #out-flow-step4-batch-table-wrap.out-batch-data-readonly tbody tr[data-out-tray='consumable'] td select.flow-batch-select:disabled {
-      background: #e3f2fd !important;
-      border-color: #b5d9f5 !important;
-    }
-    #out-flow-step4-batch-table-wrap tbody tr.out-batch-row-peeled {
+    #out-flow-step3-batch-table-wrap tbody tr.out-batch-row-peeled {
       display: none !important;
     }
     .flow-batch-position-label {
@@ -673,6 +793,9 @@
       font-size: 14px;
     }
     .flow-batch-table-wrap thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
       text-align: left;
       padding: 10px 12px;
       font-weight: 500;
@@ -680,6 +803,7 @@
       background: #fafafa;
       border-bottom: 1px solid #f0f0f0;
       white-space: nowrap;
+      box-shadow: 0 1px 0 #f0f0f0;
     }
     .flow-batch-table-wrap tbody td {
       padding: 10px 12px;
@@ -871,6 +995,58 @@
     .into-flow-config-field input {
       width: 88px;
     }
+    .out-flow-config-panel {
+      margin-bottom: 12px;
+    }
+    .out-flow-config-hint {
+      margin: 0 0 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(0, 0, 0, 0.55);
+    }
+    .out-flow-config-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 12px;
+    }
+    .out-flow-status-hint,
+    .out-flow-preview-status {
+      font-size: 13px;
+      color: #389e0d;
+      line-height: 1.5;
+    }
+    .out-flow-status-hint[hidden],
+    .out-flow-preview-status[hidden] {
+      display: none !important;
+    }
+    .flow-step-batch-unload-block {
+      margin-top: 12px;
+    }
+    .flow-step-batch-unload-block .flow-step-inline-actions {
+      margin-top: 0;
+    }
+    #out-flow-step3-confirm.ant-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #out-flow-step3-confirm .flow-btn-batch-unload-icon {
+      display: inline-flex;
+      line-height: 0;
+      flex-shrink: 0;
+    }
+    #out-flow-step3-confirm .flow-btn-batch-unload-icon svg {
+      width: 18px;
+      height: 20px;
+      vertical-align: middle;
+    }
+    #out-flow-step3-batch-table-wrap.out-batch-preview-readonly .flow-batch-rack-checkbox,
+    #out-flow-step3-batch-table-wrap.out-batch-preview-readonly #out-batch-select-all {
+      pointer-events: none;
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -988,7 +1164,7 @@
           </div>
 
           <!-- Step 2: Confirm to open outer door -->
-          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-2" data-flow-step="2">
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-2" data-flow-step="1">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon">
@@ -1014,7 +1190,7 @@
           </div>
 
           <!-- Step 3: Manual — Confirm 后进入 Step 4 -->
-          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-3" data-flow-step="3">
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-3" data-flow-step="2">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon">
@@ -1035,7 +1211,7 @@
           </div>
 
           <!-- Step 4: Auto — after manual confirm -->
-          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-4" data-flow-step="4">
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-4" data-flow-step="3">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon">
@@ -1503,6 +1679,17 @@
       <div class="flow-modal-body-split">
         <div class="flow-modal-steps-col">
 
+      <div id="out-flow-config-panel" class="out-flow-config-panel into-flow-config-panel">
+        <p class="into-flow-config-title">Select unload racks</p>
+        <p class="out-flow-config-hint" id="out-flow-config-hint">
+          Click Preview to load the unload plan. Racks are pre-selected in the table—adjust if needed, then click Proceed.
+        </p>
+        <div class="out-flow-config-actions">
+          <button type="button" class="ant-btn ant-btn-primary" id="out-flow-preview-btn">Preview</button>
+          <span id="out-flow-preview-status" class="out-flow-preview-status" hidden aria-live="polite"></span>
+        </div>
+      </div>
+
       <div class="flow-ant-steps-wrap">
         <div class="ant-steps ant-steps-vertical ant-steps-small" id="out-flow-steps">
           <div class="ant-steps-item ant-steps-item-wait" id="antd-out-step-1" data-flow-step="1">
@@ -1512,12 +1699,138 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Select racks</span>
-                    <span class="ant-tag ant-tag-warning">Manual</span>
+                    <span class="flow-step-title-text">Inner purge &amp; transfer out</span>
+                    <span class="ant-tag ant-tag-success" id="out-step-1-mode-tag">Auto</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Press footer Start to begin. Choose racks in the table on the right, then click Proceed.</p>
+                  <p class="flow-step-desc-single">Purge before inner door; inner door opens; racks transfer to airlock.</p>
+                  <div id="out-step1-inner-panel" class="flow-step-vent-panel" hidden aria-label="Inner purge ventilation strategy">
+                    <p class="flow-step-vent-panel-title">Ventilation Strategy</p>
+                    <form class="ant-form ant-form-vertical flow-step-vent-form" novalidate>
+                      <div class="ant-form-item">
+                        <div class="ant-form-item-control">
+                          <div class="ant-form-item-control-input">
+                            <div class="ant-form-item-control-input-content">
+                              <div
+                                id="out-step1-vent-select-wrap"
+                                class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled"
+                                style="width: 100%"
+                              >
+                                <div class="ant-select-selector">
+                                  <span class="ant-select-selection-search">
+                                    <select
+                                      id="out-step1-vent-select"
+                                      class="flow-ant-select-native"
+                                      disabled
+                                      aria-label="Ventilation strategy"
+                                      aria-describedby="out-step1-vent-desc"
+                                    >
+                                      <option value="standard">Standard vacuum ↔ fill (repeat)</option>
+                                      <option value="mild">Mild vacuum</option>
+                                      <option value="simultaneous">Simultaneous exchange</option>
+                                    </select>
+                                  </span>
+                                  <span id="out-step1-vent-select-label" class="ant-select-selection-item">Standard vacuum ↔ fill (repeat)</span>
+                                </div>
+                                <span class="ant-select-arrow" aria-hidden="true"></span>
+                              </div>
+                            </div>
+                          </div>
+                          <div id="out-step1-vent-desc" class="ant-form-item-extra">General consumables preset.</div>
+                        </div>
+                      </div>
+
+                      <div id="out-step1-vent-advanced-collapse" class="ant-collapse ant-collapse-ghost ant-collapse-icon-position-left flow-step-vent-advanced-collapse flow-step-vent-collapse-disabled">
+                        <div class="ant-collapse-item" id="out-step1-vent-advanced-item">
+                          <div
+                            id="out-step1-vent-advanced-toggle"
+                            class="ant-collapse-header"
+                            role="button"
+                            tabindex="-1"
+                            aria-expanded="false"
+                            aria-controls="out-step1-vent-advanced-body"
+                          >
+                            <span class="ant-collapse-header-text">Advanced parameters (optional)</span>
+                          </div>
+                          <div
+                            id="out-step1-vent-advanced-body"
+                            class="ant-collapse-content ant-collapse-content-inactive"
+                            hidden
+                          >
+                            <div class="ant-collapse-content-box">
+                              <div class="flow-step-vent-advanced-grid">
+                                <div class="ant-form-item">
+                                  <div class="ant-form-item-label">
+                                    <label for="out-step1-vent-cycles">Cycles (N)</label>
+                                  </div>
+                                  <div class="ant-form-item-control">
+                                    <div id="out-step1-vent-cycles-wrap" class="ant-input-number ant-input-number-disabled">
+                                      <div class="ant-input-number-handler-wrap">
+                                        <span class="ant-input-number-handler ant-input-number-handler-up" aria-hidden="true"></span>
+                                        <span class="ant-input-number-handler ant-input-number-handler-down" aria-hidden="true"></span>
+                                      </div>
+                                      <div class="ant-input-number-input-wrap">
+                                        <input
+                                          type="number"
+                                          class="ant-input-number-input"
+                                          id="out-step1-vent-cycles"
+                                          min="1"
+                                          max="20"
+                                          value="3"
+                                          inputmode="numeric"
+                                          disabled
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="ant-form-item">
+                                  <div class="ant-form-item-label">
+                                    <label for="out-step1-vent-duration">Duration (minute)</label>
+                                  </div>
+                                  <div class="ant-form-item-control">
+                                    <div id="out-step1-vent-duration-wrap" class="ant-input-number ant-input-number-disabled">
+                                      <div class="ant-input-number-handler-wrap">
+                                        <span class="ant-input-number-handler ant-input-number-handler-up" aria-hidden="true"></span>
+                                        <span class="ant-input-number-handler ant-input-number-handler-down" aria-hidden="true"></span>
+                                      </div>
+                                      <div class="ant-input-number-input-wrap">
+                                        <input
+                                          type="number"
+                                          class="ant-input-number-input"
+                                          id="out-step1-vent-duration"
+                                          min="1"
+                                          max="120"
+                                          value="10"
+                                          inputmode="numeric"
+                                          disabled
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="out-step1-purge-confirm" disabled>Confirm</button>
+                  </div>
+                  <div id="out-step1-metrics-wrap" class="flow-step2-metrics-wrap" hidden>
+                    <table class="flow-step2-metrics-table">
+                      <thead><tr>
+                        <th scope="col">Air Pressure</th>
+                        <th scope="col">H<sub>2</sub>O</th>
+                        <th scope="col">O<sub>2</sub></th>
+                        <th scope="col">Purge Cycle</th>
+                      </tr></thead>
+                      <tbody><tr><td>4.5mbar</td><td>0.1ppm</td><td>0.6ppm</td><td id="out-step1-purge-cycle-wrap" class="flow-step2-purge-cycle-cell"><span class="flow-step2-purge-cycle-inner"><span id="out-step1-purge-cycle-num" class="flow-step2-purge-cycle-num">1</span><span id="out-step1-purge-cycle-suffix" class="flow-step2-purge-cycle-suffix">/3</span></span></td></tr></tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1530,37 +1843,14 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Inner purge &amp; transfer out</span>
+                    <span class="flow-step-title-text">Outer purge &amp; open outer door</span>
                     <span class="ant-tag ant-tag-success" id="out-step-2-mode-tag">Auto</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Purge before inner door; inner door opens; racks transfer to airlock.</p>
-                  <div id="out-step2-inner-panel" class="flow-step1-vent-strategy" role="radiogroup" aria-label="Inner purge mode" hidden>
-                    <label id="out-step2-vent-radio-wrap" class="ant-radio-wrapper ant-radio-wrapper-checked ant-radio-wrapper-disabled flow-step1-vent-radio" aria-labelledby="out-step2-vent-title" aria-describedby="out-step2-vent-desc">
-                      <span class="ant-radio ant-radio-checked ant-radio-disabled">
-                        <input type="radio" class="ant-radio-input" name="out-step2-vent" value="standard" checked disabled tabindex="-1" />
-                        <span class="ant-radio-inner"></span>
-                      </span>
-                      <span class="flow-step1-vent-radio-label">
-                        <span id="out-step2-vent-title" class="flow-step1-vent-radio-title">Standard vacuum ↔ fill (repeat)</span>
-                        <span id="out-step2-vent-desc" class="flow-step1-vent-radio-desc">Inner-door sequence preset.</span>
-                      </span>
-                    </label>
-                  </div>
+                  <p class="flow-step-desc-single">Gas exchange prior to outer door; confirm when prompted.</p>
                   <div class="flow-step-inline-actions">
                     <button type="button" class="ant-btn ant-btn-primary" id="out-step2-confirm" disabled>Confirm</button>
-                  </div>
-                  <div id="out-step2-metrics-wrap" class="flow-step2-metrics-wrap" hidden>
-                    <table class="flow-step2-metrics-table">
-                      <thead><tr>
-                        <th scope="col">Air Pressure</th>
-                        <th scope="col">H<sub>2</sub>O</th>
-                        <th scope="col">O<sub>2</sub></th>
-                        <th scope="col">Purge Cycle</th>
-                      </tr></thead>
-                      <tbody><tr><td>4.5mbar</td><td>0.1ppm</td><td>0.6ppm</td><td id="out-step2-purge-cycle-wrap" class="flow-step2-purge-cycle-cell"><span class="flow-step2-purge-cycle-inner"><span id="out-step2-purge-cycle-num" class="flow-step2-purge-cycle-num">1</span><span class="flow-step2-purge-cycle-suffix">/5</span></span></td></tr></tbody>
-                    </table>
                   </div>
                 </div>
               </div>
@@ -1574,14 +1864,35 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Outer purge &amp; open outer door</span>
-                    <span class="ant-tag ant-tag-success" id="out-step-3-mode-tag">Auto</span>
+                    <span class="flow-step-title-text">Batch unload</span>
+                    <span class="ant-tag ant-tag-warning">Manual</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Gas exchange prior to outer door; confirm when prompted.</p>
-                  <div class="flow-step-inline-actions">
-                    <button type="button" class="ant-btn ant-btn-primary" id="out-step3-confirm" disabled>Confirm</button>
+                  <p class="flow-step-desc-single">Confirm unload data, then proceed.</p>
+                  <div class="flow-step-batch-unload-block">
+                    <div class="flow-step-inline-actions">
+                      <button type="button" class="ant-btn ant-btn-primary" id="out-flow-step3-confirm" disabled>
+                        <span class="flow-btn-batch-unload-icon" aria-hidden="true">
+                          <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g clip-path="url(#clip0_out_batch_unload)">
+                              <path d="M23.6725 19.133H9.17734L1 13H15.4951L23.6725 19.133ZM9.33535 16.2859C8.53009 16.2859 8.3878 16.6693 9.01855 17.1426C9.64974 17.616 10.8151 17.9998 11.6205 17.9998C12.4256 17.9997 12.5666 17.6159 11.9355 17.1426C11.3044 16.6694 10.1406 16.286 9.33535 16.2859ZM12.7377 16.2859C11.9326 16.286 11.7912 16.6693 12.4219 17.1426C13.053 17.6159 14.2174 17.9998 15.0229 17.9998C15.8283 17.9998 15.9691 17.616 15.3379 17.1426C14.7066 16.6693 13.543 16.2859 12.7377 16.2859ZM16.141 16.2859C15.3358 16.2859 15.1935 16.6693 15.8242 17.1426C16.4554 17.616 17.6208 17.9998 18.4262 17.9998C19.2312 17.9997 19.3723 17.6159 18.7412 17.1426C18.11 16.6694 16.9463 16.2861 16.141 16.2859ZM6.2877 14.0002C5.48228 14.0002 5.3405 14.384 5.97168 14.8574C6.60295 15.3307 7.76759 15.7141 8.57285 15.7141C9.37783 15.714 9.51934 15.3306 8.88867 14.8574C8.25757 14.3841 7.0931 14.0003 6.2877 14.0002ZM9.69004 14.0002C8.88474 14.0002 8.74385 14.3841 9.375 14.8574C10.0062 15.3307 11.1699 15.714 11.9752 15.7141C12.7805 15.7141 12.9218 15.3307 12.291 14.8574C11.6598 14.384 10.4955 14.0002 9.69004 14.0002ZM13.0934 14.0002C12.2879 14.0002 12.1462 14.384 12.7773 14.8574C13.4086 15.3307 14.5733 15.7141 15.3785 15.7141C16.1834 15.7139 16.325 15.3306 15.6943 14.8574C15.0633 14.3841 13.8988 14.0003 13.0934 14.0002Z" fill="currentColor"/>
+                              <path d="M9.16211 20H24.1621V23.6001H9.16211V20Z" fill="currentColor"/>
+                              <path d="M18.5 10.1667L14 7V9.5L17.5 12V13.5L18.5 14.1667V10.1667Z" fill="currentColor"/>
+                              <path d="M4.5 10.1667L0 7V9.5L3.5 12V13.5L4.5 14.1667V10.1667Z" fill="currentColor"/>
+                              <path d="M1 14.5L8 20V23.5L1 18V14.5Z" fill="currentColor"/>
+                            </g>
+                            <defs>
+                              <clipPath id="clip0_out_batch_unload">
+                                <rect width="24" height="26" fill="white"/>
+                              </clipPath>
+                            </defs>
+                          </svg>
+                        </span>
+                        Confirm Batch Unload
+                      </button>
+                    </div>
+                    <p id="out-flow-batch-unload-hint" class="out-flow-status-hint" hidden>Unloads the first 8 selected trays.</p>
                   </div>
                 </div>
               </div>
@@ -1595,31 +1906,8 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Batch unload</span>
-                    <span class="ant-tag ant-tag-warning">Manual</span>
-                  </div>
-                </div>
-                <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Confirm unload data, then proceed.</p>
-                  <div class="flow-step-inline-actions">
-                    <button type="button" class="ant-btn ant-btn-primary" id="out-flow-step4-confirm" disabled>
-                      Confirm Batch Unload
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="ant-steps-item ant-steps-item-wait" id="antd-out-step-5" data-flow-step="5">
-            <div class="ant-steps-item-container">
-              <div class="ant-steps-item-tail"></div>
-              <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-5-icon"></span></div>
-              <div class="ant-steps-item-content">
-                <div class="ant-steps-item-title">
-                  <div class="flow-step-title-row">
                     <span class="flow-step-title-text">Close outer door</span>
-                    <span class="ant-tag ant-tag-success" id="out-step-5-mode-tag">Auto</span>
+                    <span class="ant-tag ant-tag-success" id="out-step-4-mode-tag">Auto</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
@@ -1628,15 +1916,15 @@
                     <li>
                       Confirm outer door closed.
                       <div class="flow-step-inline-actions">
-                        <button type="button" class="ant-btn ant-btn-primary" id="out-step5-close-door-confirm" disabled>
+                        <button type="button" class="ant-btn ant-btn-primary" id="out-step4-close-door-confirm" disabled>
                           Confirm
                         </button>
                       </div>
                     </li>
                     <li>System completes purge / lockout as configured.</li>
                   </ol>
-                  <div id="out-step5-final-confirm-wrap" class="flow-step-inline-actions" hidden>
-                    <button type="button" class="ant-btn ant-btn-primary" id="out-step5-final-confirm" disabled>
+                  <div id="out-step4-final-confirm-wrap" class="flow-step-inline-actions" hidden>
+                    <button type="button" class="ant-btn ant-btn-primary" id="out-step4-final-confirm" disabled>
                       Confirm
                     </button>
                   </div>
@@ -1651,31 +1939,15 @@
       <div id="out-flow-modal-batch-split" class="flow-modal-batch-split" hidden>
         <div class="flow-modal-split-rule" aria-hidden="true"></div>
         <div class="flow-modal-side-inner">
-          <div id="out-flow-step4-batch-table-wrap" class="flow-batch-table-wrap out-batch-data-readonly">
+          <div id="out-flow-step3-batch-table-wrap" class="flow-batch-table-wrap out-batch-data-readonly">
                     <div id="out-batch-cycle-bar" class="flow-batch-submitted-bar out-batch-cycle-bar" hidden>
                       <span class="ant-tag ant-tag-processing">
-                        loop <span id="out-batch-cycle-num">3</span><span id="out-batch-cycle-suffix">/3</span>
+                        loop <span id="out-batch-cycle-num">1</span><span id="out-batch-cycle-suffix">/3</span>
                       </span>
                     </div>
                     <div id="out-flow-batch-table-main">
                     <div id="out-batch-submitted-bar" class="flow-batch-submitted-bar" hidden>
                       <span class="ant-tag ant-tag-success">Submitted</span>
-                    </div>
-                    <div id="out-batch-tray-legend" class="out-batch-tray-legend" aria-label="Tray row color legend">
-                      <div class="out-batch-tray-legend-item out-batch-tray-legend-empty">
-                        <span class="out-batch-tray-legend-swatch" aria-hidden="true"></span>
-                        <div>
-                          <strong>Empty</strong>
-                          <span class="out-batch-tray-legend-desc">Empty rack: in this preview, no consumables to unload from this slot—often used as a placeholder you may want to clear first.</span>
-                        </div>
-                      </div>
-                      <div class="out-batch-tray-legend-item out-batch-tray-legend-stock">
-                        <span class="out-batch-tray-legend-swatch" aria-hidden="true"></span>
-                        <div>
-                          <strong>Stock</strong>
-                          <span class="out-batch-tray-legend-desc">In stock: this tray carries consumables; choose whether to include it in this unload run.</span>
-                        </div>
-                      </div>
                     </div>
                     <div class="flow-batch-inner">
                       <table>
@@ -1684,11 +1956,71 @@
                             <th scope="col" class="flow-batch-checkbox-th" title="Select all racks">
                               <input type="checkbox" id="out-batch-select-all" class="flow-batch-rack-checkbox flow-batch-select-all" aria-label="Select all racks" />
                             </th>
-                            <th>Position</th>
+                            <th class="flow-batch-th-filterable">
+                              <span class="flow-batch-th-inner">
+                                <span>Position</span>
+                                <button type="button" class="flow-batch-filter-trigger" data-out-filter-key="position" aria-label="Filter Position" aria-haspopup="true" aria-expanded="false">
+                                  <svg class="flow-batch-filter-icon" viewBox="0 0 1024 1024" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M880.1 154H143.9c-24.5 0-39.9 26.7-27.5 48L349 597.4V838c0 17.7 14.2 32 31.8 32h262.4c17.6 0 31.8-14.3 31.8-32V597.4L907.7 202c12.4-21.3-3-48-27.5-48z"/></svg>
+                                </button>
+                              </span>
+                              <div class="flow-batch-filter-panel" data-out-filter-panel="position" hidden>
+                                <input type="search" class="flow-batch-filter-search ant-input" placeholder="Search in filters" autocomplete="off" />
+                                <ul class="flow-batch-filter-options" role="listbox"></ul>
+                                <div class="flow-batch-filter-actions">
+                                  <button type="button" class="ant-btn ant-btn-link flow-batch-filter-reset">Reset</button>
+                                  <button type="button" class="ant-btn ant-btn-primary ant-btn-sm flow-batch-filter-ok">OK</button>
+                                </div>
+                              </div>
+                            </th>
                             <th>Rack Barcode</th>
-                            <th>Rack</th>
-                            <th>Consumables Type</th>
-                            <th>Consumable Quantity</th>
+                            <th class="flow-batch-th-filterable">
+                              <span class="flow-batch-th-inner">
+                                <span>Rack</span>
+                                <button type="button" class="flow-batch-filter-trigger" data-out-filter-key="rack" aria-label="Filter Rack" aria-haspopup="true" aria-expanded="false">
+                                  <svg class="flow-batch-filter-icon" viewBox="0 0 1024 1024" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M880.1 154H143.9c-24.5 0-39.9 26.7-27.5 48L349 597.4V838c0 17.7 14.2 32 31.8 32h262.4c17.6 0 31.8-14.3 31.8-32V597.4L907.7 202c12.4-21.3-3-48-27.5-48z"/></svg>
+                                </button>
+                              </span>
+                              <div class="flow-batch-filter-panel" data-out-filter-panel="rack" hidden>
+                                <input type="search" class="flow-batch-filter-search ant-input" placeholder="Search in filters" autocomplete="off" />
+                                <ul class="flow-batch-filter-options" role="listbox"></ul>
+                                <div class="flow-batch-filter-actions">
+                                  <button type="button" class="ant-btn ant-btn-link flow-batch-filter-reset">Reset</button>
+                                  <button type="button" class="ant-btn ant-btn-primary ant-btn-sm flow-batch-filter-ok">OK</button>
+                                </div>
+                              </div>
+                            </th>
+                            <th class="flow-batch-th-filterable">
+                              <span class="flow-batch-th-inner">
+                                <span>Consumables Type</span>
+                                <button type="button" class="flow-batch-filter-trigger" data-out-filter-key="consumable" aria-label="Filter Consumables Type" aria-haspopup="true" aria-expanded="false">
+                                  <svg class="flow-batch-filter-icon" viewBox="0 0 1024 1024" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M880.1 154H143.9c-24.5 0-39.9 26.7-27.5 48L349 597.4V838c0 17.7 14.2 32 31.8 32h262.4c17.6 0 31.8-14.3 31.8-32V597.4L907.7 202c12.4-21.3-3-48-27.5-48z"/></svg>
+                                </button>
+                              </span>
+                              <div class="flow-batch-filter-panel" data-out-filter-panel="consumable" hidden>
+                                <input type="search" class="flow-batch-filter-search ant-input" placeholder="Search in filters" autocomplete="off" />
+                                <ul class="flow-batch-filter-options" role="listbox"></ul>
+                                <div class="flow-batch-filter-actions">
+                                  <button type="button" class="ant-btn ant-btn-link flow-batch-filter-reset">Reset</button>
+                                  <button type="button" class="ant-btn ant-btn-primary ant-btn-sm flow-batch-filter-ok">OK</button>
+                                </div>
+                              </div>
+                            </th>
+                            <th class="flow-batch-th-filterable">
+                              <span class="flow-batch-th-inner">
+                                <span>Consumable Quantity</span>
+                                <button type="button" class="flow-batch-filter-trigger" data-out-filter-key="qty" aria-label="Filter Consumable Quantity" aria-haspopup="true" aria-expanded="false">
+                                  <svg class="flow-batch-filter-icon" viewBox="0 0 1024 1024" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M880.1 154H143.9c-24.5 0-39.9 26.7-27.5 48L349 597.4V838c0 17.7 14.2 32 31.8 32h262.4c17.6 0 31.8-14.3 31.8-32V597.4L907.7 202c12.4-21.3-3-48-27.5-48z"/></svg>
+                                </button>
+                              </span>
+                              <div class="flow-batch-filter-panel" data-out-filter-panel="qty" hidden>
+                                <input type="search" class="flow-batch-filter-search ant-input" placeholder="Search in filters" autocomplete="off" />
+                                <ul class="flow-batch-filter-options" role="listbox"></ul>
+                                <div class="flow-batch-filter-actions">
+                                  <button type="button" class="ant-btn ant-btn-link flow-batch-filter-reset">Reset</button>
+                                  <button type="button" class="ant-btn ant-btn-primary ant-btn-sm flow-batch-filter-ok">OK</button>
+                                </div>
+                              </div>
+                            </th>
                             <th>Detail</th>
                           </tr>
                         </thead>
@@ -1697,7 +2029,7 @@
                             <td class="flow-batch-checkbox-cell">
                               <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-1" aria-label="Select rack L5A-1" />
                             </td>
-                            <td><span class="flow-batch-position-label">L5A-1</span></td>
+                            <td><span class="flow-batch-position-label" data-position-slot="L5A-1">208:1/L5A-1</span></td>
                             <td><input type="text" class="ant-input" id="out-batch-barcode-1" placeholder="" autocomplete="off" /></td>
                             <td>
                               <select class="flow-batch-select" id="out-batch-rack-1" aria-label="Rack">
@@ -2393,6 +2725,50 @@
                             <td><input type="text" class="ant-input" id="out-batch-qty-20" placeholder="" inputmode="numeric" autocomplete="off" /></td>
                             <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
                           </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-21" aria-label="Select rack 200:1/A-1" />
+                            </td>
+                            <td><span class="flow-batch-position-label" data-position-fixed="1" data-position-slot="200:1/A-1">200:1/A-1</span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-barcode-21"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-rack-21"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-consumable-type-21"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-qty-21"></span></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-22" aria-label="Select rack 200:2/A-1" />
+                            </td>
+                            <td><span class="flow-batch-position-label" data-position-fixed="1" data-position-slot="200:2/A-1">200:2/A-1</span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-barcode-22"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-rack-22"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-consumable-type-22"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-qty-22"></span></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-23" aria-label="Select rack 200:2/A-1" />
+                            </td>
+                            <td><span class="flow-batch-position-label" data-position-fixed="1" data-position-slot="200:2/A-1">200:2/A-1</span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-barcode-23"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-rack-23"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-consumable-type-23"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-qty-23"></span></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
+                          <tr>
+                            <td class="flow-batch-checkbox-cell">
+                              <input type="checkbox" class="flow-batch-rack-checkbox" id="out-batch-select-24" aria-label="Select rack 200:2/B-1" />
+                            </td>
+                            <td><span class="flow-batch-position-label" data-position-fixed="1" data-position-slot="200:2/B-1">200:2/B-1</span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-barcode-24"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-rack-24"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-consumable-type-24"></span></td>
+                            <td><span class="flow-batch-display-value" id="out-batch-qty-24"></span></td>
+                            <td class="flow-batch-detail-cell"><button type="button" class="flow-batch-detail-btn">Detail</button></td>
+                          </tr>
                         </tbody>
                       </table>
                     </div>
@@ -2416,7 +2792,7 @@
 
       <footer class="flow-modal-footer-row" id="out-flow-modal-footer">
         <button type="button" class="ant-btn ant-btn-danger" id="out-flow-modal-terminate">Terminate</button>
-        <button type="button" class="ant-btn ant-btn-primary" id="out-flow-modal-start" disabled>
+        <button type="button" class="ant-btn ant-btn-primary" id="out-flow-modal-start" disabled hidden>
           <span class="flow-btn-start-icon anticon" aria-hidden="true">
             <svg viewBox="0 0 1024 1024" focusable="false" fill="currentColor">
               <path d="M192 96v832L928 512 192 96z" />
@@ -2454,7 +2830,7 @@
   <script>
     (function () {
       var STEP_AUTO_MS = 2000;
-      /** Outbound loop 2/3 & 1/3: Step 1 stays loading this long, all rack checkboxes on, Proceed hidden, then auto-enters Step 2. */
+      /** Outbound loop 2/3 & 3/3: Step 1 stays loading this long, all rack checkboxes on, Proceed hidden, then auto-enters Step 2. */
       var OUT_STEP1_LOOP_BRIDGE_MS = 3000;
 
       var wrap = document.getElementById('diagram-wrap');
@@ -2476,13 +2852,13 @@
       var footerCloseOut = document.getElementById('modal-out-footer-close');
       var terminateBtnOut = document.getElementById('out-flow-modal-terminate');
       var outStep1Confirm = document.getElementById('out-step1-confirm');
+      var outStep1PurgeConfirm = document.getElementById('out-step1-purge-confirm');
       var outStep2Confirm = document.getElementById('out-step2-confirm');
-      var outStep3Confirm = document.getElementById('out-step3-confirm');
-      var outStep4BatchConfirm = document.getElementById('out-flow-step4-confirm');
+      var outStep3BatchConfirm = document.getElementById('out-flow-step3-confirm');
       var outFlowModalStart = document.getElementById('out-flow-modal-start');
       var toastEl = document.getElementById('toast');
       var toastTimer = null;
-      var flowTimers = { t2: null, tStep1Prep: null, tStep2Prep: null, purgeCycleIv: null, purgeCycleIvStep4: null };
+      var flowTimers = { t2: null, tStep1Prep: null, tStep1PurgePrep: null, purgeCycleIv: null, purgeCycleIvStep4: null };
       var intoConfigApplied = false;
       var intoConfigTrayCount = 10;
       var intoAppliedTrayCount = 10;
@@ -2490,19 +2866,22 @@
       var intoLoadCycleRemaining = 2;
       /** After footer Start: step title tags show loop N/M instead of "Auto". */
       var intoStepTagsShowLoop = false;
-      var outFlowTimers = { t2: null, tStep1Prep: null, tStep2Prep: null, tStep3Prep: null, purgeCycleIv: null };
+      var outFlowTimers = { t2: null, tStep1Prep: null, tStep1PurgePrep: null, tStep2Prep: null, purgeCycleIv: null };
       var outUnloadCycleTotal = 3;
-      var outUnloadCycleRemaining = 3;
-      /** Last macro pass: full steps 1–5 repeat this many times; matches configured loop count. */
+      /** Current macro loop index (1 … total), displayed as loop N/total. */
+      var outUnloadCycleCurrent = 1;
+      /** Last macro pass: full steps 1–4 repeat this many times; matches configured loop count. */
       var outUnloadFinalPassSequencesRemaining = 0;
-      var outConfigTrayCount = 20;
-      var outAppliedTrayCount = 20;
+      var outConfigTrayCount = 24;
+      var outAppliedTrayCount = 24;
+      /** Preview loaded rack list; required before footer Start. */
+      var outBatchPreviewLoaded = false;
       /** After footer Start: outbound step Auto tags show loop N/M. */
       var outStepTagsShowLoop = false;
-      /** Step 5 auto finished: wait for footer Confirm (loop 1/2 cases) before advancing. */
-      var outAwaitingFooterAfterStep5Auto = false;
-      /** loop 1/3 (total 3): first Step 5 on last macro pass — footer Confirm then close modal only. */
-      var outAwaitingFooterAfterFirstOneOfThreeStep5 = false;
+      /** Step 4 auto finished: wait for footer Confirm (loop 1/2 cases) before advancing. */
+      var outAwaitingFooterAfterStep4Auto = false;
+      /** loop 3/3 (total 3): first Step 4 on last macro pass — footer Confirm then close modal only. */
+      var outAwaitingFooterAfterFirstOneOfThreeStep4 = false;
       var terminateTargetIsOut = false;
 
       var spinSvg =
@@ -2526,14 +2905,6 @@
           '<path d="M912 190h-69.9c-9.8 0-19.1 4.5-25.1 12.2L404.7 724.5 207 474a32 32 0 00-25.1-12.2H112c-6.7 0-10.4 7.7-6.3 12.6l273.9 347c12.8 16.2 37.4 16.2 50.3 0l488.4-618.9c4.1-5.1.4-12.6-6.3-12.6z"></path>' +
           '</svg></span>'
         );
-      }
-
-      /** 进料弹窗宽度：与出料一致；出现右侧批量表后加宽，多轮 load 期间保持直至 resetFlowUi / beginIntoFlow。 */
-      function setIntoModalInnerWide(wide) {
-        var el = document.getElementById('modal-inner');
-        if (!el) return;
-        if (wide) el.classList.add('modal-inner--wide');
-        else el.classList.remove('modal-inner--wide');
       }
 
       function setStepItemState(stepNum, state) {
@@ -2564,7 +2935,7 @@
       }
 
       function clearFlowTimers() {
-        ['t2', 'tStep1Prep', 'tStep2Prep', 'purgeCycleIv', 'purgeCycleIvStep4'].forEach(function (k) {
+        ['t2', 'tStep1Prep', 'tStep1PurgePrep', 'purgeCycleIv', 'purgeCycleIvStep4'].forEach(function (k) {
           if (flowTimers[k]) {
             if (k === 'purgeCycleIv' || k === 'purgeCycleIvStep4') clearInterval(flowTimers[k]);
             else clearTimeout(flowTimers[k]);
@@ -2682,16 +3053,7 @@
       }
 
       function readOutConfigFromUi() {
-        var tc = document.getElementById('out-config-tray-count');
-        var lc = document.getElementById('out-config-loop-count');
-        if (tc) {
-          outConfigTrayCount = clampInt(tc.value, 1, 20);
-          tc.value = String(outConfigTrayCount);
-        }
-        if (lc) {
-          outUnloadCycleTotal = clampInt(lc.value, 1, 5);
-          lc.value = String(outUnloadCycleTotal);
-        }
+        outConfigTrayCount = OUT_BATCH_ROW_COUNT;
       }
 
       function updateIntoCycleBarNumbers() {
@@ -2794,7 +3156,7 @@
       }
 
       function clearOutFlowTimers() {
-        ['t2', 'tStep1Prep', 'tStep2Prep', 'tStep3Prep', 'purgeCycleIv'].forEach(function (k) {
+        ['t2', 'tStep1Prep', 'tStep1PurgePrep', 'tStep2Prep', 'purgeCycleIv'].forEach(function (k) {
           if (outFlowTimers[k]) {
             if (k === 'purgeCycleIv') clearInterval(outFlowTimers[k]);
             else clearTimeout(outFlowTimers[k]);
@@ -2804,7 +3166,7 @@
       }
 
       function shouldOutAutoSkipStep1ForLoopBridge() {
-        return outUnloadCycleRemaining === 2 || outUnloadCycleRemaining === 1;
+        return outUnloadCycleCurrent > 1;
       }
 
       function setOutStep1ProceedVisible(visible) {
@@ -2813,10 +3175,14 @@
         if (!visible) outStep1Confirm.disabled = true;
       }
 
+      function outBatchVisibleRowCheckboxSelector() {
+        return 'tbody tr:not(.out-batch-row-peeled):not(.out-batch-row-filter-hidden) .flow-batch-rack-checkbox';
+      }
+
       function ensureOutBatchAllCheckboxesCheckedAndSynced() {
-        var wrap = document.getElementById('out-flow-step4-batch-table-wrap');
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
         if (!wrap) return;
-        wrap.querySelectorAll('.flow-batch-rack-checkbox').forEach(function (el) {
+        wrap.querySelectorAll(outBatchVisibleRowCheckboxSelector()).forEach(function (el) {
           el.disabled = false;
           el.checked = true;
         });
@@ -2827,30 +3193,29 @@
         syncOutBatchSelectAllState();
       }
 
-      /** First transition off Step 1 (Proceed click or loop 2/3|1/3 auto): step tags switch Auto → loop N/M. */
+      /** First transition off Step 1 (Proceed click or loop 2/3|3/3 auto): step tags switch Auto → loop N/M. */
       function runOutStep1CompletionIntoStep2() {
         if (!outStepTagsShowLoop) {
           outStepTagsShowLoop = true;
         }
         updateOutUnloadCycleBarNumbers();
         setOutRightPanelMode('cyclePersist');
-        setOutStepItemState(1, 'finish');
-        setOutStepItemState(2, 'process-loading');
-        if (outStep2Confirm) outStep2Confirm.disabled = true;
-        resetOutStep2PurgeCycleDisplay();
-        var innerPanel = document.getElementById('out-step2-inner-panel');
+        setOutStepItemState(1, 'process-loading');
+        if (outStep1PurgeConfirm) outStep1PurgeConfirm.disabled = true;
+        resetOutStep1PurgeCycleDisplay();
+        var innerPanel = document.getElementById('out-step1-inner-panel');
         if (innerPanel) innerPanel.hidden = false;
-        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        var mw2 = document.getElementById('out-step1-metrics-wrap');
         if (mw2) mw2.hidden = true;
-        outFlowTimers.tStep2Prep = setTimeout(function () {
-          outFlowTimers.tStep2Prep = null;
-          setOutStepItemState(2, 'process-manual');
-          setOutVentRadioDisabled('out-step2-vent-radio-wrap', false);
-          if (outStep2Confirm) outStep2Confirm.disabled = false;
+        outFlowTimers.tStep1PurgePrep = setTimeout(function () {
+          outFlowTimers.tStep1PurgePrep = null;
+          setOutStepItemState(1, 'process-manual');
+          setOutVentStrategyEditable(true);
+          if (outStep1PurgeConfirm) outStep1PurgeConfirm.disabled = false;
         }, STEP_AUTO_MS);
       }
 
-      /** After partial/final-pass restart: Step 1 manual + Proceed, or loop 2/3|1/3 auto (3s, all checkboxes, no Proceed). */
+      /** After partial/final-pass restart: Step 1 manual + Proceed, or loop 2/3|3/3 auto (3s, all checkboxes, no Proceed). */
       function scheduleOutStep1AfterOutRestart() {
         if (shouldOutAutoSkipStep1ForLoopBridge()) {
           setOutStep1ProceedVisible(false);
@@ -2867,7 +3232,6 @@
         }
         outFlowTimers.tStep1Prep = setTimeout(function () {
           outFlowTimers.tStep1Prep = null;
-          setOutStepItemState(1, 'process-manual');
           setOutRightPanelMode('step1WithCycle');
           seedOutBatchTableDemoRows();
           setOutStep1ProceedVisible(true);
@@ -2875,29 +3239,31 @@
         }, STEP_AUTO_MS);
       }
 
-      function stopOutStep2PurgeCycleAnim() {
+      function stopOutStep1PurgeCycleAnim() {
         if (outFlowTimers.purgeCycleIv) {
           clearInterval(outFlowTimers.purgeCycleIv);
           outFlowTimers.purgeCycleIv = null;
         }
       }
 
-      /** Purge Cycle：3s 内分子 1→5 滚动动画，「/5」固定不滚动 */
-      function startOutStep2PurgeCycleAnim() {
-        stopOutStep2PurgeCycleAnim();
-        var numEl = document.getElementById('out-step2-purge-cycle-num');
+      /** Purge Cycle：3s 内分子 1→N 滚动动画，「/N」固定不滚动 */
+      function startOutStep1PurgeCycleAnim() {
+        stopOutStep1PurgeCycleAnim();
+        var numEl = document.getElementById('out-step1-purge-cycle-num');
         if (!numEl) return;
+        var max = getOutVentStrategyCycleMax();
+        syncOutStep1PurgeCycleSuffix();
         var totalMs = 3000;
-        var max = 5;
-        var intervalMs = totalMs / (max - 1);
-        var current = 1;
         numEl.textContent = '1';
         numEl.classList.remove('is-ticking');
+        if (max <= 1) return;
+        var intervalMs = totalMs / (max - 1);
+        var current = 1;
         void numEl.offsetWidth;
         numEl.classList.add('is-ticking');
         outFlowTimers.purgeCycleIv = setInterval(function () {
           if (current >= max) {
-            stopOutStep2PurgeCycleAnim();
+            stopOutStep1PurgeCycleAnim();
             numEl.classList.remove('is-ticking');
             return;
           }
@@ -2907,18 +3273,19 @@
           void numEl.offsetWidth;
           numEl.classList.add('is-ticking');
           if (current === max) {
-            stopOutStep2PurgeCycleAnim();
+            stopOutStep1PurgeCycleAnim();
           }
         }, intervalMs);
       }
 
-      function resetOutStep2PurgeCycleDisplay() {
-        stopOutStep2PurgeCycleAnim();
-        var numEl = document.getElementById('out-step2-purge-cycle-num');
+      function resetOutStep1PurgeCycleDisplay() {
+        stopOutStep1PurgeCycleAnim();
+        var numEl = document.getElementById('out-step1-purge-cycle-num');
         if (numEl) {
           numEl.textContent = '1';
           numEl.classList.remove('is-ticking');
         }
+        syncOutStep1PurgeCycleSuffix();
       }
 
       function setOutStepItemState(stepNum, state) {
@@ -2946,27 +3313,103 @@
         }
       }
 
-      function setOutVentRadioDisabled(wrapId, disabled) {
-        var label = document.getElementById(wrapId);
-        if (!label) return;
-        var span = label.querySelector('.ant-radio');
-        var input = label.querySelector('.ant-radio-input');
-        if (!span || !input) return;
-        if (disabled) {
-          label.classList.remove('flow-step1-vent-option-highlight');
-          label.classList.add('ant-radio-wrapper-disabled');
-          span.classList.add('ant-radio-disabled');
-          input.disabled = true;
-        } else {
-          label.classList.remove('ant-radio-wrapper-disabled');
-          span.classList.remove('ant-radio-disabled');
-          input.disabled = false;
-          label.classList.add('flow-step1-vent-option-highlight');
+      function syncOutVentSelectLabel() {
+        var select = document.getElementById('out-step1-vent-select');
+        var label = document.getElementById('out-step1-vent-select-label');
+        if (!select || !label) return;
+        var opt = select.options[select.selectedIndex];
+        var text = opt ? opt.textContent : '';
+        label.textContent = text;
+        label.setAttribute('title', text);
+      }
+
+      function setOutVentStrategyEditable(editable) {
+        var panel = document.getElementById('out-step1-inner-panel');
+        var selectWrap = document.getElementById('out-step1-vent-select-wrap');
+        var select = document.getElementById('out-step1-vent-select');
+        var advToggle = document.getElementById('out-step1-vent-advanced-toggle');
+        var collapse = document.getElementById('out-step1-vent-advanced-collapse');
+        var cyclesWrap = document.getElementById('out-step1-vent-cycles-wrap');
+        var durationWrap = document.getElementById('out-step1-vent-duration-wrap');
+        var cycles = document.getElementById('out-step1-vent-cycles');
+        var duration = document.getElementById('out-step1-vent-duration');
+        if (panel) panel.classList.toggle('is-editable', editable);
+        if (selectWrap) selectWrap.classList.toggle('ant-select-disabled', !editable);
+        if (select) select.disabled = !editable;
+        if (advToggle) advToggle.tabIndex = editable ? 0 : -1;
+        if (collapse) collapse.classList.toggle('flow-step-vent-collapse-disabled', !editable);
+        if (cyclesWrap) cyclesWrap.classList.toggle('ant-input-number-disabled', !editable);
+        if (durationWrap) durationWrap.classList.toggle('ant-input-number-disabled', !editable);
+        if (cycles) cycles.disabled = !editable;
+        if (duration) duration.disabled = !editable;
+      }
+
+      function resetOutVentStrategyUi() {
+        var select = document.getElementById('out-step1-vent-select');
+        var desc = document.getElementById('out-step1-vent-desc');
+        var advToggle = document.getElementById('out-step1-vent-advanced-toggle');
+        var advItem = document.getElementById('out-step1-vent-advanced-item');
+        var advBody = document.getElementById('out-step1-vent-advanced-body');
+        var cycles = document.getElementById('out-step1-vent-cycles');
+        var duration = document.getElementById('out-step1-vent-duration');
+        if (select) select.value = 'standard';
+        syncOutVentSelectLabel();
+        if (desc) desc.textContent = 'General consumables preset.';
+        if (advToggle) advToggle.setAttribute('aria-expanded', 'false');
+        if (advItem) advItem.classList.remove('ant-collapse-item-active');
+        if (advBody) {
+          advBody.hidden = true;
+          advBody.classList.remove('ant-collapse-content-active');
+          advBody.classList.add('ant-collapse-content-inactive');
         }
+        if (cycles) cycles.value = '3';
+        if (duration) duration.value = '10';
+        setOutVentStrategyEditable(false);
+        syncOutStep1PurgeCycleSuffix();
+      }
+
+      function getOutVentStrategyCycleMax() {
+        var cycles = document.getElementById('out-step1-vent-cycles');
+        var n = cycles ? parseInt(cycles.value, 10) : 3;
+        if (!n || n < 1) n = 3;
+        if (n > 20) n = 20;
+        return n;
+      }
+
+      function syncOutStep1PurgeCycleSuffix() {
+        var suffix = document.getElementById('out-step1-purge-cycle-suffix');
+        if (suffix) suffix.textContent = '/' + getOutVentStrategyCycleMax();
+      }
+
+      function updateOutVentStrategyDesc() {
+        var select = document.getElementById('out-step1-vent-select');
+        var desc = document.getElementById('out-step1-vent-desc');
+        if (!select || !desc) return;
+        var copy = {
+          standard: 'General consumables preset.',
+          mild: 'Inner flash filter recommendation.',
+          simultaneous: 'Open loaded consumable recommendation.'
+        };
+        desc.textContent = copy[select.value] || copy.standard;
+        syncOutVentSelectLabel();
+      }
+
+      function toggleOutVentAdvancedBody() {
+        var collapse = document.getElementById('out-step1-vent-advanced-collapse');
+        var advItem = document.getElementById('out-step1-vent-advanced-item');
+        var advToggle = document.getElementById('out-step1-vent-advanced-toggle');
+        var advBody = document.getElementById('out-step1-vent-advanced-body');
+        if (!collapse || !advItem || !advToggle || !advBody || collapse.classList.contains('flow-step-vent-collapse-disabled')) return;
+        var open = advBody.hidden;
+        advBody.hidden = !open;
+        advItem.classList.toggle('ant-collapse-item-active', open);
+        advBody.classList.toggle('ant-collapse-content-active', open);
+        advBody.classList.toggle('ant-collapse-content-inactive', !open);
+        advToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
       }
 
       function resetOutBatchRowPeelState() {
-        var tbody = document.querySelector('#out-flow-step4-batch-table-wrap tbody');
+        var tbody = document.querySelector('#out-flow-step3-batch-table-wrap tbody');
         if (!tbody) return;
         tbody.querySelectorAll('tr.out-batch-row-peeled').forEach(function (tr) {
           tr.classList.remove('out-batch-row-peeled');
@@ -2975,7 +3418,7 @@
 
       /** Hide the next 8 still-visible outbound batch rows (L5A/L5B/L1C peel passes). */
       function hideOutBatchNextEightVisibleRows() {
-        var tbody = document.querySelector('#out-flow-step4-batch-table-wrap tbody');
+        var tbody = document.querySelector('#out-flow-step3-batch-table-wrap tbody');
         if (!tbody) return;
         var rows = tbody.querySelectorAll('tr');
         var n = 0;
@@ -2989,10 +3432,12 @@
       }
 
       function syncOutBatchSelectAllState() {
-        var wrap = document.getElementById('out-flow-step4-batch-table-wrap');
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
         var allCb = document.getElementById('out-batch-select-all');
         if (!wrap || !allCb || allCb.disabled) return;
-        var rows = wrap.querySelectorAll('tbody tr:not(.out-batch-row-peeled) .flow-batch-rack-checkbox');
+        var rows = wrap.querySelectorAll(
+          'tbody tr:not(.out-batch-row-peeled):not(.out-batch-row-filter-hidden) .flow-batch-rack-checkbox'
+        );
         var n = rows.length;
         if (n === 0) return;
         var c = 0;
@@ -3003,35 +3448,286 @@
         allCb.checked = c === n;
       }
 
-      /** 出料 20 行表：条码 / Rack / 耗材类型 / 数量 / Detail 锁定；仅复选框与全选可交互。 */
-      function applyOutBatchTableDataFieldsLocked() {
-        var batchWrap = document.getElementById('out-flow-step4-batch-table-wrap');
-        if (!batchWrap) return;
-        var n;
-        for (n = 1; n <= 20; n++) {
-          var bc = document.getElementById('out-batch-barcode-' + n);
-          var rackEl = document.getElementById('out-batch-rack-' + n);
-          var ct = document.getElementById('out-batch-consumable-type-' + n);
-          var qty = document.getElementById('out-batch-qty-' + n);
-          if (bc) {
-            bc.readOnly = true;
-            bc.disabled = false;
-            bc.tabIndex = -1;
-          }
-          if (rackEl) rackEl.disabled = true;
-          if (ct) ct.disabled = true;
-          if (qty) {
-            qty.readOnly = true;
-            qty.disabled = false;
-            qty.tabIndex = -1;
-          }
-          var rowCb = document.getElementById('out-batch-select-' + n);
-          var tr = rowCb ? rowCb.closest('tr') : null;
-          if (tr) {
-            var detailBtn = tr.querySelector('.flow-batch-detail-btn');
-            if (detailBtn) detailBtn.disabled = true;
-          }
+      var OUT_BATCH_RACK_LABELS = {
+        '1000': '1mL_TIP_Rack',
+        '1001': '50uL_TIP_Rack',
+        '1100': 'Spatula_Rack',
+        '1200': 'Reactor_Gaskets_Rack',
+        '2000': 'Inner_Flash_Filter_Rack',
+        '2001': 'Outer_Flash_Filter_Rack',
+        '2100': 'Hopper_Rack',
+        '5001': '1mL_Ceramic_Rack',
+        '5021': '1mL_Tube_Rack',
+        '5200': 'A1_Rack',
+        '5201': 'D1_Rack',
+        '5202': 'A1_Rack_4X4'
+      };
+      var OUT_BATCH_CONSUMABLE_LABELS = {
+        '5210': 'HRA1',
+        '5211': 'D1',
+        '2110': '30mL_Hopper_Container',
+        '5212': 'HRD1'
+      };
+      var OUT_BATCH_ROW_COUNT = 24;
+      var OUT_FLOW_CONFIG_HINT_DEFAULT =
+        'Click Preview to load the unload plan. Racks are pre-selected in the table—adjust if needed, then click Proceed.';
+      var OUT_FLOW_BATCH_UNLOAD_HINT =
+        'Unloads the first 8 selected trays.';
+      var OUT_BATCH_POSITION_PREFIX = '208:1/';
+      /** @type {Record<string, string[]|null>} */
+      var outBatchActiveFilters = { position: null, rack: null, consumable: null, qty: null };
+      var outBatchFilterOpenKey = null;
+
+      function outBatchRackLabel(code) {
+        return code ? (OUT_BATCH_RACK_LABELS[code] || code) : '—';
+      }
+
+      function outBatchConsumableLabel(code) {
+        return code ? (OUT_BATCH_CONSUMABLE_LABELS[code] || code) : '—';
+      }
+
+      /** 无耗材编码时，由架型名称去掉 _Rack 得到展示名（如 1mL_TIP_Rack → 1mL_TIP）。 */
+      function outBatchConsumableFromRack(rackCode) {
+        var rackName = outBatchRackLabel(rackCode);
+        if (!rackName || rackName === '—') return '—';
+        if (rackName.indexOf('_Rack') !== -1) return rackName.replace(/_Rack/g, '');
+        return rackName;
+      }
+
+      function outBatchConsumableDisplay(rackCode, consumableCode) {
+        if (consumableCode) return outBatchConsumableLabel(consumableCode);
+        return outBatchConsumableFromRack(rackCode);
+      }
+
+      function outBatchPositionSlotFromDisplay(text) {
+        var s = String(text || '').trim();
+        if (s.indexOf(OUT_BATCH_POSITION_PREFIX) === 0) {
+          return s.slice(OUT_BATCH_POSITION_PREFIX.length);
         }
+        return s;
+      }
+
+      function formatOutBatchPosition(slot) {
+        var raw = outBatchPositionSlotFromDisplay(slot);
+        return raw ? OUT_BATCH_POSITION_PREFIX + raw : OUT_BATCH_POSITION_PREFIX.replace(/\/$/, '');
+      }
+
+      function applyOutBatchPositionLabels() {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return;
+        wrap.querySelectorAll('tbody tr').forEach(function (tr) {
+          if (tr.classList.contains('out-batch-row-peeled')) return;
+          var posEl = tr.querySelector('.flow-batch-position-label');
+          if (!posEl) return;
+          if (posEl.getAttribute('data-position-fixed') === '1') {
+            var fixedLabel = posEl.getAttribute('data-position-slot') || posEl.textContent.trim();
+            posEl.textContent = fixedLabel;
+            var cbFixed = tr.querySelector('.flow-batch-rack-checkbox');
+            if (cbFixed) cbFixed.setAttribute('aria-label', 'Select rack ' + fixedLabel);
+            syncOutBatchRowFilterData(tr);
+            return;
+          }
+          var raw = posEl.getAttribute('data-position-slot');
+          if (!raw) raw = outBatchPositionSlotFromDisplay(posEl.textContent);
+          posEl.setAttribute('data-position-slot', raw);
+          posEl.textContent = formatOutBatchPosition(raw);
+          var cb = tr.querySelector('.flow-batch-rack-checkbox');
+          if (cb) cb.setAttribute('aria-label', 'Select rack ' + formatOutBatchPosition(raw));
+          syncOutBatchRowFilterData(tr);
+        });
+      }
+
+      function replaceOutBatchFieldWithDisplay(el) {
+        if (!el || el.classList.contains('flow-batch-display-value')) return el;
+        var span = document.createElement('span');
+        span.id = el.id;
+        span.className = 'flow-batch-display-value';
+        if (el.tagName === 'SELECT') {
+          var opt = el.options[el.selectedIndex];
+          span.textContent = opt && opt.value ? opt.textContent : '—';
+          span.setAttribute('data-code', el.value || '');
+        } else {
+          span.textContent = el.value || '';
+        }
+        el.parentNode.replaceChild(span, el);
+        return span;
+      }
+
+      function upgradeOutBatchTableDisplayCells() {
+        for (var n = 1; n <= OUT_BATCH_ROW_COUNT; n++) {
+          replaceOutBatchFieldWithDisplay(document.getElementById('out-batch-barcode-' + n));
+          replaceOutBatchFieldWithDisplay(document.getElementById('out-batch-rack-' + n));
+          replaceOutBatchFieldWithDisplay(document.getElementById('out-batch-consumable-type-' + n));
+          replaceOutBatchFieldWithDisplay(document.getElementById('out-batch-qty-' + n));
+        }
+      }
+
+      function syncOutBatchRowFilterData(tr) {
+        if (!tr) return;
+        var posEl = tr.querySelector('.flow-batch-position-label');
+        var n = tr.querySelector('.flow-batch-rack-checkbox');
+        var num = n && n.id ? parseInt(n.id.replace('out-batch-select-', ''), 10) : 0;
+        var bc = num ? document.getElementById('out-batch-barcode-' + num) : null;
+        var rack = num ? document.getElementById('out-batch-rack-' + num) : null;
+        var ct = num ? document.getElementById('out-batch-consumable-type-' + num) : null;
+        var qty = num ? document.getElementById('out-batch-qty-' + num) : null;
+        tr.setAttribute('data-out-position', posEl ? posEl.textContent.trim() : '');
+        tr.setAttribute('data-out-rack', rack ? rack.textContent.trim() : '');
+        tr.setAttribute('data-out-consumable', ct ? ct.textContent.trim() : '');
+        tr.setAttribute('data-out-qty', qty ? qty.textContent.trim() : '');
+      }
+
+      function getOutBatchFilterValues(key) {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return [];
+        var attr = 'data-out-' + key;
+        var seen = {};
+        var list = [];
+        wrap.querySelectorAll('tbody tr').forEach(function (tr) {
+          if (tr.classList.contains('out-batch-row-peeled')) return;
+          var v = tr.getAttribute(attr) || '';
+          if (!seen[v]) {
+            seen[v] = true;
+            list.push(v);
+          }
+        });
+        list.sort(function (a, b) {
+          if (key === 'qty') return Number(a) - Number(b);
+          return a.localeCompare(b, undefined, { numeric: true });
+        });
+        return list;
+      }
+
+      function closeOutBatchFilterPanels() {
+        document.querySelectorAll('#out-flow-step3-batch-table-wrap .flow-batch-filter-panel').forEach(function (p) {
+          p.hidden = true;
+        });
+        document.querySelectorAll('#out-flow-step3-batch-table-wrap .flow-batch-filter-trigger').forEach(function (btn) {
+          btn.setAttribute('aria-expanded', 'false');
+        });
+        outBatchFilterOpenKey = null;
+      }
+
+      function rebuildOutBatchFilterOptions(key) {
+        var panel = document.querySelector(
+          '#out-flow-step3-batch-table-wrap .flow-batch-filter-panel[data-out-filter-panel="' + key + '"]'
+        );
+        if (!panel) return;
+        var list = panel.querySelector('.flow-batch-filter-options');
+        var search = panel.querySelector('.flow-batch-filter-search');
+        if (!list) return;
+        var values = getOutBatchFilterValues(key);
+        var active = outBatchActiveFilters[key];
+        var pending = active ? active.slice() : values.slice();
+        list.innerHTML = '';
+        values.forEach(function (val) {
+          var li = document.createElement('li');
+          li.className = 'flow-batch-filter-option';
+          var label = document.createElement('label');
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = val;
+          cb.checked = pending.indexOf(val) !== -1;
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(val || '—'));
+          li.appendChild(label);
+          list.appendChild(li);
+        });
+        if (search) search.value = '';
+      }
+
+      function applyOutBatchRowFilters() {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return;
+        wrap.querySelectorAll('tbody tr').forEach(function (tr) {
+          if (tr.classList.contains('out-batch-row-peeled')) return;
+          var show = true;
+          ['position', 'rack', 'consumable', 'qty'].forEach(function (key) {
+            var sel = outBatchActiveFilters[key];
+            if (!sel || !sel.length) return;
+            var val = tr.getAttribute('data-out-' + key) || '';
+            if (sel.indexOf(val) === -1) show = false;
+          });
+          tr.classList.toggle('out-batch-row-filter-hidden', !show);
+        });
+        document.querySelectorAll('#out-flow-step3-batch-table-wrap .flow-batch-filter-trigger').forEach(function (btn) {
+          var k = btn.getAttribute('data-out-filter-key');
+          var active = k && outBatchActiveFilters[k] && outBatchActiveFilters[k].length;
+          btn.classList.toggle('is-active', !!active);
+        });
+        syncOutBatchSelectAllState();
+      }
+
+      function initOutBatchTableColumnFilters() {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap || wrap.getAttribute('data-out-filters-ready') === '1') return;
+        wrap.setAttribute('data-out-filters-ready', '1');
+
+        wrap.querySelectorAll('.flow-batch-filter-trigger').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var key = btn.getAttribute('data-out-filter-key');
+            if (!key) return;
+            if (outBatchFilterOpenKey === key) {
+              closeOutBatchFilterPanels();
+              return;
+            }
+            closeOutBatchFilterPanels();
+            rebuildOutBatchFilterOptions(key);
+            var panel = wrap.querySelector('.flow-batch-filter-panel[data-out-filter-panel="' + key + '"]');
+            if (panel) panel.hidden = false;
+            btn.setAttribute('aria-expanded', 'true');
+            outBatchFilterOpenKey = key;
+          });
+        });
+
+        wrap.querySelectorAll('.flow-batch-filter-panel').forEach(function (panel) {
+          var key = panel.getAttribute('data-out-filter-panel');
+          var search = panel.querySelector('.flow-batch-filter-search');
+          if (search) {
+            search.addEventListener('input', function () {
+              var q = search.value.trim().toLowerCase();
+              panel.querySelectorAll('.flow-batch-filter-option').forEach(function (li) {
+                var text = li.textContent.trim().toLowerCase();
+                li.hidden = q && text.indexOf(q) === -1;
+              });
+            });
+          }
+          var resetBtn = panel.querySelector('.flow-batch-filter-reset');
+          if (resetBtn) {
+            resetBtn.addEventListener('click', function () {
+              panel.querySelectorAll('.flow-batch-filter-option input').forEach(function (cb) {
+                cb.checked = true;
+              });
+            });
+          }
+          var okBtn = panel.querySelector('.flow-batch-filter-ok');
+          if (okBtn) {
+            okBtn.addEventListener('click', function () {
+              var checked = [];
+              panel.querySelectorAll('.flow-batch-filter-option input:checked').forEach(function (cb) {
+                checked.push(cb.value);
+              });
+              var allValues = getOutBatchFilterValues(key);
+              outBatchActiveFilters[key] =
+                checked.length === 0 || checked.length === allValues.length ? null : checked;
+              closeOutBatchFilterPanels();
+              applyOutBatchRowFilters();
+            });
+          }
+        });
+
+        document.addEventListener('click', function (e) {
+          if (!outBatchFilterOpenKey) return;
+          if (e.target.closest('.flow-batch-filter-panel') || e.target.closest('.flow-batch-filter-trigger')) return;
+          closeOutBatchFilterPanels();
+        });
+      }
+
+      /** 出料表：数据列仅展示；复选框、全选、Detail 与列筛选可交互。 */
+      function applyOutBatchTableDataFieldsLocked() {
+        var batchWrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!batchWrap) return;
         batchWrap.querySelectorAll('.flow-batch-rack-checkbox').forEach(function (el) {
           el.disabled = false;
         });
@@ -3042,7 +3738,7 @@
       }
 
       function clearOutBatchTableSubmittedState() {
-        var batchWrap = document.getElementById('out-flow-step4-batch-table-wrap');
+        var batchWrap = document.getElementById('out-flow-step3-batch-table-wrap');
         if (!batchWrap) return;
         batchWrap.classList.remove('flow-batch-submitted');
         var bar = document.getElementById('out-batch-submitted-bar');
@@ -3053,7 +3749,7 @@
       function updateOutUnloadCycleBarNumbers() {
         var numEl = document.getElementById('out-batch-cycle-num');
         var sufEl = document.getElementById('out-batch-cycle-suffix');
-        if (numEl) numEl.textContent = String(outUnloadCycleRemaining);
+        if (numEl) numEl.textContent = String(outUnloadCycleCurrent);
         if (sufEl) sufEl.textContent = '/' + outUnloadCycleTotal;
         if (outStepTagsShowLoop) {
           syncOutStepLoopTags();
@@ -3061,8 +3757,8 @@
       }
 
       function syncOutStepLoopTags() {
-        var text = 'loop ' + outUnloadCycleRemaining + '/' + outUnloadCycleTotal;
-        ['2', '3', '5'].forEach(function (s) {
+        var text = 'loop ' + outUnloadCycleCurrent + '/' + outUnloadCycleTotal;
+        ['1', '2', '4'].forEach(function (s) {
           var el = document.getElementById('out-step-' + s + '-mode-tag');
           if (!el) return;
           el.classList.remove('ant-tag-success');
@@ -3073,7 +3769,7 @@
 
       function resetOutStepModeTags() {
         outStepTagsShowLoop = false;
-        ['2', '3', '5'].forEach(function (s) {
+        ['1', '2', '4'].forEach(function (s) {
           var el = document.getElementById('out-step-' + s + '-mode-tag');
           if (!el) return;
           el.classList.remove('ant-tag-processing');
@@ -3084,9 +3780,9 @@
 
       function resetOutUnloadCycleBarState() {
         readOutConfigFromUi();
-        outUnloadCycleRemaining = outUnloadCycleTotal;
+        outUnloadCycleCurrent = 1;
         outUnloadFinalPassSequencesRemaining = 0;
-        hideOutStep5FinalConfirmUi();
+        hideOutStep4FinalConfirmUi();
         var cycleBar = document.getElementById('out-batch-cycle-bar');
         var mainBlock = document.getElementById('out-flow-batch-table-main');
         if (cycleBar) cycleBar.hidden = true;
@@ -3123,48 +3819,167 @@
           if (act1) act1.hidden = false;
           if (cycleBar) cycleBar.hidden = true;
           if (mainBlock) mainBlock.hidden = false;
+          setOutBatchPreviewTableInteractive(true);
         } else if (mode === 'step1WithCycle') {
           split.hidden = false;
           if (act1) act1.hidden = false;
           if (cycleBar) cycleBar.hidden = false;
           if (mainBlock) mainBlock.hidden = false;
+          setOutBatchPreviewTableInteractive(true);
+        } else if (mode === 'preview') {
+          split.hidden = false;
+          if (act1) act1.hidden = true;
+          if (cycleBar) cycleBar.hidden = true;
+          if (mainBlock) mainBlock.hidden = false;
+          setOutBatchPreviewTableInteractive(false);
         } else if (mode === 'cyclePersist') {
           split.hidden = false;
           if (act1) act1.hidden = true;
           if (cycleBar) cycleBar.hidden = false;
           if (mainBlock) mainBlock.hidden = true;
-        }
-
-        var outInner = document.getElementById('modal-out-inner');
-        if (outInner) {
-          if (mode === 'hidden') outInner.classList.remove('modal-out-inner--wide');
-          else outInner.classList.add('modal-out-inner--wide');
+          setOutBatchPreviewTableInteractive(true);
         }
       }
 
-      function hideOutStep5FinalConfirmUi() {
-        var wrap = document.getElementById('out-step5-final-confirm-wrap');
-        var btn = document.getElementById('out-step5-final-confirm');
+      function setOutBatchPreviewTableInteractive(interactive) {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return;
+        wrap.classList.toggle('out-batch-preview-readonly', !interactive);
+      }
+
+      function resetOutBatchTableDisplayEmpty() {
+        for (var n = 1; n <= OUT_BATCH_ROW_COUNT; n++) {
+          var bc = document.getElementById('out-batch-barcode-' + n);
+          var rackEl = document.getElementById('out-batch-rack-' + n);
+          var ct = document.getElementById('out-batch-consumable-type-' + n);
+          var qty = document.getElementById('out-batch-qty-' + n);
+          if (bc) bc.textContent = '';
+          if (rackEl) {
+            rackEl.textContent = '';
+            rackEl.removeAttribute('data-code');
+          }
+          if (ct) {
+            ct.textContent = '';
+            ct.removeAttribute('data-code');
+          }
+          if (qty) qty.textContent = '';
+        }
+      }
+
+      function fetchOutUnloadPlan() {
+        return new Promise(function (resolve) {
+          window.setTimeout(function () {
+            seedOutBatchTableDemoRows();
+            resolve();
+          }, 450);
+        });
+      }
+
+      function countOutBatchSelectedUnloadRows() {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return 0;
+        var n = 0;
+        wrap.querySelectorAll(outBatchVisibleRowCheckboxSelector()).forEach(function (cb) {
+          if (cb.checked) n++;
+        });
+        return n;
+      }
+
+      function formatOutFlowPreviewStatusSelectedCount(n) {
+        return n === 1 ? '1 unload row selected.' : n + ' unload rows selected.';
+      }
+
+      function updateOutFlowPreviewStatusSelectedCount() {
+        var status = document.getElementById('out-flow-preview-status');
+        if (!status) return;
+        var n = countOutBatchSelectedUnloadRows();
+        status.hidden = false;
+        status.textContent = formatOutFlowPreviewStatusSelectedCount(n);
+      }
+
+      function showOutFlowBatchUnloadHint() {
+        var hint = document.getElementById('out-flow-batch-unload-hint');
+        if (!hint) return;
+        hint.textContent = OUT_FLOW_BATCH_UNLOAD_HINT;
+        hint.hidden = false;
+      }
+
+      function hideOutFlowBatchUnloadHint() {
+        var hint = document.getElementById('out-flow-batch-unload-hint');
+        if (hint) hint.hidden = true;
+      }
+
+      /** After Preview (or refresh): show table, auto-check racks, enable Proceed / Refresh. */
+      function applyOutPreviewRackSelectionUi() {
+        setOutRightPanelMode('step1');
+        setOutBatchPreviewTableInteractive(true);
+        ensureOutBatchAllCheckboxesCheckedAndSynced();
+        applyOutBatchTableDataFieldsLocked();
+        setOutStep1ProceedVisible(true);
+        if (outStep1Confirm) outStep1Confirm.disabled = false;
+      }
+
+      function onOutFlowPreviewClick() {
+        var btn = document.getElementById('out-flow-preview-btn');
+        if (!btn || btn.disabled) return;
+        readOutConfigFromUi();
+        var pan = document.getElementById('out-flow-config-panel');
+        var hint = document.getElementById('out-flow-config-hint');
+        var status = document.getElementById('out-flow-preview-status');
+        if (pan) pan.classList.remove('is-done');
+        btn.disabled = true;
+        if (hint) hint.textContent = 'Loading rack list…';
+        if (status) status.hidden = true;
+        fetchOutUnloadPlan()
+          .then(function () {
+            outBatchPreviewLoaded = true;
+            outAppliedTrayCount = outConfigTrayCount;
+            outUnloadCycleCurrent = 1;
+            updateOutUnloadCycleBarNumbers();
+            if (pan) pan.classList.add('is-done');
+            applyOutPreviewRackSelectionUi();
+            if (hint) hint.textContent = OUT_FLOW_CONFIG_HINT_DEFAULT;
+            if (status) {
+              status.hidden = false;
+              status.textContent = 'Rack list ready. Adjust selection and click Proceed.';
+            }
+            toast('Preview loaded. Racks pre-selected—click Proceed when ready.');
+          })
+          .catch(function () {
+            outBatchPreviewLoaded = false;
+            if (hint) {
+              hint.textContent = 'Preview failed. Check settings and try again.';
+            }
+            toast('Could not load preview.');
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
+      }
+
+      function hideOutStep4FinalConfirmUi() {
+        var wrap = document.getElementById('out-step4-final-confirm-wrap');
+        var btn = document.getElementById('out-step4-final-confirm');
         if (wrap) wrap.hidden = true;
         if (btn) {
           btn.disabled = true;
         }
-        var closeDoorBtn = document.getElementById('out-step5-close-door-confirm');
+        var closeDoorBtn = document.getElementById('out-step4-close-door-confirm');
         if (closeDoorBtn) closeDoorBtn.disabled = true;
       }
 
-      function showOutStep5FinalConfirmUi() {
-        var wrap = document.getElementById('out-step5-final-confirm-wrap');
-        var btn = document.getElementById('out-step5-final-confirm');
+      function showOutStep4FinalConfirmUi() {
+        var wrap = document.getElementById('out-step4-final-confirm-wrap');
+        var btn = document.getElementById('out-step4-final-confirm');
         if (wrap) wrap.hidden = true;
         if (btn) btn.disabled = true;
-        var closeDoorBtn = document.getElementById('out-step5-close-door-confirm');
+        var closeDoorBtn = document.getElementById('out-step4-close-door-confirm');
         if (closeDoorBtn) closeDoorBtn.disabled = false;
       }
 
-      /** Macro loop 1/2 + auto Step 5: pause for footer Confirm (not the in-step final-pass Confirm). */
-      function shouldPauseOutStep5ForLoopOneOfTwoFooter() {
-        if (outUnloadCycleRemaining !== 1 || outUnloadCycleTotal !== 2) return false;
+      /** Macro loop 1/2 + auto Step 4: pause for footer Confirm (not the in-step final-pass Confirm). */
+      function shouldPauseOutStep4ForLoopOneOfTwoFooter() {
+        if (outUnloadCycleTotal !== 2 || outUnloadCycleCurrent !== outUnloadCycleTotal) return false;
         if (outUnloadFinalPassSequencesRemaining === 1) return false;
         return (
           outUnloadFinalPassSequencesRemaining === 0 ||
@@ -3172,63 +3987,63 @@
         );
       }
 
-      /** Step 5: auto timer, in-step Confirm for last final-pass cycle, pause + footer for first 1/3 Step 5, or footer after loop 1/2 auto. */
-      function scheduleOutStep5AfterStep4() {
-        hideOutStep5FinalConfirmUi();
+      /** Step 4: auto timer, in-step Confirm for last final-pass cycle, pause + footer for first 3/3 Step 4, or footer after loop 1/2 auto. */
+      function scheduleOutStep4AfterStep3() {
+        hideOutStep4FinalConfirmUi();
         if (
           outUnloadCycleTotal === 3 &&
-          outUnloadCycleRemaining === 1 &&
+          outUnloadCycleCurrent === outUnloadCycleTotal &&
           outUnloadFinalPassSequencesRemaining === outUnloadCycleTotal
         ) {
-          setOutStepItemState(5, 'process-manual');
+          setOutStepItemState(4, 'process-manual');
           if (footerCloseOut) {
             footerCloseOut.classList.add('visible');
             footerCloseOut.focus();
           }
-          outAwaitingFooterAfterFirstOneOfThreeStep5 = true;
+          outAwaitingFooterAfterFirstOneOfThreeStep4 = true;
           return;
         }
-        if (outUnloadCycleRemaining === 1 && outUnloadFinalPassSequencesRemaining === 1) {
-          setOutStepItemState(5, 'process-manual');
-          showOutStep5FinalConfirmUi();
+        if (outUnloadCycleCurrent === outUnloadCycleTotal && outUnloadFinalPassSequencesRemaining === 1) {
+          setOutStepItemState(4, 'process-manual');
+          showOutStep4FinalConfirmUi();
           return;
         }
-        setOutStepItemState(5, 'process-manual');
-        var closeDoorBtnAuto = document.getElementById('out-step5-close-door-confirm');
+        setOutStepItemState(4, 'process-manual');
+        var closeDoorBtnAuto = document.getElementById('out-step4-close-door-confirm');
         if (closeDoorBtnAuto) closeDoorBtnAuto.disabled = false;
       }
 
-      function runOutStep5AutoTimerAfterCloseDoor() {
+      function runOutStep4AutoTimerAfterCloseDoor() {
         outFlowTimers.t2 = setTimeout(function () {
           outFlowTimers.t2 = null;
-          setOutStepItemState(5, 'finish');
-          if (shouldPauseOutStep5ForLoopOneOfTwoFooter()) {
-            outAwaitingFooterAfterStep5Auto = true;
+          setOutStepItemState(4, 'finish');
+          if (shouldPauseOutStep4ForLoopOneOfTwoFooter()) {
+            outAwaitingFooterAfterStep4Auto = true;
             if (footerCloseOut) {
               footerCloseOut.classList.add('visible');
               footerCloseOut.focus();
             }
             return;
           }
-          outUnloadCycleOnStep5Complete();
+          outUnloadCycleOnStep4Complete();
         }, STEP_AUTO_MS);
       }
 
-      function onOutStep5CloseDoorConfirmed() {
-        var btn = document.getElementById('out-step5-close-door-confirm');
+      function onOutStep4CloseDoorConfirmed() {
+        var btn = document.getElementById('out-step4-close-door-confirm');
         if (!btn || btn.disabled) return;
         btn.disabled = true;
-        if (outUnloadCycleRemaining === 1 && outUnloadFinalPassSequencesRemaining === 1) {
-          hideOutStep5FinalConfirmUi();
-          setOutStepItemState(5, 'finish');
-          outUnloadCycleOnStep5Complete();
+        if (outUnloadCycleCurrent === outUnloadCycleTotal && outUnloadFinalPassSequencesRemaining === 1) {
+          hideOutStep4FinalConfirmUi();
+          setOutStepItemState(4, 'finish');
+          outUnloadCycleOnStep4Complete();
           return;
         }
-        setOutStepItemState(5, 'process-loading');
-        runOutStep5AutoTimerAfterCloseDoor();
+        setOutStepItemState(4, 'process-loading');
+        runOutStep4AutoTimerAfterCloseDoor();
       }
 
-      function outUnloadCycleOnStep5Complete(opts) {
+      function outUnloadCycleOnStep4Complete(opts) {
         opts = opts || {};
         var cycleBar = document.getElementById('out-batch-cycle-bar');
         if (!cycleBar || cycleBar.hidden) return false;
@@ -3236,45 +4051,38 @@
         if (outUnloadFinalPassSequencesRemaining > 0) {
           outUnloadFinalPassSequencesRemaining--;
           if (outUnloadFinalPassSequencesRemaining > 0) {
-            restartOutUnloadAfterFinalPassStep5();
+            restartOutUnloadAfterFinalPassStep4();
             return false;
           }
           outUnloadFinalPassSequencesRemaining = 0;
         }
 
-        if (outUnloadCycleRemaining > 1) {
-          outUnloadCycleRemaining--;
+        if (outUnloadCycleCurrent < outUnloadCycleTotal) {
+          outUnloadCycleCurrent++;
           updateOutUnloadCycleBarNumbers();
-          restartOutUnloadAfterPartialStep4();
+          restartOutUnloadAfterPartialStep3();
           return false;
         }
 
-        outUnloadCycleRemaining--;
-        if (outUnloadCycleRemaining <= 0) {
-          outUnloadCycleRemaining = outUnloadCycleTotal;
-          updateOutUnloadCycleBarNumbers();
-          resetOutBatchRowPeelState();
-          applyOutRightPanelHiddenDom();
-          var outInnerComplete = document.getElementById('modal-out-inner');
-          if (outInnerComplete) outInnerComplete.classList.remove('modal-out-inner--wide');
-          hideOutStep5FinalConfirmUi();
-          setOutStepItemState(5, 'finish');
-          if (!opts.skipCompletionFooter && footerCloseOut) {
-            footerCloseOut.classList.add('visible');
-            footerCloseOut.focus();
-          }
-          return true;
-        }
+        outUnloadCycleCurrent = 1;
         updateOutUnloadCycleBarNumbers();
-        return false;
+        resetOutBatchRowPeelState();
+        applyOutRightPanelHiddenDom();
+        hideOutStep4FinalConfirmUi();
+        setOutStepItemState(4, 'finish');
+        if (!opts.skipCompletionFooter && footerCloseOut) {
+          footerCloseOut.classList.add('visible');
+          footerCloseOut.focus();
+        }
+        return true;
       }
 
       function seedOutBatchTableDemoRows() {
-        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        var bout = document.getElementById('out-flow-step3-batch-table-wrap');
         if (!bout) return;
         /**
-         * 20 行完整演示数据 [kind, barcode, rackValue, consumableValue, qty]。
-         * kind: empty = 空架（默认勾选，Consumable Quantity 固定为 0）；consumable = 带耗材（默认不勾选）。
+         * 24 行演示数据 [kind, barcode, rackValue, consumableValue, qty, position?]。
+         * kind: empty = 空架（默认勾选）；consumable = 带耗材。position 可选，固定展示（如 200:1/A-1）。
          */
         var specs = [
           ['empty', 'T1M20260511L5A01', '1000', '', '96'],
@@ -3296,9 +4104,13 @@
           ['empty', 'T10U20260511L1C01', '1001', '', '96'],
           ['consumable', 'L1CR20260511L1C02', '5202', '5210', '48'],
           ['empty', 'T11M20260511L1C03', '1100', '', '24'],
-          ['consumable', 'L1CR20260511L1C04', '5200', '5212', '36']
+          ['consumable', 'L1CR20260511L1C04', '5200', '5212', '36'],
+          ['consumable', 'A1R20260520A101', '5200', '5210', '96', '200:1/A-1'],
+          ['empty', 'T200A20260520A102', '1000', '', '96', '200:2/A-1'],
+          ['empty', 'T200A30260520A103', '1001', '', '96', '200:2/A-1'],
+          ['consumable', 'D1R20260520B101', '5201', '5211', '48', '200:2/B-1']
         ];
-        for (var i = 0; i < 20; i++) {
+        for (var i = 0; i < specs.length; i++) {
           var n = i + 1;
           var cb = document.getElementById('out-batch-select-' + n);
           var bc = document.getElementById('out-batch-barcode-' + n);
@@ -3309,12 +4121,31 @@
           var s = specs[i];
           var trayKind = s[0] === 'empty' ? 'empty' : 'consumable';
           if (rowEl) rowEl.setAttribute('data-out-tray', trayKind);
-          if (bc) bc.value = s[1];
-          if (rackEl) rackEl.value = s[2];
-          if (ct) ct.value = s[3];
-          if (qty) qty.value = trayKind === 'empty' ? '0' : s[4];
+          if (bc) bc.textContent = s[1];
+          if (rackEl) {
+            rackEl.textContent = outBatchRackLabel(s[2]);
+            rackEl.setAttribute('data-code', s[2] || '');
+          }
+          if (ct) {
+            ct.textContent = outBatchConsumableDisplay(s[2], s[3]);
+            ct.setAttribute('data-code', s[3] || '');
+          }
+          if (qty) qty.textContent = trayKind === 'empty' ? '0' : s[4];
           if (cb) cb.checked = s[0] === 'empty';
+          if (rowEl && s[5]) {
+            var posElSeed = rowEl.querySelector('.flow-batch-position-label');
+            if (posElSeed) {
+              posElSeed.setAttribute('data-position-fixed', '1');
+              posElSeed.setAttribute('data-position-slot', s[5]);
+            }
+          }
+          if (rowEl) syncOutBatchRowFilterData(rowEl);
         }
+        applyOutBatchPositionLabels();
+        ['position', 'rack', 'consumable', 'qty'].forEach(function (k) {
+          rebuildOutBatchFilterOptions(k);
+        });
+        applyOutBatchRowFilters();
         syncOutBatchSelectAllState();
         applyOutBatchTableDataFieldsLocked();
       }
@@ -3347,38 +4178,40 @@
 
       function resetOutFlowUi() {
         clearOutFlowTimers();
-        outAwaitingFooterAfterStep5Auto = false;
-        outAwaitingFooterAfterFirstOneOfThreeStep5 = false;
-        hideOutStep5FinalConfirmUi();
-        resetOutStep2PurgeCycleDisplay();
+        outAwaitingFooterAfterStep4Auto = false;
+        outAwaitingFooterAfterFirstOneOfThreeStep4 = false;
+        hideOutStep4FinalConfirmUi();
+        hideOutFlowBatchUnloadHint();
+        resetOutStep1PurgeCycleDisplay();
         outUnloadCycleTotal = 3;
-        outConfigTrayCount = 20;
-        outAppliedTrayCount = 20;
-        if (outFlowModalStart) outFlowModalStart.disabled = false;
-        for (var os = 1; os <= 5; os++) setOutStepItemState(os, 'wait');
+        outConfigTrayCount = 24;
+        outAppliedTrayCount = 24;
+        outBatchPreviewLoaded = false;
+        var outCfgPan = document.getElementById('out-flow-config-panel');
+        if (outCfgPan) outCfgPan.classList.remove('is-done');
+        var outCfgHint = document.getElementById('out-flow-config-hint');
+        if (outCfgHint) outCfgHint.textContent = OUT_FLOW_CONFIG_HINT_DEFAULT;
+        var outPrevStatus = document.getElementById('out-flow-preview-status');
+        if (outPrevStatus) outPrevStatus.hidden = true;
+        for (var os = 1; os <= 4; os++) setOutStepItemState(os, 'wait');
         if (outStep1Confirm) outStep1Confirm.disabled = true;
         setOutStep1ProceedVisible(true);
+        if (outStep1PurgeConfirm) outStep1PurgeConfirm.disabled = true;
         if (outStep2Confirm) outStep2Confirm.disabled = true;
-        if (outStep3Confirm) outStep3Confirm.disabled = true;
-        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = true;
+        if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = true;
         if (footerCloseOut) footerCloseOut.classList.remove('visible');
-        var innerPanel = document.getElementById('out-step2-inner-panel');
+        var innerPanel = document.getElementById('out-step1-inner-panel');
         if (innerPanel) innerPanel.hidden = true;
-        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        var mw2 = document.getElementById('out-step1-metrics-wrap');
         if (mw2) mw2.hidden = true;
-        setOutVentRadioDisabled('out-step2-vent-radio-wrap', true);
+        resetOutVentStrategyUi();
         setOutRightPanelMode('hidden');
         resetOutStepModeTags();
         resetOutUnloadCycleBarState();
-        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        var bout = document.getElementById('out-flow-step3-batch-table-wrap');
         if (bout) {
           clearOutBatchTableSubmittedState();
-          bout.querySelectorAll('input.ant-input').forEach(function (el) {
-            el.value = '';
-          });
-          bout.querySelectorAll('select.flow-batch-select').forEach(function (el) {
-            el.selectedIndex = 0;
-          });
+          resetOutBatchTableDisplayEmpty();
           bout.querySelectorAll('.flow-batch-rack-checkbox').forEach(function (el) {
             el.checked = false;
             el.disabled = false;
@@ -3389,151 +4222,156 @@
             selectAll.indeterminate = false;
             selectAll.disabled = false;
           }
+          setOutBatchPreviewTableInteractive(true);
           applyOutBatchTableDataFieldsLocked();
         }
       }
 
       function beginOutFlow() {
         clearOutFlowTimers();
-        hideOutStep5FinalConfirmUi();
-        resetOutStep2PurgeCycleDisplay();
-        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        hideOutStep4FinalConfirmUi();
+        resetOutStep1PurgeCycleDisplay();
+        var bout = document.getElementById('out-flow-step3-batch-table-wrap');
         if (bout) clearOutBatchTableSubmittedState();
         resetOutUnloadCycleBarState();
-        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        var mw2 = document.getElementById('out-step1-metrics-wrap');
         if (mw2) mw2.hidden = true;
-        var innerPanel = document.getElementById('out-step2-inner-panel');
+        var innerPanel = document.getElementById('out-step1-inner-panel');
         if (innerPanel) innerPanel.hidden = true;
-        setOutVentRadioDisabled('out-step2-vent-radio-wrap', true);
-        setOutStepItemState(1, 'process-loading');
-        for (var j = 2; j <= 5; j++) setOutStepItemState(j, 'wait');
+        resetOutVentStrategyUi();
+        for (var j = 1; j <= 4; j++) setOutStepItemState(j, 'wait');
         if (outStep1Confirm) outStep1Confirm.disabled = true;
+        if (outStep1PurgeConfirm) outStep1PurgeConfirm.disabled = true;
         if (outStep2Confirm) outStep2Confirm.disabled = true;
-        if (outStep3Confirm) outStep3Confirm.disabled = true;
-        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = true;
+        if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = true;
+        hideOutFlowBatchUnloadHint();
         if (footerCloseOut) footerCloseOut.classList.remove('visible');
 
         outFlowTimers.tStep1Prep = setTimeout(function () {
           outFlowTimers.tStep1Prep = null;
-          setOutStepItemState(1, 'process-manual');
-          setOutRightPanelMode('step1');
-          seedOutBatchTableDemoRows();
-          setOutStep1ProceedVisible(true);
-          if (outStep1Confirm) outStep1Confirm.disabled = false;
+          applyOutPreviewRackSelectionUi();
         }, STEP_AUTO_MS);
       }
 
       function onOutStep1Confirmed() {
         if (!outStep1Confirm || outStep1Confirm.disabled) return;
+        var selected = countOutBatchSelectedUnloadRows();
+        if (selected < 1) {
+          toast('Select at least one row for unload.');
+          return;
+        }
         outStep1Confirm.disabled = true;
+        updateOutFlowPreviewStatusSelectedCount();
         runOutStep1CompletionIntoStep2();
+      }
+
+      function onOutStep1PurgeConfirmed() {
+        if (!outStep1PurgeConfirm || outStep1PurgeConfirm.disabled) return;
+        outStep1PurgeConfirm.disabled = true;
+        setOutVentStrategyEditable(false);
+        var mw2Confirm = document.getElementById('out-step1-metrics-wrap');
+        if (mw2Confirm) mw2Confirm.hidden = false;
+        startOutStep1PurgeCycleAnim();
+        setOutStepItemState(1, 'finish');
+        setOutStepItemState(2, 'process-loading');
+        if (outStep2Confirm) outStep2Confirm.disabled = true;
+        outFlowTimers.tStep2Prep = setTimeout(function () {
+          outFlowTimers.tStep2Prep = null;
+          setOutStepItemState(2, 'process-manual');
+          if (outStep2Confirm) outStep2Confirm.disabled = false;
+        }, STEP_AUTO_MS);
       }
 
       function onOutStep2Confirmed() {
         if (!outStep2Confirm || outStep2Confirm.disabled) return;
         outStep2Confirm.disabled = true;
-        var mw2Confirm = document.getElementById('out-step2-metrics-wrap');
-        if (mw2Confirm) mw2Confirm.hidden = false;
-        startOutStep2PurgeCycleAnim();
         setOutStepItemState(2, 'finish');
-        setOutStepItemState(3, 'process-loading');
-        if (outStep3Confirm) outStep3Confirm.disabled = true;
-        outFlowTimers.tStep3Prep = setTimeout(function () {
-          outFlowTimers.tStep3Prep = null;
-          setOutStepItemState(3, 'process-manual');
-          if (outStep3Confirm) outStep3Confirm.disabled = false;
-        }, STEP_AUTO_MS);
+        setOutStepItemState(3, 'process-manual');
+        if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = false;
+        showOutFlowBatchUnloadHint();
       }
 
-      function onOutStep3Confirmed() {
-        if (!outStep3Confirm || outStep3Confirm.disabled) return;
-        outStep3Confirm.disabled = true;
-        setOutStepItemState(3, 'finish');
-        setOutStepItemState(4, 'process-manual');
-        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = false;
-      }
-
-      /** After step 5 during the final (3rd) unload pass: repeat full 1–5 without peeling rows or changing loop 1/3. */
-      function restartOutUnloadAfterFinalPassStep5() {
+      /** After step 4 during the final (3rd) unload pass: repeat full flow without peeling rows or changing loop 3/3. */
+      function restartOutUnloadAfterFinalPassStep4() {
         clearOutFlowTimers();
-        hideOutStep5FinalConfirmUi();
-        resetOutStep2PurgeCycleDisplay();
-        var innerPanel = document.getElementById('out-step2-inner-panel');
+        hideOutStep4FinalConfirmUi();
+        resetOutStep1PurgeCycleDisplay();
+        var innerPanel = document.getElementById('out-step1-inner-panel');
         if (innerPanel) innerPanel.hidden = true;
-        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        var mw2 = document.getElementById('out-step1-metrics-wrap');
         if (mw2) mw2.hidden = true;
-        setOutVentRadioDisabled('out-step2-vent-radio-wrap', true);
-        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        resetOutVentStrategyUi();
+        var bout = document.getElementById('out-flow-step3-batch-table-wrap');
         if (bout) clearOutBatchTableSubmittedState();
         setOutRightPanelMode('step1WithCycle');
         seedOutBatchTableDemoRows();
-        for (var j = 2; j <= 5; j++) setOutStepItemState(j, 'wait');
-        setOutStepItemState(1, 'process-loading');
+        for (var j = 1; j <= 4; j++) setOutStepItemState(j, 'wait');
         if (outStep1Confirm) outStep1Confirm.disabled = true;
+        if (outStep1PurgeConfirm) outStep1PurgeConfirm.disabled = true;
         if (outStep2Confirm) outStep2Confirm.disabled = true;
-        if (outStep3Confirm) outStep3Confirm.disabled = true;
-        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = true;
+        if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = true;
+        hideOutFlowBatchUnloadHint();
         if (footerCloseOut) footerCloseOut.classList.remove('visible');
 
         scheduleOutStep1AfterOutRestart();
       }
 
-      /** After step 5 when macro passes 1–2 remain (3→2, 2→1): peel next 8 rows and return to step 1 with loop bar + table. */
-      function restartOutUnloadAfterPartialStep4() {
+      /** After step 4 when macro passes 1–2 remain (3→2, 2→1): peel next 8 rows and return to rack selection with loop bar + table. */
+      function restartOutUnloadAfterPartialStep3() {
         clearOutFlowTimers();
-        hideOutStep5FinalConfirmUi();
-        resetOutStep2PurgeCycleDisplay();
+        hideOutStep4FinalConfirmUi();
+        resetOutStep1PurgeCycleDisplay();
         hideOutBatchNextEightVisibleRows();
-        var innerPanel = document.getElementById('out-step2-inner-panel');
+        var innerPanel = document.getElementById('out-step1-inner-panel');
         if (innerPanel) innerPanel.hidden = true;
-        var mw2 = document.getElementById('out-step2-metrics-wrap');
+        var mw2 = document.getElementById('out-step1-metrics-wrap');
         if (mw2) mw2.hidden = true;
-        setOutVentRadioDisabled('out-step2-vent-radio-wrap', true);
-        var bout = document.getElementById('out-flow-step4-batch-table-wrap');
+        resetOutVentStrategyUi();
+        var bout = document.getElementById('out-flow-step3-batch-table-wrap');
         if (bout) clearOutBatchTableSubmittedState();
         setOutRightPanelMode('step1WithCycle');
         seedOutBatchTableDemoRows();
-        for (var j = 2; j <= 5; j++) setOutStepItemState(j, 'wait');
-        setOutStepItemState(1, 'process-loading');
+        for (var j = 1; j <= 4; j++) setOutStepItemState(j, 'wait');
         if (outStep1Confirm) outStep1Confirm.disabled = true;
+        if (outStep1PurgeConfirm) outStep1PurgeConfirm.disabled = true;
         if (outStep2Confirm) outStep2Confirm.disabled = true;
-        if (outStep3Confirm) outStep3Confirm.disabled = true;
-        if (outStep4BatchConfirm) outStep4BatchConfirm.disabled = true;
+        if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = true;
+        hideOutFlowBatchUnloadHint();
         if (footerCloseOut) footerCloseOut.classList.remove('visible');
 
         scheduleOutStep1AfterOutRestart();
       }
 
-      function onOutStep4BatchConfirmed() {
-        if (!outStep4BatchConfirm || outStep4BatchConfirm.disabled) return;
-        outStep4BatchConfirm.disabled = true;
-        setOutStepItemState(4, 'finish');
+      function onOutStep3BatchConfirmed() {
+        if (!outStep3BatchConfirm || outStep3BatchConfirm.disabled) return;
+        outStep3BatchConfirm.disabled = true;
+        hideOutFlowBatchUnloadHint();
+        setOutStepItemState(3, 'finish');
 
-        if (outUnloadCycleRemaining === 1 && outUnloadFinalPassSequencesRemaining === 0) {
+        if (outUnloadCycleCurrent === outUnloadCycleTotal && outUnloadFinalPassSequencesRemaining === 0) {
           outUnloadFinalPassSequencesRemaining = outUnloadCycleTotal;
         }
-        scheduleOutStep5AfterStep4();
+        scheduleOutStep4AfterStep3();
       }
 
-      function onOutStep5FinalConfirmClicked() {
-        onOutStep5CloseDoorConfirmed();
+      function onOutStep4FinalConfirmClicked() {
+        onOutStep4CloseDoorConfirmed();
       }
 
       function openModalOut() {
         if (!modalOut) return;
         modalOut.classList.add('open');
-        var outInner = document.getElementById('modal-out-inner');
-        if (outInner) outInner.classList.remove('modal-out-inner--wide');
         resetOutFlowUi();
-        if (outFlowModalStart) outFlowModalStart.focus();
+        var outPreviewBtn = document.getElementById('out-flow-preview-btn');
+        if (outPreviewBtn) outPreviewBtn.focus();
       }
 
       function closeModalOut() {
         if (!modalOut) return;
         var needReset = footerCloseOut && footerCloseOut.classList.contains('visible');
         if (footerCloseOut) footerCloseOut.classList.remove('visible');
-        outAwaitingFooterAfterStep5Auto = false;
-        outAwaitingFooterAfterFirstOneOfThreeStep5 = false;
+        outAwaitingFooterAfterStep4Auto = false;
+        outAwaitingFooterAfterFirstOneOfThreeStep4 = false;
         modalOut.classList.remove('open');
         clearOutFlowTimers();
         if (needReset) {
@@ -3542,18 +4380,18 @@
       }
 
       function onOutFooterCloseClick() {
-        if (outAwaitingFooterAfterFirstOneOfThreeStep5) {
-          outAwaitingFooterAfterFirstOneOfThreeStep5 = false;
+        if (outAwaitingFooterAfterFirstOneOfThreeStep4) {
+          outAwaitingFooterAfterFirstOneOfThreeStep4 = false;
           if (footerCloseOut) footerCloseOut.classList.remove('visible');
           resetOutFlowUi();
           modalOut.classList.remove('open');
           clearOutFlowTimers();
           return;
         }
-        if (outAwaitingFooterAfterStep5Auto) {
-          outAwaitingFooterAfterStep5Auto = false;
+        if (outAwaitingFooterAfterStep4Auto) {
+          outAwaitingFooterAfterStep4Auto = false;
           if (footerCloseOut) footerCloseOut.classList.remove('visible');
-          var flowEnded = outUnloadCycleOnStep5Complete({ skipCompletionFooter: true });
+          var flowEnded = outUnloadCycleOnStep4Complete({ skipCompletionFooter: true });
           if (flowEnded) {
             resetOutFlowUi();
             modalOut.classList.remove('open');
@@ -3610,7 +4448,6 @@
 
       function resetFlowUi() {
         clearFlowTimers();
-        setIntoModalInnerWide(false);
         resetIntoStep2PurgeCycleDisplay();
         resetIntoStep4PurgeCycleDisplay();
         intoConfigApplied = false;
@@ -3713,7 +4550,6 @@
       /** 在用户点击 Start 之后执行：步骤 1 需 Confirm → 步骤 2 需 Confirm → 步骤 3 批量（不在此处重置 Start 按钮状态） */
       function beginIntoFlow() {
         clearFlowTimers();
-        setIntoModalInnerWide(false);
         resetIntoStep2PurgeCycleDisplay();
         resetIntoStep4PurgeCycleDisplay();
         var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
@@ -3758,9 +4594,13 @@
 
       function onOutFlowStart() {
         if (!outFlowModalStart || outFlowModalStart.disabled) return;
+        if (!outBatchPreviewLoaded) {
+          toast('Preview the unload plan first.');
+          return;
+        }
         readOutConfigFromUi();
         outAppliedTrayCount = outConfigTrayCount;
-        outUnloadCycleRemaining = outUnloadCycleTotal;
+        outUnloadCycleCurrent = 1;
         updateOutUnloadCycleBarNumbers();
         outFlowModalStart.disabled = true;
         beginOutFlow();
@@ -3775,8 +4615,8 @@
         setStepItemState(1, 'finish');
         setStepItemState(2, 'process-loading');
         if (step2DoorConfirm) step2DoorConfirm.disabled = true;
-        flowTimers.tStep2Prep = setTimeout(function () {
-          flowTimers.tStep2Prep = null;
+        flowTimers.tStep1PurgePrep = setTimeout(function () {
+          flowTimers.tStep1PurgePrep = null;
           setStepItemState(2, 'process-manual');
           if (step2DoorConfirm) step2DoorConfirm.disabled = false;
         }, STEP_AUTO_MS);
@@ -3793,7 +4633,6 @@
         if (batchWrap) {
           seedBatchTableDemoRows();
         }
-        setIntoModalInnerWide(true);
       }
 
       function onStartFlow() {
@@ -3926,13 +4765,30 @@
       if (terminateBtnOut) terminateBtnOut.addEventListener('click', openTerminateConfirmFromOut);
       startBtn.addEventListener('click', onStartFlow);
       if (outStep1Confirm) outStep1Confirm.addEventListener('click', onOutStep1Confirmed);
+      if (outStep1PurgeConfirm) outStep1PurgeConfirm.addEventListener('click', onOutStep1PurgeConfirmed);
+      var outStep2VentSelect = document.getElementById('out-step1-vent-select');
+      if (outStep2VentSelect) outStep2VentSelect.addEventListener('change', updateOutVentStrategyDesc);
+      var outStep2VentAdvToggle = document.getElementById('out-step1-vent-advanced-toggle');
+      if (outStep2VentAdvToggle) {
+        outStep2VentAdvToggle.addEventListener('click', toggleOutVentAdvancedBody);
+        outStep2VentAdvToggle.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleOutVentAdvancedBody();
+          }
+        });
+      }
+      var outStep2VentCycles = document.getElementById('out-step1-vent-cycles');
+      if (outStep2VentCycles) {
+        outStep2VentCycles.addEventListener('change', syncOutStep1PurgeCycleSuffix);
+        outStep2VentCycles.addEventListener('input', syncOutStep1PurgeCycleSuffix);
+      }
       if (outStep2Confirm) outStep2Confirm.addEventListener('click', onOutStep2Confirmed);
-      if (outStep3Confirm) outStep3Confirm.addEventListener('click', onOutStep3Confirmed);
-      if (outStep4BatchConfirm) outStep4BatchConfirm.addEventListener('click', onOutStep4BatchConfirmed);
-      var outStep5FinalConfirmBtn = document.getElementById('out-step5-final-confirm');
-      if (outStep5FinalConfirmBtn) outStep5FinalConfirmBtn.addEventListener('click', onOutStep5FinalConfirmClicked);
-      var outStep5CloseDoorConfirmBtn = document.getElementById('out-step5-close-door-confirm');
-      if (outStep5CloseDoorConfirmBtn) outStep5CloseDoorConfirmBtn.addEventListener('click', onOutStep5CloseDoorConfirmed);
+      if (outStep3BatchConfirm) outStep3BatchConfirm.addEventListener('click', onOutStep3BatchConfirmed);
+      var outStep4FinalConfirmBtn = document.getElementById('out-step4-final-confirm');
+      if (outStep4FinalConfirmBtn) outStep4FinalConfirmBtn.addEventListener('click', onOutStep4FinalConfirmClicked);
+      var outStep4CloseDoorConfirmBtn = document.getElementById('out-step4-close-door-confirm');
+      if (outStep4CloseDoorConfirmBtn) outStep4CloseDoorConfirmBtn.addEventListener('click', onOutStep4CloseDoorConfirmed);
       terminateConfirmCancel.addEventListener('click', closeTerminateConfirm);
       terminateConfirmOk.addEventListener('click', performTerminate);
       terminateConfirmModal.addEventListener('click', function (e) {
@@ -3954,16 +4810,21 @@
       });
       var intoCfgApply = document.getElementById('into-config-apply');
       if (intoCfgApply) intoCfgApply.addEventListener('click', onIntoConfigApply);
-      if (outFlowModalStart) outFlowModalStart.addEventListener('click', onOutFlowStart);
-      var outBatchWrapEl = document.getElementById('out-flow-step4-batch-table-wrap');
+      var outFlowPreviewBtn = document.getElementById('out-flow-preview-btn');
+      if (outFlowPreviewBtn) outFlowPreviewBtn.addEventListener('click', onOutFlowPreviewClick);
+      var outBatchWrapEl = document.getElementById('out-flow-step3-batch-table-wrap');
       if (outBatchWrapEl) {
         outBatchWrapEl.addEventListener('change', function (e) {
           var t = e.target;
           if (t && t.id === 'out-batch-select-all') {
             var on = t.checked;
-            outBatchWrapEl.querySelectorAll('tbody tr:not(.out-batch-row-peeled) .flow-batch-rack-checkbox').forEach(function (cb) {
-              cb.checked = on;
-            });
+            outBatchWrapEl
+              .querySelectorAll(
+                'tbody tr:not(.out-batch-row-peeled):not(.out-batch-row-filter-hidden) .flow-batch-rack-checkbox'
+              )
+              .forEach(function (cb) {
+                cb.checked = on;
+              });
             t.indeterminate = false;
             return;
           }
@@ -3972,7 +4833,8 @@
           }
         });
         outBatchWrapEl.addEventListener('click', function (e) {
-          if (e.target.closest('.flow-batch-detail-btn')) {
+          var detailBtn = e.target.closest('.flow-batch-detail-btn');
+          if (detailBtn && !detailBtn.disabled) {
             toast('Detail view (preview)');
           }
         });
@@ -3981,10 +4843,15 @@
       if (outStep1RefreshEl) {
         outStep1RefreshEl.addEventListener('click', function () {
           if (this.disabled) return;
-          seedOutBatchTableDemoRows();
-          toast('Refreshed');
+          readOutConfigFromUi();
+          fetchOutUnloadPlan().then(function () {
+            applyOutPreviewRackSelectionUi();
+            toast('Refreshed');
+          });
         });
       }
+      upgradeOutBatchTableDisplayCells();
+      initOutBatchTableColumnFilters();
       modal.addEventListener('click', function (e) {
         if (e.target === modal) closeModal();
       });
