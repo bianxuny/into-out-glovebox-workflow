@@ -387,6 +387,16 @@
       background-color: #1677ff;
     }
     /* Out step 2: ventilation (Ant Design Form + Select + Collapse + InputNumber) */
+    .into-purge-setting-wrap .flow-step-vent-panel + .flow-step-vent-panel {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .flow-step-vent-panel.is-vent-configured .flow-step-vent-panel-title::after {
+      content: ' ✓';
+      color: #52c41a;
+      font-weight: 600;
+    }
     .flow-step-vent-panel {
       margin-top: 12px;
       padding: 12px 14px;
@@ -485,6 +495,78 @@
       color: rgba(0, 0, 0, 0.65);
       white-space: nowrap;
     }
+    .flow-step-vent-select-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      width: 100%;
+    }
+    .flow-step-vent-select-row .flow-step-vent-select-grow {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .flow-step-vent-select-row .flow-step-vent-select-grow.ant-select {
+      width: 100%;
+    }
+    .flow-step-vent-cycles-toggle {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      margin-top: 0;
+      padding: 0;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      background: #fff;
+      color: rgba(0, 0, 0, 0.65);
+      cursor: pointer;
+    }
+    .flow-step-vent-panel.is-editable .flow-step-vent-cycles-toggle:not(:disabled):hover,
+    .flow-step-vent-cycles-toggle.is-open {
+      color: #1677ff;
+      border-color: #1677ff;
+    }
+    .flow-step-vent-cycles-toggle:disabled {
+      color: rgba(0, 0, 0, 0.25);
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+    .flow-step-vent-cycles-toggle[hidden] {
+      display: none !important;
+    }
+    .flow-step-vent-cycles-toggle .anticon {
+      display: inline-flex;
+      font-size: 14px;
+      transition: transform 0.2s ease;
+    }
+    .flow-step-vent-cycles-toggle.is-open .anticon {
+      transform: rotate(180deg);
+    }
+    .flow-step-vent-cycles-popover {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step-vent-cycles-popover[hidden] {
+      display: none !important;
+    }
+    .flow-step-vent-cycles-popover .ant-form-item-label label {
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.88);
+    }
+    .flow-step-vent-cycles-hint {
+      margin: 6px 0 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: rgba(0, 0, 0, 0.45);
+    }
+    .flow-step-vent-cycles-popover .ant-input-number {
+      width: 100%;
+    }
     /* Step 1：环境读数表格（仅步骤一 Confirm 点击后出现） */
     .flow-step2-metrics-wrap[hidden] {
       display: none !important;
@@ -497,13 +579,26 @@
       border-radius: 6px;
       background: #fafafa;
     }
-    .flow-step4-inner-purge-metrics {
+    .flow-step5-inner-purge-metrics {
       margin-top: 12px;
       /* Match step 1 metrics: cancel ol padding so width and left edge align with #flow-step2-metrics-wrap */
       margin-left: -18px;
       width: calc(100% + 18px);
       max-width: none;
       box-sizing: border-box;
+    }
+    @keyframes flow-step5-metrics-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .flow-step5-inner-purge-metrics.is-revealing {
+      animation: flow-step5-metrics-reveal 0.4s ease-out;
     }
     /* Into glovebox: identical column grid for step 1 and step 4 metrics tables */
     #into-flow-steps .flow-step2-metrics-table {
@@ -605,6 +700,25 @@
     .flow-step2-refresh-btn svg {
       width: 16px;
       height: 16px;
+    }
+    .flow-step2-edit-table-btn.ant-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      min-width: 32px;
+      height: 32px;
+      padding: 0;
+    }
+    .flow-step2-edit-table-btn .anticon {
+      line-height: 0;
+    }
+    .flow-step2-edit-table-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    .flow-step2-edit-table-btn[hidden] {
+      display: none !important;
     }
     .flow-step2-actions .ant-btn[disabled] {
       cursor: not-allowed;
@@ -784,6 +898,72 @@
       padding: 0 4px;
       height: auto;
       font-size: 13px;
+    }
+    .flow-batch-th-sortable {
+      position: relative;
+      vertical-align: middle;
+    }
+    .flow-batch-sort-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: none;
+      border-radius: 2px;
+      background: transparent;
+      color: rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+    }
+    .flow-batch-sort-trigger:hover,
+    .flow-batch-sort-trigger[aria-expanded='true'] {
+      color: #1677ff;
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .flow-batch-sort-trigger.is-active {
+      color: #1677ff;
+    }
+    .flow-batch-sort-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      z-index: 20;
+      min-width: 168px;
+      padding: 4px;
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08);
+    }
+    .flow-batch-sort-panel[hidden] {
+      display: none !important;
+    }
+    .flow-batch-sort-option {
+      display: block;
+      width: 100%;
+      padding: 5px 12px;
+      border: none;
+      border-radius: 2px;
+      background: transparent;
+      font-size: 13px;
+      line-height: 1.5715;
+      text-align: left;
+      color: rgba(0, 0, 0, 0.88);
+      cursor: pointer;
+    }
+    .flow-batch-sort-option:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .flow-batch-sort-option.is-selected {
+      color: #1677ff;
+      background: #e6f4ff;
+      font-weight: 500;
+    }
+    .flow-batch-sort-clear {
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid #f0f0f0;
+      color: rgba(0, 0, 0, 0.45);
     }
     #out-flow-step3-batch-table-wrap.out-batch-data-readonly .flow-batch-detail-btn:disabled {
       color: rgba(0, 0, 0, 0.25);
@@ -1037,7 +1217,7 @@
       flex-wrap: wrap;
       gap: 12px 20px;
       align-items: flex-end;
-      margin-bottom: 10px;
+      margin-bottom: 0;
     }
     .into-flow-config-field label {
       display: block;
@@ -1134,7 +1314,6 @@
             <input type="number" class="ant-input" id="into-config-loop-count" min="1" max="5" value="2" inputmode="numeric" />
           </div>
         </div>
-        <button type="button" class="ant-btn ant-btn-primary" id="into-config-apply">Apply</button>
       </div>
 
       <div class="flow-ant-steps-wrap">
@@ -1149,41 +1328,111 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Outer-door purge</span>
+                    <span class="flow-step-title-text">Purge Setting</span>
                     <span class="ant-tag ant-tag-success" id="into-step-1-mode-tag">Auto</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Purge to meet interlock before opening the outer door.</p>
-                  <div id="into-step1-vent-panel" class="flow-step-vent-panel" hidden aria-label="Inner purge ventilation strategy">
-                    <p class="flow-step-vent-panel-title">Ventilation Strategy</p>
+                  <p class="flow-step-desc-single">Configure purge for outer-door and inner-door interlocks, then confirm.</p>
+                  <div id="into-purge-setting-wrap" class="into-purge-setting-wrap" hidden aria-label="Inner purge ventilation strategy">
+                  <div id="into-step1-vent-panel" class="flow-step-vent-panel">
+                    <p class="flow-step-vent-panel-title">Step 1: Purge-before open outer door</p>
                     <form class="ant-form ant-form-vertical flow-step-vent-form" novalidate>
                       <div class="ant-form-item">
                         <div class="ant-form-item-control">
                           <div class="ant-form-item-control-input">
                             <div class="ant-form-item-control-input-content">
-                              <div
-                                id="into-step1-vent-select-wrap"
-                                class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled"
-                                style="width: 100%"
-                              >
-                                <div class="ant-select-selector">
-                                  <span class="ant-select-selection-search">
-                                    <select
-                                      id="into-step1-vent-select"
-                                      class="flow-ant-select-native"
-                                      disabled
-                                      aria-label="Ventilation strategy"
-                                      aria-describedby="into-step1-vent-desc"
-                                    >
-                                      <option value="standard">Standard vacuum ↔ fill (repeat)</option>
-                                      <option value="mild">Mild vacuum</option>
-                                      <option value="simultaneous">Simultaneous exchange</option>
-                                    </select>
-                                  </span>
-                                  <span id="into-step1-vent-select-label" class="ant-select-selection-item">Standard vacuum ↔ fill (repeat)</span>
+                              <div class="flow-step-vent-select-row">
+                                <div
+                                  id="into-step1-vent-select-wrap"
+                                  class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-select-grow"
+                                >
+                                  <div class="ant-select-selector">
+                                    <span class="ant-select-selection-search">
+                                      <select
+                                        id="into-step1-vent-select"
+                                        class="flow-ant-select-native"
+                                        disabled
+                                        aria-label="Ventilation strategy"
+                                        aria-describedby="into-step1-vent-desc"
+                                      >
+                                        <option value="standard">Standard vacuum ↔ fill (repeat)</option>
+                                        <option value="mild">Mild vacuum</option>
+                                        <option value="simultaneous">Simultaneous exchange</option>
+                                      </select>
+                                    </span>
+                                    <span id="into-step1-vent-select-label" class="ant-select-selection-item">Standard vacuum ↔ fill (repeat)</span>
+                                  </div>
+                                  <span class="ant-select-arrow" aria-hidden="true"></span>
                                 </div>
-                                <span class="ant-select-arrow" aria-hidden="true"></span>
+                                <button
+                                  type="button"
+                                  id="into-step1-vent-cycles-toggle"
+                                  class="flow-step-vent-cycles-toggle"
+                                  hidden
+                                  aria-label="Configure cycles (N)"
+                                  aria-expanded="false"
+                                  aria-controls="into-step1-vent-cycles-popover"
+                                >
+                                  <span class="anticon" aria-hidden="true">
+                                    <svg viewBox="64 64 896 896" width="1em" height="1em" fill="currentColor">
+                                      <path
+                                        d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+                                      />
+                                    </svg>
+                                  </span>
+                                </button>
+                              </div>
+                              <div id="into-step1-vent-cycles-popover" class="flow-step-vent-cycles-popover" hidden>
+                                <div class="ant-form-item">
+                                  <div class="ant-form-item-label">
+                                    <label for="into-step1-vent-cycles">Cycles (N)</label>
+                                  </div>
+                                  <div class="ant-form-item-control">
+                                    <div id="into-step1-vent-cycles-wrap" class="ant-input-number ant-input-number-disabled">
+                                      <div class="ant-input-number-input-wrap">
+                                        <input
+                                          type="number"
+                                          class="ant-input-number-input"
+                                          id="into-step1-vent-cycles"
+                                          min="1"
+                                          max="20"
+                                          value="3"
+                                          inputmode="numeric"
+                                          disabled
+                                        />
+                                      </div>
+                                    </div>
+                                    <p class="flow-step-vent-cycles-hint">Repeat mode use cycles(N)</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div id="into-step1-vent-duration-popover" class="flow-step-vent-cycles-popover" hidden>
+                                <div class="ant-form-item">
+                                  <div class="ant-form-item-label">
+                                    <label for="into-step1-vent-duration-pop">Duration</label>
+                                  </div>
+                                  <div class="ant-form-item-control">
+                                    <div class="flow-step-vent-duration-row">
+                                      <div id="into-step1-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
+                                        <div class="ant-input-number-input-wrap">
+                                          <input
+                                            type="number"
+                                            class="ant-input-number-input"
+                                            id="into-step1-vent-duration-pop"
+                                            min="1"
+                                            max="120"
+                                            value="10"
+                                            inputmode="numeric"
+                                            disabled
+                                            aria-describedby="into-step1-vent-duration-pop-unit"
+                                          />
+                                        </div>
+                                      </div>
+                                      <span id="into-step1-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1245,6 +1494,167 @@
                         </div>
                       </div>
                     </form>
+                  </div>
+                  <div id="into-step5-vent-panel" class="flow-step-vent-panel">
+                    <p class="flow-step-vent-panel-title">Step 5: Purge-before open inner door</p>
+                    <form class="ant-form ant-form-vertical flow-step-vent-form" novalidate>
+                      <div class="ant-form-item">
+                        <div class="ant-form-item-control">
+                          <div class="ant-form-item-control-input">
+                            <div class="ant-form-item-control-input-content">
+                              <div class="flow-step-vent-select-row">
+                                <div
+                                  id="into-step5-vent-select-wrap"
+                                  class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-select-grow"
+                                >
+                                  <div class="ant-select-selector">
+                                    <span class="ant-select-selection-search">
+                                      <select
+                                        id="into-step5-vent-select"
+                                        class="flow-ant-select-native"
+                                        disabled
+                                        aria-label="Ventilation strategy"
+                                        aria-describedby="into-step5-vent-desc"
+                                      >
+                                        <option value="standard">Standard vacuum ↔ fill (repeat)</option>
+                                        <option value="mild">Mild vacuum</option>
+                                        <option value="simultaneous">Simultaneous exchange</option>
+                                      </select>
+                                    </span>
+                                    <span id="into-step5-vent-select-label" class="ant-select-selection-item">Standard vacuum ↔ fill (repeat)</span>
+                                  </div>
+                                  <span class="ant-select-arrow" aria-hidden="true"></span>
+                                </div>
+                                <button
+                                  type="button"
+                                  id="into-step5-vent-cycles-toggle"
+                                  class="flow-step-vent-cycles-toggle"
+                                  hidden
+                                  aria-label="Configure cycles (N)"
+                                  aria-expanded="false"
+                                  aria-controls="into-step5-vent-cycles-popover"
+                                >
+                                  <span class="anticon" aria-hidden="true">
+                                    <svg viewBox="64 64 896 896" width="1em" height="1em" fill="currentColor">
+                                      <path
+                                        d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+                                      />
+                                    </svg>
+                                  </span>
+                                </button>
+                              </div>
+                              <div id="into-step5-vent-cycles-popover" class="flow-step-vent-cycles-popover" hidden>
+                                <div class="ant-form-item">
+                                  <div class="ant-form-item-label">
+                                    <label for="into-step5-vent-cycles">Cycles (N)</label>
+                                  </div>
+                                  <div class="ant-form-item-control">
+                                    <div id="into-step5-vent-cycles-wrap" class="ant-input-number ant-input-number-disabled">
+                                      <div class="ant-input-number-input-wrap">
+                                        <input
+                                          type="number"
+                                          class="ant-input-number-input"
+                                          id="into-step5-vent-cycles"
+                                          min="1"
+                                          max="20"
+                                          value="3"
+                                          inputmode="numeric"
+                                          disabled
+                                        />
+                                      </div>
+                                    </div>
+                                    <p class="flow-step-vent-cycles-hint">Repeat mode use cycles(N)</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div id="into-step5-vent-duration-popover" class="flow-step-vent-cycles-popover" hidden>
+                                <div class="ant-form-item">
+                                  <div class="ant-form-item-label">
+                                    <label for="into-step5-vent-duration-pop">Duration</label>
+                                  </div>
+                                  <div class="ant-form-item-control">
+                                    <div class="flow-step-vent-duration-row">
+                                      <div id="into-step5-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
+                                        <div class="ant-input-number-input-wrap">
+                                          <input
+                                            type="number"
+                                            class="ant-input-number-input"
+                                            id="into-step5-vent-duration-pop"
+                                            min="1"
+                                            max="120"
+                                            value="10"
+                                            inputmode="numeric"
+                                            disabled
+                                            aria-describedby="into-step5-vent-duration-pop-unit"
+                                          />
+                                        </div>
+                                      </div>
+                                      <span id="into-step5-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div id="into-step5-vent-desc" class="ant-form-item-extra">General consumables preset.</div>
+                        </div>
+                      </div>
+
+                      <div id="into-step5-vent-advanced-collapse" class="ant-collapse ant-collapse-ghost ant-collapse-icon-position-left flow-step-vent-advanced-collapse flow-step-vent-collapse-disabled">
+                        <div class="ant-collapse-item" id="into-step5-vent-advanced-item">
+                          <div
+                            id="into-step5-vent-advanced-toggle"
+                            class="ant-collapse-header"
+                            role="button"
+                            tabindex="-1"
+                            aria-expanded="false"
+                            aria-controls="into-step5-vent-advanced-body"
+                          >
+                            <span class="ant-collapse-header-text">Advanced parameters (optional)</span>
+                          </div>
+                          <div
+                            id="into-step5-vent-advanced-body"
+                            class="ant-collapse-content ant-collapse-content-inactive"
+                            hidden
+                          >
+                            <div class="ant-collapse-content-box">
+                              <div class="flow-step-vent-advanced-grid">
+                                <div class="ant-form-item">
+                                  <div class="ant-form-item-label">
+                                    <label for="into-step5-vent-duration">Duration</label>
+                                  </div>
+                                  <div class="ant-form-item-control">
+                                    <div class="flow-step-vent-duration-row">
+                                      <div id="into-step5-vent-duration-wrap" class="ant-input-number ant-input-number-disabled">
+                                        <div class="ant-input-number-handler-wrap">
+                                          <span class="ant-input-number-handler ant-input-number-handler-up" aria-hidden="true"></span>
+                                          <span class="ant-input-number-handler ant-input-number-handler-down" aria-hidden="true"></span>
+                                        </div>
+                                        <div class="ant-input-number-input-wrap">
+                                          <input
+                                            type="number"
+                                            class="ant-input-number-input"
+                                            id="into-step5-vent-duration"
+                                            min="1"
+                                            max="120"
+                                            value="10"
+                                            inputmode="numeric"
+                                            disabled
+                                            aria-describedby="into-step5-vent-duration-unit"
+                                          />
+                                        </div>
+                                      </div>
+                                      <span id="into-step5-vent-duration-unit" class="flow-step-vent-duration-unit">minute</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
                   </div>
                   <div class="flow-step-inline-actions">
                     <button type="button" class="ant-btn ant-btn-primary" id="flow-step1-confirm" disabled>
@@ -1316,19 +1726,19 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Airlock shelf load</span>
+                    <span class="flow-step-title-text">Load racks into airlock shelf</span>
                     <span class="ant-tag ant-tag-warning">Manual</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Enter rack data in the table, then confirm.</p>
+                  <p class="flow-step-desc-single">Enter rack data in the table, then confirm load.</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Step 4: Auto — after manual confirm -->
-          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-4" data-flow-step="3">
+          <!-- Step 4: Close outer door -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-4" data-flow-step="4">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon">
@@ -1337,54 +1747,98 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Close, purge, transfer in</span>
+                    <span class="flow-step-title-text">Close outer door</span>
                     <span class="ant-tag ant-tag-success" id="into-step-4-mode-tag">Auto</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
-                  <ol class="flow-step-desc-list">
-                    <li>
-                      Close outer door.
-                      <div class="flow-step-inline-actions">
-                        <button type="button" class="ant-btn ant-btn-primary" id="flow-step4-close-door-confirm" disabled>
-                          Confirm
-                        </button>
-                      </div>
-                    </li>
-                    <li>
-                      Purge to inner-door interlock.
-                      <div
-                        id="flow-step4-inner-metrics-wrap"
-                        class="flow-step2-metrics-wrap flow-step4-inner-purge-metrics"
-                        hidden
-                        aria-label="Inner interlock purge readings"
-                      >
-                        <table class="flow-step2-metrics-table">
-                          <thead>
-                            <tr>
-                              <th scope="col">Air Pressure</th>
-                              <th scope="col">H<sub>2</sub>O</th>
-                              <th scope="col">O<sub>2</sub></th>
-                              <th scope="col">Purge Cycle</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td>4.5mbar</td>
-                              <td>0.1ppm</td>
-                              <td>0.6ppm</td>
-                          <td id="into-step4-purge-cycle-wrap" class="flow-step2-purge-cycle-cell">
-                                <span class="flow-step2-purge-cycle-inner">
-                                  <span id="into-step4-purge-cycle-num" class="flow-step2-purge-cycle-num">1</span><span class="flow-step2-purge-cycle-suffix">/5</span>
-                                </span>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </li>
-                    <li>Inner door opens; rack transfers into glovebox.</li>
-                  </ol>
+                  <p class="flow-step-desc-single">Confirm when the outer door is closed.</p>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="flow-step4-close-door-confirm" disabled>
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 5: Inner purge before inner door -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-5" data-flow-step="5">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon">
+                <span class="ant-steps-icon" id="antd-step-5-icon"></span>
+              </div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Purge before inner door</span>
+                    <span class="ant-tag ant-tag-success" id="into-step-5-mode-tag">Auto</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Purge to meet inner-door interlock (strategy set in Purge Setting).</p>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="flow-step5-purge-confirm" disabled>
+                      Confirm
+                    </button>
+                  </div>
+                  <div
+                    id="flow-step5-inner-metrics-wrap"
+                    class="flow-step2-metrics-wrap flow-step5-inner-purge-metrics"
+                    hidden
+                    aria-label="Inner interlock purge readings"
+                  >
+                    <table class="flow-step2-metrics-table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Air Pressure</th>
+                          <th scope="col">H<sub>2</sub>O</th>
+                          <th scope="col">O<sub>2</sub></th>
+                          <th scope="col">Purge Cycle</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>4.5mbar</td>
+                          <td>0.1ppm</td>
+                          <td>0.6ppm</td>
+                          <td id="into-step5-purge-cycle-wrap" class="flow-step2-purge-cycle-cell">
+                            <span class="flow-step2-purge-cycle-inner">
+                              <span id="into-step5-purge-cycle-num" class="flow-step2-purge-cycle-num">1</span><span class="flow-step2-purge-cycle-suffix">/3</span>
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 6: Transfer into glovebox -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-6" data-flow-step="6">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon">
+                <span class="ant-steps-icon" id="antd-step-6-icon"></span>
+              </div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Transfer into glovebox</span>
+                    <span class="ant-tag ant-tag-success" id="into-step-6-mode-tag">Auto</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Inner door opens; racks transfer into the glovebox.</p>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="flow-step6-transfer-confirm" disabled>
+                      Confirm
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1399,7 +1853,7 @@
                   <div id="flow-step2-batch-table-wrap" class="flow-batch-table-wrap">
                     <div id="flow-batch-submitted-bar" class="flow-batch-submitted-bar" hidden>
                       <span class="ant-tag ant-tag-success">Submitted</span>
-                      <span class="flow-batch-submitted-hint">Submitted. Step 4 proceeds automatically.</span>
+                      <span class="flow-batch-submitted-hint">Submitted. Steps 4–6 proceed after confirm.</span>
                     </div>
                     <div class="flow-batch-inner">
                       <table>
@@ -1740,7 +2194,7 @@
                   </div>
                   <div class="flow-step2-actions">
                     <button type="button" class="ant-btn ant-btn-primary" id="flow-step2-confirm" disabled>
-                      Confirm
+                      Load
                     </button>
                     <button
                       type="button"
@@ -1754,6 +2208,22 @@
                         <svg viewBox="64 64 896 896" focusable="false" fill="currentColor">
                           <path
                             d="M909.1 209.3l-56.4 44.1C775.8 155.1 656.2 92 521.9 92 290 92 102.3 279.5 102 511.5 101.7 743.7 289.8 932 521.9 932c181.3 0 335.8-115 394.6-276.1 1.5-4.2-.7-8.9-4.9-10.3l-56.7-19.5a8 8 0 00-10.1 4.8c-1.8 5-3.8 10-5.9 14.9-17.3 41-42.1 77.8-73.7 109.4A344.77 344.77 0 01655.9 829c-42.3 17.9-87.4 27-133.8 27-46.5 0-91.5-9.1-133.8-27A341.5 341.5 0 01279 755.2a342.16 342.16 0 01-73.7-109.4c-17.9-42.4-27-87.4-27-133.9s9.1-91.5 27-133.9c17.3-41 42.1-77.8 73.7-109.4 31.6-31.6 68.4-56.4 109.3-73.8 42.3-17.9 87.4-27 133.8-27 46.5 0 91.5 9.1 133.8 27a341.5 341.5 0 01109.3 73.8c9.9 9.9 19.2 20.4 27.8 31.4l-60.2 47a8 8 0 003 14.1l175.6 43c5 1.2 9.9-2.6 9.9-7.7l.8-180.9c-.1-6.6-7.8-10.3-13-6.2z"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      class="ant-btn ant-btn-default flow-step2-edit-table-btn"
+                      id="flow-step2-edit-table"
+                      hidden
+                      aria-label="Return to step 3 to edit table"
+                      title="Edit table (return to step 3)"
+                    >
+                      <span class="anticon anticon-edit" aria-hidden="true">
+                        <svg viewBox="64 64 896 896" focusable="false" fill="currentColor">
+                          <path
+                            d="M257.7 752c2 0 4-.2 6-.5L431.9 722c2-.4 3.9-1.3 5.3-2.8l423.9-423.9a9.96 9.96 0 000-14.1L694.9 114.9c-1.9-1.9-4.4-2.9-7.1-2.9s-5.2 1-7.1 2.9L256.8 538.8c-1.5 1.5-2.4 3.3-2.8 5.3l-29.5 168.2a33.5 33.5 0 009.4 29.8c6.6 6.4 14.9 9.9 23.8 9.9zm67.4-174.4L687.8 215l73.3 73.3-362.7 362.6-88.9 15.7 15.6-89zM880 836H144c-17.7 0-32 14.3-32 32v36c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-36c0-17.7-14.3-32-32-32z"
                           />
                         </svg>
                       </span>
@@ -2101,20 +2571,28 @@
                                 </div>
                               </div>
                             </th>
-                            <th class="flow-batch-th-filterable">
+                            <th class="flow-batch-th-sortable">
                               <span class="flow-batch-th-inner">
                                 <span>Consumable Quantity</span>
-                                <button type="button" class="flow-batch-filter-trigger" data-out-filter-key="qty" aria-label="Filter Consumable Quantity" aria-haspopup="true" aria-expanded="false">
-                                  <svg class="flow-batch-filter-icon" viewBox="0 0 1024 1024" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M880.1 154H143.9c-24.5 0-39.9 26.7-27.5 48L349 597.4V838c0 17.7 14.2 32 31.8 32h262.4c17.6 0 31.8-14.3 31.8-32V597.4L907.7 202c12.4-21.3-3-48-27.5-48z"/></svg>
+                                <button
+                                  type="button"
+                                  class="flow-batch-sort-trigger"
+                                  data-out-sort-key="qty"
+                                  aria-label="Sort Consumable Quantity"
+                                  aria-haspopup="true"
+                                  aria-expanded="false"
+                                  aria-sort="none"
+                                >
+                                  <svg class="flow-batch-sort-icon" viewBox="0 0 1024 1024" width="12" height="12" aria-hidden="true">
+                                    <path fill="currentColor" d="M371 536l139 139 139-139 60 60-199 199-199-199z" opacity="0.45" />
+                                    <path fill="currentColor" d="M653 488L514 349 375 488l-60-60 199-199 199 199z" />
+                                  </svg>
                                 </button>
                               </span>
-                              <div class="flow-batch-filter-panel" data-out-filter-panel="qty" hidden>
-                                <input type="search" class="flow-batch-filter-search ant-input" placeholder="Search in filters" autocomplete="off" />
-                                <ul class="flow-batch-filter-options" role="listbox"></ul>
-                                <div class="flow-batch-filter-actions">
-                                  <button type="button" class="ant-btn ant-btn-link flow-batch-filter-reset">Reset</button>
-                                  <button type="button" class="ant-btn ant-btn-primary ant-btn-sm flow-batch-filter-ok">OK</button>
-                                </div>
+                              <div class="flow-batch-sort-panel" data-out-sort-panel="qty" hidden role="menu">
+                                <button type="button" class="flow-batch-sort-option" data-out-sort-dir="asc" role="menuitem">Sort ascending</button>
+                                <button type="button" class="flow-batch-sort-option" data-out-sort-dir="desc" role="menuitem">Sort descending</button>
+                                <button type="button" class="flow-batch-sort-option flow-batch-sort-clear" data-out-sort-dir="" role="menuitem">Clear sort</button>
                               </div>
                             </th>
                             <th>Detail</th>
@@ -2942,6 +3420,8 @@
       var step2DoorConfirm = document.getElementById('flow-step2-door-confirm');
       var step2Confirm = document.getElementById('flow-step2-confirm');
       var step4CloseDoorConfirm = document.getElementById('flow-step4-close-door-confirm');
+      var step5PurgeConfirm = document.getElementById('flow-step5-purge-confirm');
+      var step6TransferConfirm = document.getElementById('flow-step6-transfer-confirm');
       var batchSplit = document.getElementById('flow-modal-batch-split');
       var modalOut = document.getElementById('modal-out');
       var closeOutBtn = document.getElementById('modal-out-close');
@@ -2959,10 +3439,10 @@
         tStep1Prep: null,
         tStep1PurgePrep: null,
         purgeCycleIv: null,
-        purgeCycleIvStep4: null,
+        purgeCycleIvStep5: null,
+        tStep5Prep: null,
         intoTransferTimeouts: []
       };
-      var intoConfigApplied = false;
       var intoConfigTrayCount = 10;
       var intoAppliedTrayCount = 10;
       var intoLoadCycleTotal = 2;
@@ -2971,6 +3451,8 @@
       /** After footer Start: step title tags show loop N/M instead of "Auto". */
       var intoStepTagsShowLoop = false;
       var INTO_BATCH_DEFAULT_POSITIONS = ['B-1', 'B-2', 'B-3', 'B-4', 'A-1', 'A-2', 'A-3', 'A-4', 'A-5', 'A-6'];
+      var INTO_VENT_CYCLES_DEFAULT = 3;
+      var intoVentStepConfigured = { '1': false, '5': false };
       var INTO_BATCH_ROW_COUNT = 10;
       var INTO_BATCH_TRAY_STATUS_META = {
         submitted: { label: 'Submitted', cls: 'ant-tag-default' },
@@ -3051,9 +3533,9 @@
 
       function clearFlowTimers() {
         stopIntoStep4TransferProgressAnim();
-        ['t2', 'tStep1Prep', 'tStep1PurgePrep', 'purgeCycleIv', 'purgeCycleIvStep4'].forEach(function (k) {
+        ['t2', 'tStep1Prep', 'tStep1PurgePrep', 'tStep5Prep', 'purgeCycleIv', 'purgeCycleIvStep5'].forEach(function (k) {
           if (flowTimers[k]) {
-            if (k === 'purgeCycleIv' || k === 'purgeCycleIvStep4') clearInterval(flowTimers[k]);
+            if (k === 'purgeCycleIv' || k === 'purgeCycleIvStep5') clearInterval(flowTimers[k]);
             else clearTimeout(flowTimers[k]);
             flowTimers[k] = null;
           }
@@ -3067,29 +3549,48 @@
         }
       }
 
-      function stopIntoStep4PurgeCycleAnim() {
-        if (flowTimers.purgeCycleIvStep4) {
-          clearInterval(flowTimers.purgeCycleIvStep4);
-          flowTimers.purgeCycleIvStep4 = null;
+      function stopIntoStep5PurgeCycleAnim() {
+        if (flowTimers.purgeCycleIvStep5) {
+          clearInterval(flowTimers.purgeCycleIvStep5);
+          flowTimers.purgeCycleIvStep5 = null;
         }
       }
 
-      /** 进料步骤四内嵌指标：与步骤一相同的 Purge Cycle 1→5 分子滚动 */
-      function startIntoStep4PurgeCycleAnim() {
-        stopIntoStep4PurgeCycleAnim();
-        var numEl = document.getElementById('into-step4-purge-cycle-num');
+      function intoVentEl(stepKey, part) {
+        return document.getElementById('into-step' + stepKey + '-vent-' + part);
+      }
+
+      function getIntoVentCyclesMax(stepKey) {
+        var el = intoVentEl(stepKey, 'cycles');
+        return clampInt(el && el.value, 1, 20);
+      }
+
+      function syncIntoStep5PurgeCycleSuffix() {
+        var suf = document.querySelector('#into-step5-purge-cycle-wrap .flow-step2-purge-cycle-suffix');
+        if (suf) suf.textContent = '/' + getIntoVentCyclesMax('5');
+      }
+
+      /** 进料步骤五内嵌指标：Purge Cycle 1→N（N 来自换气策略 Cycles） */
+      function startIntoStep5PurgeCycleAnim() {
+        stopIntoStep5PurgeCycleAnim();
+        var numEl = document.getElementById('into-step5-purge-cycle-num');
         if (!numEl) return;
+        syncIntoStep5PurgeCycleSuffix();
         var totalMs = 3000;
-        var max = 5;
+        var max = getIntoVentCyclesMax('5');
+        if (max <= 1) {
+          numEl.textContent = '1';
+          return;
+        }
         var intervalMs = totalMs / (max - 1);
         var current = 1;
         numEl.textContent = '1';
         numEl.classList.remove('is-ticking');
         void numEl.offsetWidth;
         numEl.classList.add('is-ticking');
-        flowTimers.purgeCycleIvStep4 = setInterval(function () {
+        flowTimers.purgeCycleIvStep5 = setInterval(function () {
           if (current >= max) {
-            stopIntoStep4PurgeCycleAnim();
+            stopIntoStep5PurgeCycleAnim();
             numEl.classList.remove('is-ticking');
             return;
           }
@@ -3099,18 +3600,43 @@
           void numEl.offsetWidth;
           numEl.classList.add('is-ticking');
           if (current === max) {
-            stopIntoStep4PurgeCycleAnim();
+            stopIntoStep5PurgeCycleAnim();
           }
         }, intervalMs);
       }
 
-      function resetIntoStep4PurgeCycleDisplay() {
-        stopIntoStep4PurgeCycleAnim();
-        var numEl = document.getElementById('into-step4-purge-cycle-num');
+      function resetIntoStep5PurgeCycleDisplay() {
+        stopIntoStep5PurgeCycleAnim();
+        var numEl = document.getElementById('into-step5-purge-cycle-num');
         if (numEl) {
           numEl.textContent = '1';
           numEl.classList.remove('is-ticking');
         }
+        syncIntoStep5PurgeCycleSuffix();
+      }
+
+      function hideIntoStep5InnerMetrics() {
+        var mw = document.getElementById('flow-step5-inner-metrics-wrap');
+        if (!mw) return;
+        mw.hidden = true;
+        mw.classList.remove('is-revealing');
+      }
+
+      function showIntoStep5InnerMetrics() {
+        var mw = document.getElementById('flow-step5-inner-metrics-wrap');
+        if (!mw) return;
+        mw.hidden = false;
+        mw.classList.remove('is-revealing');
+        void mw.offsetWidth;
+        mw.classList.add('is-revealing');
+      }
+
+      function resetIntoSteps456ConfirmState() {
+        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
+        if (step5PurgeConfirm) step5PurgeConfirm.disabled = true;
+        if (step6TransferConfirm) step6TransferConfirm.disabled = true;
+        hideIntoStep5InnerMetrics();
+        resetIntoStep5PurgeCycleDisplay();
       }
 
       /** 进料步骤一指标区：Purge Cycle 分子 1→5 滚动，「/5」固定（与出料同效果） */
@@ -3150,7 +3676,7 @@
           numEl.textContent = '1';
           numEl.classList.remove('is-ticking');
         }
-        resetIntoStep4PurgeCycleDisplay();
+        resetIntoStep5PurgeCycleDisplay();
       }
 
       function clampInt(n, min, max) {
@@ -3195,7 +3721,7 @@
 
       function syncIntoStepLoopTags() {
         var text = 'loop ' + intoLoadCycleCurrent + '/' + intoLoadCycleTotal;
-        ['1', '2', '4'].forEach(function (s) {
+        ['1', '2', '4', '5', '6'].forEach(function (s) {
           var el = document.getElementById('into-step-' + s + '-mode-tag');
           if (!el) return;
           el.classList.remove('ant-tag-success');
@@ -3206,7 +3732,7 @@
 
       function resetIntoStepModeTags() {
         intoStepTagsShowLoop = false;
-        ['1', '2', '4'].forEach(function (s) {
+        ['1', '2', '4', '5', '6'].forEach(function (s) {
           var el = document.getElementById('into-step-' + s + '-mode-tag');
           if (!el) return;
           el.classList.remove('ant-tag-processing');
@@ -3221,9 +3747,9 @@
         updateIntoCycleBarNumbers();
       }
 
-      function syncIntoVentSelectLabel() {
-        var select = document.getElementById('into-step1-vent-select');
-        var label = document.getElementById('into-step1-vent-select-label');
+      function syncIntoVentSelectLabel(stepKey) {
+        var select = intoVentEl(stepKey, 'select');
+        var label = intoVentEl(stepKey, 'select-label');
         if (!select || !label) return;
         var opt = select.options[select.selectedIndex];
         var text = opt ? opt.textContent : '';
@@ -3231,14 +3757,95 @@
         label.setAttribute('title', text);
       }
 
-      function setIntoVentStrategyEditable(editable) {
-        var panel = document.getElementById('into-step1-vent-panel');
-        var selectWrap = document.getElementById('into-step1-vent-select-wrap');
-        var select = document.getElementById('into-step1-vent-select');
-        var advToggle = document.getElementById('into-step1-vent-advanced-toggle');
-        var collapse = document.getElementById('into-step1-vent-advanced-collapse');
-        var durationWrap = document.getElementById('into-step1-vent-duration-wrap');
-        var duration = document.getElementById('into-step1-vent-duration');
+      function closeIntoVentCyclesPopover(stepKey) {
+        var pop = intoVentEl(stepKey, 'cycles-popover');
+        if (pop) pop.hidden = true;
+        syncIntoVentExtraToggleExpanded(stepKey);
+      }
+
+      function closeIntoVentDurationPopover(stepKey) {
+        var pop = intoVentEl(stepKey, 'duration-popover');
+        if (pop) pop.hidden = true;
+        syncIntoVentExtraToggleExpanded(stepKey);
+      }
+
+      function syncIntoVentExtraToggleExpanded(stepKey) {
+        var toggle = intoVentEl(stepKey, 'cycles-toggle');
+        var cyclesPop = intoVentEl(stepKey, 'cycles-popover');
+        var durationPop = intoVentEl(stepKey, 'duration-popover');
+        if (!toggle) return;
+        var anyOpen =
+          (cyclesPop && !cyclesPop.hidden) || (durationPop && !durationPop.hidden);
+        if (!anyOpen) {
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.classList.remove('is-open');
+        }
+      }
+
+      function syncIntoVentDurationFields(stepKey, source) {
+        var adv = intoVentEl(stepKey, 'duration');
+        var pop = intoVentEl(stepKey, 'duration-pop');
+        if (!adv || !pop) return;
+        if (source === 'pop') adv.value = pop.value;
+        else pop.value = adv.value;
+      }
+
+      function syncIntoVentExtraUi(stepKey) {
+        var select = intoVentEl(stepKey, 'select');
+        var toggle = intoVentEl(stepKey, 'cycles-toggle');
+        if (!select || !toggle) return;
+        var v = select.value;
+        var showToggle = v === 'standard' || v === 'simultaneous';
+        toggle.hidden = !showToggle;
+        if (v === 'standard') {
+          toggle.setAttribute('aria-label', 'Configure cycles (N)');
+          toggle.setAttribute('aria-controls', 'into-step' + stepKey + '-vent-cycles-popover');
+        } else if (v === 'simultaneous') {
+          toggle.setAttribute('aria-label', 'Configure duration');
+          toggle.setAttribute('aria-controls', 'into-step' + stepKey + '-vent-duration-popover');
+        }
+        if (v !== 'standard') closeIntoVentCyclesPopover(stepKey);
+        if (v !== 'simultaneous') closeIntoVentDurationPopover(stepKey);
+      }
+
+      function toggleIntoVentExtraPopover(stepKey) {
+        var select = intoVentEl(stepKey, 'select');
+        var toggle = intoVentEl(stepKey, 'cycles-toggle');
+        var panel = intoVentEl(stepKey, 'panel');
+        if (!select || !toggle) return;
+        if (toggle.disabled || (panel && !panel.classList.contains('is-editable'))) return;
+        if (select.value === 'standard') {
+          var cyclesPop = intoVentEl(stepKey, 'cycles-popover');
+          if (!cyclesPop) return;
+          closeIntoVentDurationPopover(stepKey);
+          var openCycles = cyclesPop.hidden;
+          cyclesPop.hidden = !openCycles;
+          toggle.setAttribute('aria-expanded', openCycles ? 'true' : 'false');
+          toggle.classList.toggle('is-open', openCycles);
+        } else if (select.value === 'simultaneous') {
+          var durationPop = intoVentEl(stepKey, 'duration-popover');
+          if (!durationPop) return;
+          closeIntoVentCyclesPopover(stepKey);
+          var openDur = durationPop.hidden;
+          durationPop.hidden = !openDur;
+          toggle.setAttribute('aria-expanded', openDur ? 'true' : 'false');
+          toggle.classList.toggle('is-open', openDur);
+        }
+      }
+
+      function setIntoVentStrategyEditable(stepKey, editable) {
+        var panel = intoVentEl(stepKey, 'panel');
+        var selectWrap = intoVentEl(stepKey, 'select-wrap');
+        var select = intoVentEl(stepKey, 'select');
+        var advToggle = intoVentEl(stepKey, 'advanced-toggle');
+        var collapse = intoVentEl(stepKey, 'advanced-collapse');
+        var durationWrap = intoVentEl(stepKey, 'duration-wrap');
+        var duration = intoVentEl(stepKey, 'duration');
+        var durationPopWrap = intoVentEl(stepKey, 'duration-pop-wrap');
+        var durationPop = intoVentEl(stepKey, 'duration-pop');
+        var cyclesWrap = intoVentEl(stepKey, 'cycles-wrap');
+        var cycles = intoVentEl(stepKey, 'cycles');
+        var cyclesToggle = intoVentEl(stepKey, 'cycles-toggle');
         if (panel) panel.classList.toggle('is-editable', editable);
         if (selectWrap) selectWrap.classList.toggle('ant-select-disabled', !editable);
         if (select) select.disabled = !editable;
@@ -3246,18 +3853,62 @@
         if (collapse) collapse.classList.toggle('flow-step-vent-collapse-disabled', !editable);
         if (durationWrap) durationWrap.classList.toggle('ant-input-number-disabled', !editable);
         if (duration) duration.disabled = !editable;
+        if (durationPopWrap) durationPopWrap.classList.toggle('ant-input-number-disabled', !editable);
+        if (durationPop) durationPop.disabled = !editable;
+        if (cyclesWrap) cyclesWrap.classList.toggle('ant-input-number-disabled', !editable);
+        if (cycles) cycles.disabled = !editable;
+        if (cyclesToggle) cyclesToggle.disabled = !editable;
+        if (!editable) {
+          closeIntoVentCyclesPopover(stepKey);
+          closeIntoVentDurationPopover(stepKey);
+        }
+        syncIntoVentExtraUi(stepKey);
+        if (stepKey === '5') syncIntoStep5PurgeCycleSuffix();
       }
 
-      function resetIntoVentStrategyUi() {
-        var select = document.getElementById('into-step1-vent-select');
-        var desc = document.getElementById('into-step1-vent-desc');
-        var advToggle = document.getElementById('into-step1-vent-advanced-toggle');
-        var advItem = document.getElementById('into-step1-vent-advanced-item');
-        var advBody = document.getElementById('into-step1-vent-advanced-body');
-        var duration = document.getElementById('into-step1-vent-duration');
-        var panel = document.getElementById('into-step1-vent-panel');
+      function updateIntoStep1ConfirmState() {
+        if (!step1Confirm) return;
+        var wrap = document.getElementById('into-purge-setting-wrap');
+        var panel1 = intoVentEl('1', 'panel');
+        var editable =
+          wrap &&
+          !wrap.hidden &&
+          panel1 &&
+          panel1.classList.contains('is-editable');
+        step1Confirm.disabled =
+          !editable || !intoVentStepConfigured['1'] || !intoVentStepConfigured['5'];
+      }
+
+      function markIntoVentPanelConfigured(stepKey) {
+        if (intoVentStepConfigured[stepKey]) return;
+        intoVentStepConfigured[stepKey] = true;
+        var panel = intoVentEl(stepKey, 'panel');
+        if (panel) panel.classList.add('is-vent-configured');
+        updateIntoStep1ConfirmState();
+      }
+
+      function resetIntoVentConfiguredFlags() {
+        intoVentStepConfigured['1'] = false;
+        intoVentStepConfigured['5'] = false;
+        ['1', '5'].forEach(function (k) {
+          var panel = intoVentEl(k, 'panel');
+          if (panel) panel.classList.remove('is-vent-configured');
+        });
+        updateIntoStep1ConfirmState();
+      }
+
+      function resetIntoVentStrategyUi(stepKey) {
+        var select = intoVentEl(stepKey, 'select');
+        var desc = intoVentEl(stepKey, 'desc');
+        var advToggle = intoVentEl(stepKey, 'advanced-toggle');
+        var advItem = intoVentEl(stepKey, 'advanced-item');
+        var advBody = intoVentEl(stepKey, 'advanced-body');
+        var duration = intoVentEl(stepKey, 'duration');
+        var durationPop = intoVentEl(stepKey, 'duration-pop');
+        var cycles = intoVentEl(stepKey, 'cycles');
+        var panel = intoVentEl(stepKey, 'panel');
         if (select) select.value = 'standard';
-        syncIntoVentSelectLabel();
+        syncIntoVentSelectLabel(stepKey);
         if (desc) desc.textContent = 'General consumables preset.';
         if (advToggle) advToggle.setAttribute('aria-expanded', 'false');
         if (advItem) advItem.classList.remove('ant-collapse-item-active');
@@ -3267,13 +3918,36 @@
           advBody.classList.add('ant-collapse-content-inactive');
         }
         if (duration) duration.value = '10';
-        if (panel) panel.hidden = true;
-        setIntoVentStrategyEditable(false);
+        if (durationPop) durationPop.value = '10';
+        if (cycles) cycles.value = String(INTO_VENT_CYCLES_DEFAULT);
+        closeIntoVentCyclesPopover(stepKey);
+        closeIntoVentDurationPopover(stepKey);
+        syncIntoVentExtraUi(stepKey);
+        if (panel) panel.classList.remove('is-vent-configured');
+        intoVentStepConfigured[stepKey] = false;
+        setIntoVentStrategyEditable(stepKey, false);
+        if (stepKey === '5') syncIntoStep5PurgeCycleSuffix();
       }
 
-      function updateIntoVentStrategyDesc() {
-        var select = document.getElementById('into-step1-vent-select');
-        var desc = document.getElementById('into-step1-vent-desc');
+      function showIntoVentPanelsAtStep1Start() {
+        var wrap = document.getElementById('into-purge-setting-wrap');
+        if (wrap) wrap.hidden = false;
+        resetIntoVentConfiguredFlags();
+        setIntoVentStrategyEditable('1', true);
+        setIntoVentStrategyEditable('5', true);
+      }
+
+      function resetAllIntoVentStrategyUi() {
+        resetIntoVentStrategyUi('1');
+        resetIntoVentStrategyUi('5');
+        var wrap = document.getElementById('into-purge-setting-wrap');
+        if (wrap) wrap.hidden = true;
+        updateIntoStep1ConfirmState();
+      }
+
+      function updateIntoVentStrategyDesc(stepKey) {
+        var select = intoVentEl(stepKey, 'select');
+        var desc = intoVentEl(stepKey, 'desc');
         if (!select || !desc) return;
         var copy = {
           standard: 'General consumables preset.',
@@ -3281,14 +3955,15 @@
           simultaneous: 'Open loaded consumable recommendation.'
         };
         desc.textContent = copy[select.value] || copy.standard;
-        syncIntoVentSelectLabel();
+        syncIntoVentSelectLabel(stepKey);
+        syncIntoVentExtraUi(stepKey);
       }
 
-      function toggleIntoVentAdvancedBody() {
-        var collapse = document.getElementById('into-step1-vent-advanced-collapse');
-        var advItem = document.getElementById('into-step1-vent-advanced-item');
-        var advToggle = document.getElementById('into-step1-vent-advanced-toggle');
-        var advBody = document.getElementById('into-step1-vent-advanced-body');
+      function toggleIntoVentAdvancedBody(stepKey) {
+        var collapse = intoVentEl(stepKey, 'advanced-collapse');
+        var advItem = intoVentEl(stepKey, 'advanced-item');
+        var advToggle = intoVentEl(stepKey, 'advanced-toggle');
+        var advBody = intoVentEl(stepKey, 'advanced-body');
         if (!collapse || !advItem || !advToggle || !advBody || collapse.classList.contains('flow-step-vent-collapse-disabled')) return;
         var open = advBody.hidden;
         advBody.hidden = !open;
@@ -3301,7 +3976,7 @@
       function restartIntoAfterFullCycle() {
         clearFlowTimers();
         resetIntoStep2PurgeCycleDisplay();
-        resetIntoStep4PurgeCycleDisplay();
+        resetIntoSteps456ConfirmState();
         footerClose.classList.remove('visible');
         var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
         if (batchWrap) clearBatchTableSubmittedState();
@@ -3309,26 +3984,21 @@
         if (batchSplit) batchSplit.hidden = true;
         var metricsWrap = document.getElementById('flow-step2-metrics-wrap');
         if (metricsWrap) metricsWrap.hidden = true;
-        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
-        if (step4InnerMetrics) step4InnerMetrics.hidden = true;
-        resetIntoVentStrategyUi();
-        var intoVentPanel = document.getElementById('into-step1-vent-panel');
-        if (intoVentPanel) intoVentPanel.hidden = true;
+        resetAllIntoVentStrategyUi();
         setStepItemState(1, 'process-loading');
         setStepItemState(2, 'wait');
         setStepItemState(3, 'wait');
         setStepItemState(4, 'wait');
+        setStepItemState(5, 'wait');
+        setStepItemState(6, 'wait');
         if (step1Confirm) step1Confirm.disabled = true;
         if (step2DoorConfirm) step2DoorConfirm.disabled = true;
         step2Confirm.disabled = true;
-        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
 
         flowTimers.tStep1Prep = setTimeout(function () {
           flowTimers.tStep1Prep = null;
           setStepItemState(1, 'process-manual');
-          if (intoVentPanel) intoVentPanel.hidden = false;
-          setIntoVentStrategyEditable(true);
-          if (step1Confirm) step1Confirm.disabled = false;
+          showIntoVentPanelsAtStep1Start();
         }, STEP_AUTO_MS);
       }
 
@@ -3751,6 +4421,8 @@
       var OUT_FLOW_BATCH_UNLOAD_HINT =
         'Unloads the first 8 selected trays.';
       var OUT_BATCH_POSITION_PREFIX = '208:1/';
+      /** Position column filter: zone prefixes only (not per-slot values). */
+      var OUT_BATCH_POSITION_ZONE_PREFIXES = ['200:2/', '208:1/', '200:1/'];
       /** Purge cycle display /N when cycles UI is not exposed (fixed). */
       var OUT_VENT_STRATEGY_CYCLE_MAX = 3;
       var OUT_BATCH_TRAY_STATUS_META = {
@@ -3760,8 +4432,11 @@
         removed: { label: 'Removed', cls: 'ant-tag-success' }
       };
       /** @type {Record<string, string[]|null>} */
-      var outBatchActiveFilters = { position: null, rack: null, consumable: null, qty: null };
+      var outBatchActiveFilters = { position: null, rack: null, consumable: null };
       var outBatchFilterOpenKey = null;
+      /** @type {null|'asc'|'desc'} */
+      var outBatchQtySort = null;
+      var outBatchSortOpenKey = null;
 
       function outBatchRackLabel(code) {
         return code ? (OUT_BATCH_RACK_LABELS[code] || code) : '—';
@@ -3790,6 +4465,15 @@
           return s.slice(OUT_BATCH_POSITION_PREFIX.length);
         }
         return s;
+      }
+
+      function getOutBatchPositionZone(posText) {
+        var s = String(posText || '').trim();
+        for (var i = 0; i < OUT_BATCH_POSITION_ZONE_PREFIXES.length; i++) {
+          var prefix = OUT_BATCH_POSITION_ZONE_PREFIXES[i];
+          if (s.indexOf(prefix) === 0) return prefix;
+        }
+        return '';
       }
 
       function formatOutBatchPosition(slot) {
@@ -3856,13 +4540,18 @@
         var rack = num ? document.getElementById('out-batch-rack-' + num) : null;
         var ct = num ? document.getElementById('out-batch-consumable-type-' + num) : null;
         var qty = num ? document.getElementById('out-batch-qty-' + num) : null;
-        tr.setAttribute('data-out-position', posEl ? posEl.textContent.trim() : '');
+        var posText = posEl ? posEl.textContent.trim() : '';
+        tr.setAttribute('data-out-position', posText);
+        tr.setAttribute('data-out-position-zone', getOutBatchPositionZone(posText));
         tr.setAttribute('data-out-rack', rack ? rack.textContent.trim() : '');
         tr.setAttribute('data-out-consumable', ct ? ct.textContent.trim() : '');
         tr.setAttribute('data-out-qty', qty ? qty.textContent.trim() : '');
       }
 
       function getOutBatchFilterValues(key) {
+        if (key === 'position') {
+          return OUT_BATCH_POSITION_ZONE_PREFIXES.slice();
+        }
         var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
         if (!wrap) return [];
         var attr = 'data-out-' + key;
@@ -3883,6 +4572,16 @@
         return list;
       }
 
+      function closeOutBatchSortPanels() {
+        document.querySelectorAll('#out-flow-step3-batch-table-wrap .flow-batch-sort-panel').forEach(function (p) {
+          p.hidden = true;
+        });
+        document.querySelectorAll('#out-flow-step3-batch-table-wrap .flow-batch-sort-trigger').forEach(function (btn) {
+          btn.setAttribute('aria-expanded', 'false');
+        });
+        outBatchSortOpenKey = null;
+      }
+
       function closeOutBatchFilterPanels() {
         document.querySelectorAll('#out-flow-step3-batch-table-wrap .flow-batch-filter-panel').forEach(function (p) {
           p.hidden = true;
@@ -3891,6 +4590,103 @@
           btn.setAttribute('aria-expanded', 'false');
         });
         outBatchFilterOpenKey = null;
+      }
+
+      function closeOutBatchColumnPanels() {
+        closeOutBatchFilterPanels();
+        closeOutBatchSortPanels();
+      }
+
+      function getOutBatchQtyNumeric(tr) {
+        var v = (tr.getAttribute('data-out-qty') || '').replace(/,/g, '').trim();
+        if (!v || v === '—') return null;
+        var n = parseFloat(v);
+        return isNaN(n) ? null : n;
+      }
+
+      function restoreOutBatchDefaultRowOrder() {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return;
+        var tbody = wrap.querySelector('tbody');
+        if (!tbody) return;
+        var peeled = [];
+        tbody.querySelectorAll('tr.out-batch-row-peeled').forEach(function (tr) {
+          peeled.push(tr);
+        });
+        for (var n = 1; n <= OUT_BATCH_ROW_COUNT; n++) {
+          var cb = document.getElementById('out-batch-select-' + n);
+          var tr = cb ? cb.closest('tr') : null;
+          if (tr && !tr.classList.contains('out-batch-row-peeled')) tbody.appendChild(tr);
+        }
+        peeled.forEach(function (tr) {
+          tbody.appendChild(tr);
+        });
+      }
+
+      function updateOutBatchQtySortUi() {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return;
+        var btn = wrap.querySelector('.flow-batch-sort-trigger[data-out-sort-key="qty"]');
+        if (btn) {
+          btn.classList.toggle('is-active', !!outBatchQtySort);
+          btn.setAttribute(
+            'aria-sort',
+            outBatchQtySort === 'asc' ? 'ascending' : outBatchQtySort === 'desc' ? 'descending' : 'none'
+          );
+        }
+        wrap.querySelectorAll('.flow-batch-sort-option[data-out-sort-dir]').forEach(function (opt) {
+          var dir = opt.getAttribute('data-out-sort-dir');
+          var selected = dir === '' ? !outBatchQtySort : outBatchQtySort === dir;
+          opt.classList.toggle('is-selected', selected);
+        });
+      }
+
+      function applyOutBatchQtySort() {
+        if (!outBatchQtySort) {
+          restoreOutBatchDefaultRowOrder();
+          updateOutBatchQtySortUi();
+          return;
+        }
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return;
+        var tbody = wrap.querySelector('tbody');
+        if (!tbody) return;
+        var peeled = [];
+        var rows = [];
+        tbody.querySelectorAll('tr').forEach(function (tr) {
+          if (tr.classList.contains('out-batch-row-peeled')) peeled.push(tr);
+          else rows.push(tr);
+        });
+        var dir = outBatchQtySort === 'desc' ? -1 : 1;
+        rows.sort(function (a, b) {
+          var na = getOutBatchQtyNumeric(a);
+          var nb = getOutBatchQtyNumeric(b);
+          if (na === null && nb === null) return 0;
+          if (na === null) return 1;
+          if (nb === null) return -1;
+          if (na === nb) {
+            var idA = a.querySelector('.flow-batch-rack-checkbox');
+            var idB = b.querySelector('.flow-batch-rack-checkbox');
+            var numA = idA && idA.id ? parseInt(idA.id.replace('out-batch-select-', ''), 10) : 0;
+            var numB = idB && idB.id ? parseInt(idB.id.replace('out-batch-select-', ''), 10) : 0;
+            return numA - numB;
+          }
+          return (na - nb) * dir;
+        });
+        rows.forEach(function (tr) {
+          tbody.appendChild(tr);
+        });
+        peeled.forEach(function (tr) {
+          tbody.appendChild(tr);
+        });
+        updateOutBatchQtySortUi();
+      }
+
+      function resetOutBatchQtySort() {
+        outBatchQtySort = null;
+        restoreOutBatchDefaultRowOrder();
+        updateOutBatchQtySortUi();
+        closeOutBatchSortPanels();
       }
 
       function rebuildOutBatchFilterOptions(key) {
@@ -3927,9 +4723,14 @@
         wrap.querySelectorAll('tbody tr').forEach(function (tr) {
           if (tr.classList.contains('out-batch-row-peeled')) return;
           var show = true;
-          ['position', 'rack', 'consumable', 'qty'].forEach(function (key) {
+          ['position', 'rack', 'consumable'].forEach(function (key) {
             var sel = outBatchActiveFilters[key];
             if (!sel || !sel.length) return;
+            if (key === 'position') {
+              var zone = tr.getAttribute('data-out-position-zone') || '';
+              if (!zone || sel.indexOf(zone) === -1) show = false;
+              return;
+            }
             var val = tr.getAttribute('data-out-' + key) || '';
             if (sel.indexOf(val) === -1) show = false;
           });
@@ -3941,6 +4742,7 @@
           btn.classList.toggle('is-active', !!active);
         });
         syncOutBatchSelectAllState();
+        if (outBatchQtySort) applyOutBatchQtySort();
       }
 
       function initOutBatchTableColumnFilters() {
@@ -3954,10 +4756,10 @@
             var key = btn.getAttribute('data-out-filter-key');
             if (!key) return;
             if (outBatchFilterOpenKey === key) {
-              closeOutBatchFilterPanels();
+              closeOutBatchColumnPanels();
               return;
             }
-            closeOutBatchFilterPanels();
+            closeOutBatchColumnPanels();
             rebuildOutBatchFilterOptions(key);
             var panel = wrap.querySelector('.flow-batch-filter-panel[data-out-filter-panel="' + key + '"]');
             if (panel) panel.hidden = false;
@@ -3996,17 +4798,64 @@
               var allValues = getOutBatchFilterValues(key);
               outBatchActiveFilters[key] =
                 checked.length === 0 || checked.length === allValues.length ? null : checked;
-              closeOutBatchFilterPanels();
+              closeOutBatchColumnPanels();
               applyOutBatchRowFilters();
             });
           }
         });
 
         document.addEventListener('click', function (e) {
-          if (!outBatchFilterOpenKey) return;
-          if (e.target.closest('.flow-batch-filter-panel') || e.target.closest('.flow-batch-filter-trigger')) return;
-          closeOutBatchFilterPanels();
+          if (!outBatchFilterOpenKey && !outBatchSortOpenKey) return;
+          if (
+            e.target.closest('.flow-batch-filter-panel') ||
+            e.target.closest('.flow-batch-filter-trigger') ||
+            e.target.closest('.flow-batch-sort-panel') ||
+            e.target.closest('.flow-batch-sort-trigger')
+          ) {
+            return;
+          }
+          closeOutBatchColumnPanels();
         });
+      }
+
+      function initOutBatchTableQtySort() {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap || wrap.getAttribute('data-out-sort-ready') === '1') return;
+        wrap.setAttribute('data-out-sort-ready', '1');
+
+        wrap.querySelectorAll('.flow-batch-sort-trigger').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var key = btn.getAttribute('data-out-sort-key');
+            if (!key) return;
+            if (outBatchSortOpenKey === key) {
+              closeOutBatchSortPanels();
+              return;
+            }
+            closeOutBatchColumnPanels();
+            var panel = wrap.querySelector('.flow-batch-sort-panel[data-out-sort-panel="' + key + '"]');
+            if (panel) panel.hidden = false;
+            btn.setAttribute('aria-expanded', 'true');
+            outBatchSortOpenKey = key;
+            updateOutBatchQtySortUi();
+          });
+        });
+
+        wrap.querySelectorAll('.flow-batch-sort-option').forEach(function (opt) {
+          opt.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var dir = opt.getAttribute('data-out-sort-dir');
+            if (dir === 'asc' || dir === 'desc') {
+              outBatchQtySort = dir;
+            } else {
+              outBatchQtySort = null;
+            }
+            closeOutBatchSortPanels();
+            applyOutBatchQtySort();
+          });
+        });
+
+        updateOutBatchQtySortUi();
       }
 
       /** 出料表：数据列仅展示；复选框、全选、Detail 与列筛选可交互。 */
@@ -4427,10 +5276,11 @@
           if (rowEl) syncOutBatchRowFilterData(rowEl);
         }
         applyOutBatchPositionLabels();
-        ['position', 'rack', 'consumable', 'qty'].forEach(function (k) {
+        ['position', 'rack', 'consumable'].forEach(function (k) {
           rebuildOutBatchFilterOptions(k);
         });
         applyOutBatchRowFilters();
+        if (outBatchQtySort) applyOutBatchQtySort();
         syncOutBatchSelectAllState();
         applyOutBatchTableDataFieldsLocked();
         if (!document.getElementById('out-flow-step3-batch-table-wrap').classList.contains('out-batch-tray-status-visible')) {
@@ -4515,6 +5365,7 @@
           }
           setOutBatchPreviewTableInteractive(true);
           applyOutBatchTableDataFieldsLocked();
+          resetOutBatchQtySort();
         }
       }
 
@@ -4822,6 +5673,17 @@
         });
       }
 
+      function syncIntoBatchEditTableBtnVisibility() {
+        var btn = document.getElementById('flow-step2-edit-table');
+        var wrap = document.getElementById('flow-step2-batch-table-wrap');
+        if (!btn || !wrap) return;
+        var show =
+          wrap.classList.contains('into-batch-step4-persist') &&
+          step4CloseDoorConfirm &&
+          !step4CloseDoorConfirm.disabled;
+        btn.hidden = !show;
+      }
+
       function setIntoBatchActionsAfterSubmit() {
         var wrap = document.getElementById('flow-step2-batch-table-wrap');
         if (wrap) wrap.classList.add('into-batch-step4-persist');
@@ -4831,6 +5693,26 @@
         }
         var refBtn = document.getElementById('flow-step2-refresh');
         if (refBtn) refBtn.disabled = false;
+        syncIntoBatchEditTableBtnVisibility();
+      }
+
+      function returnToIntoStep3EditBatch() {
+        var editBtn = document.getElementById('flow-step2-edit-table');
+        if (!editBtn || editBtn.hidden) return;
+        clearBatchTableSubmittedState();
+        setStepItemState(3, 'process-manual');
+        setStepItemState(4, 'wait');
+        setStepItemState(5, 'wait');
+        setStepItemState(6, 'wait');
+        if (step2Confirm) {
+          step2Confirm.hidden = false;
+          step2Confirm.disabled = false;
+        }
+        resetIntoSteps456ConfirmState();
+        if (batchSplit) batchSplit.hidden = false;
+        syncIntoBatchTableLoop2RowVisibility();
+        syncIntoBatchEditTableBtnVisibility();
+        toast('Returned to step 3. Edit the table and confirm again.');
       }
 
       function clearBatchTableSubmittedState() {
@@ -4843,7 +5725,7 @@
           if (!bar.querySelector('.flow-batch-submitted-hint')) {
             var hint = document.createElement('span');
             hint.className = 'flow-batch-submitted-hint';
-            hint.textContent = 'Submitted. Step 4 proceeds automatically.';
+            hint.textContent = 'Submitted. Steps 4–6 proceed after confirm.';
             bar.appendChild(hint);
           }
         }
@@ -4856,6 +5738,7 @@
         var refBtn = document.getElementById('flow-step2-refresh');
         if (refBtn) refBtn.disabled = false;
         clearIntoBatchTrayStatuses();
+        syncIntoBatchEditTableBtnVisibility();
       }
 
       function applyBatchTableSubmittedState() {
@@ -4881,27 +5764,26 @@
       function resetFlowUi() {
         clearFlowTimers();
         resetIntoStep2PurgeCycleDisplay();
-        resetIntoStep4PurgeCycleDisplay();
-        intoConfigApplied = false;
+        resetIntoSteps456ConfirmState();
         var cfgPan = document.getElementById('into-flow-config-panel');
         if (cfgPan) cfgPan.classList.remove('is-done');
         setStepItemState(1, 'wait');
         setStepItemState(2, 'wait');
         setStepItemState(3, 'wait');
         setStepItemState(4, 'wait');
+        setStepItemState(5, 'wait');
+        setStepItemState(6, 'wait');
         if (step1Confirm) step1Confirm.disabled = true;
         if (step2DoorConfirm) step2DoorConfirm.disabled = true;
         step2Confirm.disabled = true;
-        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
+        resetIntoSteps456ConfirmState();
         footerClose.classList.remove('visible');
-        startBtn.disabled = true;
+        startBtn.disabled = false;
         var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
         if (batchSplit) batchSplit.hidden = true;
         var metricsWrap = document.getElementById('flow-step2-metrics-wrap');
         if (metricsWrap) metricsWrap.hidden = true;
-        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
-        if (step4InnerMetrics) step4InnerMetrics.hidden = true;
-        resetIntoVentStrategyUi();
+        resetAllIntoVentStrategyUi();
         if (batchWrap) {
           clearBatchTableSubmittedState();
           batchWrap.querySelectorAll('input.ant-input:not(.flow-batch-position-input)').forEach(function (el) {
@@ -4986,7 +5868,7 @@
       function beginIntoFlow() {
         clearFlowTimers();
         resetIntoStep2PurgeCycleDisplay();
-        resetIntoStep4PurgeCycleDisplay();
+        resetIntoSteps456ConfirmState();
         var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
         if (batchWrap) {
           clearBatchTableSubmittedState();
@@ -4994,40 +5876,25 @@
         if (batchSplit) batchSplit.hidden = true;
         var metricsWrap = document.getElementById('flow-step2-metrics-wrap');
         if (metricsWrap) metricsWrap.hidden = true;
-        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
-        if (step4InnerMetrics) step4InnerMetrics.hidden = true;
-        resetIntoVentStrategyUi();
-        var intoVentPanelBegin = document.getElementById('into-step1-vent-panel');
-        if (intoVentPanelBegin) intoVentPanelBegin.hidden = true;
+        resetAllIntoVentStrategyUi();
+        var intoPurgeSettingWrap = document.getElementById('into-purge-setting-wrap');
+        if (intoPurgeSettingWrap) intoPurgeSettingWrap.hidden = true;
         setStepItemState(1, 'process-loading');
         setStepItemState(2, 'wait');
         setStepItemState(3, 'wait');
         setStepItemState(4, 'wait');
+        setStepItemState(5, 'wait');
+        setStepItemState(6, 'wait');
         if (step1Confirm) step1Confirm.disabled = true;
         if (step2DoorConfirm) step2DoorConfirm.disabled = true;
         step2Confirm.disabled = true;
-        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
         footerClose.classList.remove('visible');
 
         flowTimers.tStep1Prep = setTimeout(function () {
           flowTimers.tStep1Prep = null;
           setStepItemState(1, 'process-manual');
-          if (intoVentPanelBegin) intoVentPanelBegin.hidden = false;
-          setIntoVentStrategyEditable(true);
-          if (step1Confirm) step1Confirm.disabled = false;
+          showIntoVentPanelsAtStep1Start();
         }, STEP_AUTO_MS);
-      }
-
-      function onIntoConfigApply() {
-        readIntoConfigFromUi();
-        intoAppliedTrayCount = intoConfigTrayCount;
-        intoLoadCycleCurrent = 1;
-        intoConfigApplied = true;
-        var pan = document.getElementById('into-flow-config-panel');
-        if (pan) pan.classList.add('is-done');
-        updateIntoCycleBarNumbers();
-        startBtn.disabled = false;
-        toast('Configuration applied. Press Start to begin.');
       }
 
       function onOutFlowStart() {
@@ -5047,7 +5914,8 @@
       function onStep1Confirmed() {
         if (!step1Confirm || step1Confirm.disabled) return;
         step1Confirm.disabled = true;
-        setIntoVentStrategyEditable(false);
+        setIntoVentStrategyEditable('1', false);
+        setIntoVentStrategyEditable('5', false);
         var mwStep1 = document.getElementById('flow-step2-metrics-wrap');
         if (mwStep1) mwStep1.hidden = false;
         startIntoStep2PurgeCycleAnim();
@@ -5075,16 +5943,14 @@
       }
 
       function onStartFlow() {
-        if (!intoConfigApplied) {
-          toast('Apply load configuration first.');
-          return;
-        }
         if (startBtn.disabled) return;
         readIntoConfigFromUi();
         intoAppliedTrayCount = intoConfigTrayCount;
         intoLoadCycleCurrent = 1;
         intoStepTagsShowLoop = true;
         updateIntoCycleBarNumbers();
+        var cfgPan = document.getElementById('into-flow-config-panel');
+        if (cfgPan) cfgPan.classList.add('is-done');
         startBtn.disabled = true;
         beginIntoFlow();
       }
@@ -5096,25 +5962,55 @@
         if (batchSplit) batchSplit.hidden = false;
         setStepItemState(3, 'finish');
         setStepItemState(4, 'process-manual');
+        setStepItemState(5, 'wait');
+        setStepItemState(6, 'wait');
         applyIntoBatchTrayStatusesPendingTransfer();
-        resetIntoStep4PurgeCycleDisplay();
-        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
-        if (step4InnerMetrics) step4InnerMetrics.hidden = true;
+        resetIntoSteps456ConfirmState();
         if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = false;
+        syncIntoBatchEditTableBtnVisibility();
       }
 
       function onStep4CloseDoorConfirmed() {
         if (!step4CloseDoorConfirm || step4CloseDoorConfirm.disabled) return;
         step4CloseDoorConfirm.disabled = true;
-        setStepItemState(4, 'process-loading');
-        var step4InnerMetrics = document.getElementById('flow-step4-inner-metrics-wrap');
-        if (step4InnerMetrics) step4InnerMetrics.hidden = false;
-        startIntoStep4TransferProgressAnim();
-        startIntoStep4PurgeCycleAnim();
+        syncIntoBatchEditTableBtnVisibility();
+        setStepItemState(4, 'finish');
+        setStepItemState(5, 'process-loading');
+        resetIntoStep5PurgeCycleDisplay();
+        hideIntoStep5InnerMetrics();
+
+        flowTimers.tStep5Prep = setTimeout(function () {
+          flowTimers.tStep5Prep = null;
+          setStepItemState(5, 'process-manual');
+          if (step5PurgeConfirm) step5PurgeConfirm.disabled = false;
+        }, STEP_AUTO_MS);
+      }
+
+      function onStep5PurgeConfirmed() {
+        if (!step5PurgeConfirm || step5PurgeConfirm.disabled) return;
+        step5PurgeConfirm.disabled = true;
+        setIntoVentStrategyEditable('5', false);
+        setStepItemState(5, 'process-loading');
+        showIntoStep5InnerMetrics();
+        startIntoStep5PurgeCycleAnim();
 
         flowTimers.t2 = setTimeout(function () {
           flowTimers.t2 = null;
-          setStepItemState(4, 'finish');
+          setStepItemState(5, 'finish');
+          setStepItemState(6, 'process-manual');
+          if (step6TransferConfirm) step6TransferConfirm.disabled = false;
+        }, STEP_AUTO_MS);
+      }
+
+      function onStep6TransferConfirmed() {
+        if (!step6TransferConfirm || step6TransferConfirm.disabled) return;
+        step6TransferConfirm.disabled = true;
+        setStepItemState(6, 'process-loading');
+        startIntoStep4TransferProgressAnim();
+
+        flowTimers.t2 = setTimeout(function () {
+          flowTimers.t2 = null;
+          setStepItemState(6, 'finish');
           if (intoLoadCycleCurrent < intoLoadCycleTotal) {
             intoLoadCycleCurrent++;
             updateIntoCycleBarNumbers();
@@ -5232,21 +6128,79 @@
         if (e.target === terminateConfirmModal) closeTerminateConfirm();
       });
       if (step1Confirm) step1Confirm.addEventListener('click', onStep1Confirmed);
-      var intoStep1VentSelect = document.getElementById('into-step1-vent-select');
-      if (intoStep1VentSelect) intoStep1VentSelect.addEventListener('change', updateIntoVentStrategyDesc);
-      var intoStep1VentAdvToggle = document.getElementById('into-step1-vent-advanced-toggle');
-      if (intoStep1VentAdvToggle) {
-        intoStep1VentAdvToggle.addEventListener('click', toggleIntoVentAdvancedBody);
-        intoStep1VentAdvToggle.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggleIntoVentAdvancedBody();
-          }
-        });
+      function bindIntoVentPanelUi(stepKey) {
+        var markConfigured = function () {
+          markIntoVentPanelConfigured(stepKey);
+        };
+        var select = intoVentEl(stepKey, 'select');
+        if (select) {
+          select.addEventListener('change', function () {
+            updateIntoVentStrategyDesc(stepKey);
+            markConfigured();
+          });
+        }
+        var advToggle = intoVentEl(stepKey, 'advanced-toggle');
+        if (advToggle) {
+          advToggle.addEventListener('click', function () {
+            toggleIntoVentAdvancedBody(stepKey);
+            markConfigured();
+          });
+          advToggle.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleIntoVentAdvancedBody(stepKey);
+              markConfigured();
+            }
+          });
+        }
+        var cyclesToggle = intoVentEl(stepKey, 'cycles-toggle');
+        if (cyclesToggle) {
+          cyclesToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleIntoVentExtraPopover(stepKey);
+            markConfigured();
+          });
+        }
+        var durationInput = intoVentEl(stepKey, 'duration');
+        var durationPopInput = intoVentEl(stepKey, 'duration-pop');
+        if (durationInput && durationPopInput) {
+          durationInput.addEventListener('input', function () {
+            syncIntoVentDurationFields(stepKey, 'adv');
+            markConfigured();
+          });
+          durationInput.addEventListener('change', function () {
+            syncIntoVentDurationFields(stepKey, 'adv');
+            markConfigured();
+          });
+          durationPopInput.addEventListener('input', function () {
+            syncIntoVentDurationFields(stepKey, 'pop');
+            markConfigured();
+          });
+          durationPopInput.addEventListener('change', function () {
+            syncIntoVentDurationFields(stepKey, 'pop');
+            markConfigured();
+          });
+        }
+        var cyclesInput = intoVentEl(stepKey, 'cycles');
+        if (cyclesInput) {
+          cyclesInput.addEventListener('change', function () {
+            if (stepKey === '5') syncIntoStep5PurgeCycleSuffix();
+            markConfigured();
+          });
+          cyclesInput.addEventListener('input', function () {
+            if (stepKey === '5') syncIntoStep5PurgeCycleSuffix();
+            markConfigured();
+          });
+        }
       }
+      bindIntoVentPanelUi('1');
+      bindIntoVentPanelUi('5');
+      syncIntoStep5PurgeCycleSuffix();
       if (step2DoorConfirm) step2DoorConfirm.addEventListener('click', onStep2DoorConfirmed);
       step2Confirm.addEventListener('click', onStep2Confirmed);
       if (step4CloseDoorConfirm) step4CloseDoorConfirm.addEventListener('click', onStep4CloseDoorConfirmed);
+      if (step5PurgeConfirm) step5PurgeConfirm.addEventListener('click', onStep5PurgeConfirmed);
+      if (step6TransferConfirm) step6TransferConfirm.addEventListener('click', onStep6TransferConfirmed);
       document.getElementById('flow-step2-batch-table-wrap').addEventListener('click', function (e) {
         var detailBtn = e.target.closest('.flow-batch-detail-btn');
         if (!detailBtn || detailBtn.disabled) return;
@@ -5255,26 +6209,25 @@
         var posLabel = posInput && posInput.value.trim() ? posInput.value.trim() : '—';
         toast('Detail view (preview): ' + posLabel);
       });
+      var flowStep2EditTableBtn = document.getElementById('flow-step2-edit-table');
+      if (flowStep2EditTableBtn) flowStep2EditTableBtn.addEventListener('click', returnToIntoStep3EditBatch);
       document.getElementById('flow-step2-refresh').addEventListener('click', function () {
         if (this.disabled) return;
         var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
         var wasSubmitted = batchWrap && batchWrap.classList.contains('flow-batch-submitted');
         var onStep4 = batchWrap && batchWrap.classList.contains('into-batch-step4-persist');
-        var step4Loading =
-          document.getElementById('antd-step-4') &&
-          document.getElementById('antd-step-4').classList.contains('ant-steps-item-process') &&
-          document.getElementById('antd-step-4').classList.contains('ant-steps-item-active') &&
-          step4CloseDoorConfirm &&
-          step4CloseDoorConfirm.disabled;
+        var step6Item = document.getElementById('antd-step-6');
+        var pastStep4Manual =
+          step6Item &&
+          (step6Item.classList.contains('ant-steps-item-process') ||
+            step6Item.classList.contains('ant-steps-item-finish'));
         seedBatchTableDemoRows();
         if (wasSubmitted) {
           applyIntoBatchTrayStatusesSubmitted();
-          if (onStep4 && !step4Loading) applyIntoBatchTrayStatusesPendingTransfer();
+          if (onStep4 && !pastStep4Manual) applyIntoBatchTrayStatusesPendingTransfer();
         }
         toast('Refreshed');
       });
-      var intoCfgApply = document.getElementById('into-config-apply');
-      if (intoCfgApply) intoCfgApply.addEventListener('click', onIntoConfigApply);
       var outFlowPreviewBtn = document.getElementById('out-flow-preview-btn');
       if (outFlowPreviewBtn) outFlowPreviewBtn.addEventListener('click', onOutFlowPreviewClick);
       var outBatchWrapEl = document.getElementById('out-flow-step3-batch-table-wrap');
@@ -5318,6 +6271,7 @@
       upgradeOutBatchTableDisplayCells();
       ensureOutBatchTrayStatusColumn();
       initOutBatchTableColumnFilters();
+      initOutBatchTableQtySort();
       modal.addEventListener('click', function (e) {
         if (e.target === modal) closeModal();
       });
