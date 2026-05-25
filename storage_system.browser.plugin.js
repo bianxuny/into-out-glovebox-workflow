@@ -29,6 +29,7 @@
       var lab = getInkscapeLabel(el)
       if (lab.indexOf(BUTTON_PREFIX) === 0) {
         el.classList.add('svg-inkscape-button')
+        el.setAttribute('data-flow-action', lab.slice(BUTTON_PREFIX.length))
       }
     }
   }
@@ -74,6 +75,7 @@
     this.width = options.width !== undefined ? options.width : 1709
     this.height = options.height !== undefined ? options.height : 2200
     this._hooks = options.hooks || {}
+    this._svgRoot = null
   }
 
   Object.defineProperty(Plugin.prototype, 'svgId', {
@@ -88,6 +90,94 @@
   Plugin.prototype._toast = function (msg) {
     if (this._hooks.toast) this._hooks.toast(msg)
     else console.log('[Plugin demo]', msg)
+  }
+
+  Plugin.prototype.attachSvg = function (svg) {
+    this._svgRoot = svg || null
+  }
+
+  Plugin.prototype.findButtonGroup = function (action) {
+    if (!this._svgRoot || !action) return null
+    var key = String(action).toLowerCase()
+    var nodes = this._svgRoot.querySelectorAll('[data-flow-action]')
+    var i
+    for (i = 0; i < nodes.length; i++) {
+      if (nodes[i].getAttribute('data-flow-action') === key) return nodes[i]
+    }
+    var all = this._svgRoot.getElementsByTagName('*')
+    for (i = 0; i < all.length; i++) {
+      var lab = getInkscapeLabel(all[i])
+      if (lab === BUTTON_PREFIX + key) return all[i]
+    }
+    return null
+  }
+
+  function patchStyleProp(style, prop, value) {
+    var s = style || ''
+    var re = new RegExp(prop + '\\s*:[^;]+;?', 'gi')
+    if (re.test(s)) return s.replace(re, prop + ':' + value + ';')
+    return s + (s && !/;\s*$/.test(s) ? ';' : '') + prop + ':' + value + ';'
+  }
+
+  function storeSvgDefaultStyle(el) {
+    if (!el || el.hasAttribute('data-flow-default-style')) return
+    el.setAttribute('data-flow-default-style', el.getAttribute('style') || '')
+  }
+
+  function restoreSvgDefaultStyle(el) {
+    if (!el || !el.hasAttribute('data-flow-default-style')) return
+    var saved = el.getAttribute('data-flow-default-style')
+    if (saved) el.setAttribute('style', saved)
+    else el.removeAttribute('style')
+  }
+
+  function applyRunningStylesToButtonGroup(group) {
+    var rects = group.querySelectorAll(':scope > rect')
+    var tspans = group.querySelectorAll('text tspan')
+    var i
+    for (i = 0; i < rects.length; i++) {
+      storeSvgDefaultStyle(rects[i])
+      if (i === 0) {
+        rects[i].setAttribute(
+          'style',
+          'fill:#1677ff;fill-opacity:0.32;stroke:#1677ff;stroke-opacity:1;stroke-width:0.692377;stroke-linecap:butt;stroke-linejoin:miter;'
+        )
+      } else {
+        rects[i].setAttribute('style', 'fill:#1677ff;fill-opacity:0.14;stroke:none;')
+      }
+    }
+    for (i = 0; i < tspans.length; i++) {
+      storeSvgDefaultStyle(tspans[i])
+      var saved = tspans[i].getAttribute('data-flow-default-style') || tspans[i].getAttribute('style') || ''
+      var next = patchStyleProp(patchStyleProp(saved, 'fill', '#1677ff'), 'fill-opacity', '1')
+      next = patchStyleProp(next, 'font-weight', '600')
+      if (!/text-anchor\s*:\s*middle/i.test(next)) {
+        next = patchStyleProp(next, 'text-align', 'center')
+        next = patchStyleProp(next, 'text-anchor', 'middle')
+      }
+      tspans[i].setAttribute('style', next)
+    }
+  }
+
+  function restoreDefaultStylesFromButtonGroup(group) {
+    var els = group.querySelectorAll('[data-flow-default-style]')
+    var i
+    for (i = 0; i < els.length; i++) restoreSvgDefaultStyle(els[i])
+  }
+
+  /** @param {'default'|'running'} state */
+  Plugin.prototype.setButtonState = function (action, state) {
+    var group = this.findButtonGroup(action)
+    if (!group) return
+    if (state === 'running') {
+      group.classList.add('svg-button-running')
+      group.setAttribute('data-button-state', 'running')
+      applyRunningStylesToButtonGroup(group)
+    } else {
+      group.classList.remove('svg-button-running')
+      group.removeAttribute('data-button-state')
+      restoreDefaultStylesFromButtonGroup(group)
+    }
   }
 
   /**
