@@ -525,6 +525,7 @@
       align-items: center;
       gap: 8px;
       width: 100%;
+      flex-wrap: wrap;
     }
     .flow-step-vent-duration-row .ant-input-number {
       flex: 1 1 auto;
@@ -637,6 +638,71 @@
     .flow-step-vent-apply-btn {
       flex: 0 0 auto;
       margin-left: auto;
+    }
+    .flow-step-vent-simultaneous-row {
+      align-items: flex-end;
+      flex-wrap: nowrap;
+      gap: 10px;
+      width: auto;
+      max-width: 100%;
+    }
+    .flow-step-vent-param-field {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .flow-step-vent-duration-field {
+      flex: 0 0 auto;
+    }
+    .flow-step-vent-gas-field {
+      flex: 0 0 128px;
+      width: 128px;
+      max-width: 128px;
+    }
+    .flow-step-vent-param-label {
+      font-size: 12px;
+      line-height: 1.4;
+      color: rgba(0, 0, 0, 0.88);
+      white-space: nowrap;
+    }
+    .flow-step-vent-param-control {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 32px;
+    }
+    .flow-step-vent-simultaneous-row .flow-step-vent-param-control .ant-input-number {
+      flex: 0 0 auto;
+      width: 56px;
+      min-width: 56px;
+    }
+    .flow-step-vent-simultaneous-row .flow-step-vent-duration-unit {
+      font-size: 13px;
+      line-height: 32px;
+    }
+    .flow-step-vent-simultaneous-row .flow-step-vent-gas-select.ant-select {
+      flex: 0 0 128px;
+      width: 128px;
+      min-width: 128px;
+      max-width: 128px;
+    }
+    .flow-step-vent-simultaneous-row .flow-step-vent-gas-select .ant-select-selector {
+      padding: 0 8px;
+      min-height: 32px;
+    }
+    .flow-step-vent-simultaneous-row .flow-step-vent-gas-select .ant-select-selection-item {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 96px;
+      font-size: 13px;
+      line-height: 30px;
+    }
+    .flow-step-vent-simultaneous-row .flow-step-vent-apply-btn {
+      align-self: flex-end;
+      margin-left: 4px;
+      flex-shrink: 0;
     }
     /* Step 1：环境读数表格（仅步骤一 Confirm 点击后出现） */
     .flow-step2-metrics-wrap[hidden] {
@@ -972,9 +1038,20 @@
     #out-flow-step3-batch-table-wrap tbody tr.out-batch-row-filter-hidden {
       display: none !important;
     }
+    #out-flow-step3-batch-table-wrap .flow-batch-usage-th,
+    #out-flow-step3-batch-table-wrap .flow-batch-usage-cell {
+      display: none !important;
+    }
     #out-flow-step3-batch-table-wrap:not(.out-batch-tray-status-visible) .flow-batch-tray-status-th,
     #out-flow-step3-batch-table-wrap:not(.out-batch-tray-status-visible) .flow-batch-tray-status-cell {
       display: none;
+    }
+    #out-flow-step3-batch-table-wrap.out-batch-post-start .flow-batch-checkbox-th,
+    #out-flow-step3-batch-table-wrap.out-batch-post-start .flow-batch-checkbox-cell {
+      display: none !important;
+    }
+    #out-flow-step3-batch-table-wrap tbody tr.out-batch-row-unselected-hidden {
+      display: none !important;
     }
     .flow-batch-tray-status-cell {
       min-width: 118px;
@@ -987,6 +1064,9 @@
       line-height: 20px;
     }
     .out-batch-tray-status-empty {
+      color: rgba(0, 0, 0, 0.25);
+    }
+    #out-flow-step3-batch-table-wrap .flow-batch-position-label.out-batch-position-removed {
       color: rgba(0, 0, 0, 0.25);
     }
     .flow-batch-usage-th,
@@ -1372,6 +1452,15 @@
     }
     #flow-step2-batch-table-wrap.into-batch-step4-persist #flow-step2-confirm {
       display: none;
+    }
+    .flow-step3-close-door-phase {
+      margin-top: 12px;
+    }
+    .flow-step3-close-door-phase[hidden] {
+      display: none !important;
+    }
+    .flow-step3-close-door-phase .flow-step-desc-single {
+      margin-bottom: 8px;
     }
     .flow-batch-checkbox-th,
     .flow-batch-checkbox-cell {
@@ -1788,7 +1877,7 @@
         <p class="into-flow-config-title">Load &amp; purge setup</p>
         <div class="into-flow-config-grid">
           <div class="into-flow-config-field">
-            <label for="into-config-tray-count">Tray number</label>
+            <label for="into-config-tray-count">Rack number</label>
             <input type="number" class="ant-input" id="into-config-tray-count" min="1" max="10" value="10" inputmode="numeric" />
           </div>
           <div class="into-flow-config-field">
@@ -1850,7 +1939,7 @@
                                           />
                                         </div>
                                       </div>
-                                      <span id="into-step1-vent-cycles-unit" class="flow-step-vent-duration-unit">N</span>
+                                      <span id="into-step1-vent-cycles-unit" class="flow-step-vent-duration-unit">Times</span>
                                       <button type="button" class="ant-btn ant-btn-primary flow-step-vent-apply-btn" disabled>Apply</button>
                                     </div>
                                   </div>
@@ -1858,27 +1947,54 @@
                               </div>
                               <div id="into-step1-vent-duration-popover" class="flow-step-vent-cycles-popover flow-step-vent-params-block" hidden>
                                 <div class="ant-form-item">
-                                  <div class="ant-form-item-label">
-                                    <label for="into-step1-vent-duration-pop">Duration</label>
-                                  </div>
                                   <div class="ant-form-item-control">
-                                    <div class="flow-step-vent-duration-row">
-                                      <div id="into-step1-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
-                                        <div class="ant-input-number-input-wrap">
-                                          <input
-                                            type="number"
-                                            class="ant-input-number-input"
-                                            id="into-step1-vent-duration-pop"
-                                            min="1"
-                                            max="120"
-                                            value="5"
-                                            inputmode="numeric"
-                                            disabled
-                                            aria-describedby="into-step1-vent-duration-pop-unit"
-                                          />
+                                    <div class="flow-step-vent-duration-row flow-step-vent-simultaneous-row">
+                                      <div class="flow-step-vent-param-field flow-step-vent-duration-field">
+                                        <label for="into-step1-vent-duration-pop" class="flow-step-vent-param-label">Duration</label>
+                                        <div class="flow-step-vent-param-control">
+                                          <div id="into-step1-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
+                                            <div class="ant-input-number-input-wrap">
+                                              <input
+                                                type="number"
+                                                class="ant-input-number-input"
+                                                id="into-step1-vent-duration-pop"
+                                                min="1"
+                                                max="120"
+                                                value="5"
+                                                inputmode="numeric"
+                                                disabled
+                                                aria-describedby="into-step1-vent-duration-pop-unit"
+                                              />
+                                            </div>
+                                          </div>
+                                          <span id="into-step1-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
                                         </div>
                                       </div>
-                                      <span id="into-step1-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
+                                      <div class="flow-step-vent-param-field flow-step-vent-gas-field">
+                                        <label for="into-step1-vent-gas-select" class="flow-step-vent-param-label">Gas</label>
+                                        <div class="flow-step-vent-param-control">
+                                          <div
+                                            id="into-step1-vent-gas-select-wrap"
+                                            class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-gas-select"
+                                          >
+                                            <div class="ant-select-selector">
+                                              <span class="ant-select-selection-search">
+                                                <select
+                                                  id="into-step1-vent-gas-select"
+                                                  class="flow-ant-select-native"
+                                                  disabled
+                                                  aria-label="Gas selection"
+                                                >
+                                                  <option value="N2">N2</option>
+                                                  <option value="CDA">CDA</option>
+                                                </select>
+                                              </span>
+                                              <span id="into-step1-vent-gas-select-label" class="ant-select-selection-item">N2</span>
+                                            </div>
+                                            <span class="ant-select-arrow" aria-hidden="true"></span>
+                                          </div>
+                                        </div>
+                                      </div>
                                       <button type="button" class="ant-btn ant-btn-primary flow-step-vent-apply-btn" disabled>Apply</button>
                                     </div>
                                   </div>
@@ -1893,7 +2009,7 @@
                     </form>
                   </div>
                   <div id="into-step5-vent-panel" class="flow-step-vent-panel">
-                    <p class="flow-step-vent-panel-title">Step 5: Purge-before open inner door</p>
+                    <p class="flow-step-vent-panel-title">Step 4: Purge-before open inner door</p>
                     <form class="ant-form ant-form-vertical flow-step-vent-form" novalidate>
                       <div class="ant-form-item">
                         <div class="ant-form-item-control">
@@ -1945,7 +2061,7 @@
                                           />
                                         </div>
                                       </div>
-                                      <span id="into-step5-vent-cycles-unit" class="flow-step-vent-duration-unit">N</span>
+                                      <span id="into-step5-vent-cycles-unit" class="flow-step-vent-duration-unit">Times</span>
                                       <button type="button" class="ant-btn ant-btn-primary flow-step-vent-apply-btn" disabled>Apply</button>
                                     </div>
                                   </div>
@@ -1953,27 +2069,54 @@
                               </div>
                               <div id="into-step5-vent-duration-popover" class="flow-step-vent-cycles-popover flow-step-vent-params-block" hidden>
                                 <div class="ant-form-item">
-                                  <div class="ant-form-item-label">
-                                    <label for="into-step5-vent-duration-pop">Duration</label>
-                                  </div>
                                   <div class="ant-form-item-control">
-                                    <div class="flow-step-vent-duration-row">
-                                      <div id="into-step5-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
-                                        <div class="ant-input-number-input-wrap">
-                                          <input
-                                            type="number"
-                                            class="ant-input-number-input"
-                                            id="into-step5-vent-duration-pop"
-                                            min="1"
-                                            max="120"
-                                            value="5"
-                                            inputmode="numeric"
-                                            disabled
-                                            aria-describedby="into-step5-vent-duration-pop-unit"
-                                          />
+                                    <div class="flow-step-vent-duration-row flow-step-vent-simultaneous-row">
+                                      <div class="flow-step-vent-param-field flow-step-vent-duration-field">
+                                        <label for="into-step5-vent-duration-pop" class="flow-step-vent-param-label">Duration</label>
+                                        <div class="flow-step-vent-param-control">
+                                          <div id="into-step5-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
+                                            <div class="ant-input-number-input-wrap">
+                                              <input
+                                                type="number"
+                                                class="ant-input-number-input"
+                                                id="into-step5-vent-duration-pop"
+                                                min="1"
+                                                max="120"
+                                                value="5"
+                                                inputmode="numeric"
+                                                disabled
+                                                aria-describedby="into-step5-vent-duration-pop-unit"
+                                              />
+                                            </div>
+                                          </div>
+                                          <span id="into-step5-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
                                         </div>
                                       </div>
-                                      <span id="into-step5-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
+                                      <div class="flow-step-vent-param-field flow-step-vent-gas-field">
+                                        <label for="into-step5-vent-gas-select" class="flow-step-vent-param-label">Gas</label>
+                                        <div class="flow-step-vent-param-control">
+                                          <div
+                                            id="into-step5-vent-gas-select-wrap"
+                                            class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-gas-select"
+                                          >
+                                            <div class="ant-select-selector">
+                                              <span class="ant-select-selection-search">
+                                                <select
+                                                  id="into-step5-vent-gas-select"
+                                                  class="flow-ant-select-native"
+                                                  disabled
+                                                  aria-label="Gas selection"
+                                                >
+                                                  <option value="N2">N2</option>
+                                                  <option value="CDA">CDA</option>
+                                                </select>
+                                              </span>
+                                              <span id="into-step5-vent-gas-select-label" class="ant-select-selection-item">N2</span>
+                                            </div>
+                                            <span class="ant-select-arrow" aria-hidden="true"></span>
+                                          </div>
+                                        </div>
+                                      </div>
                                       <button type="button" class="ant-btn ant-btn-primary flow-step-vent-apply-btn" disabled>Apply</button>
                                     </div>
                                   </div>
@@ -2060,7 +2203,7 @@
             </div>
           </div>
 
-          <!-- Step 3: Manual — Confirm 后进入 Step 4 -->
+          <!-- Step 3: Load racks & close outer door (phase A: load, phase B: close door) -->
           <div class="ant-steps-item ant-steps-item-wait" id="antd-step-3" data-flow-step="2">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
@@ -2070,12 +2213,12 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Load racks into airlock shelf</span>
-                    <span class="ant-tag ant-tag-warning">Manual</span>
+                    <span class="flow-step-title-text">Load racks &amp; close outer door</span>
+                    <span class="ant-tag ant-tag-warning" id="into-step-3-mode-tag">Manual</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Enter rack data in the table, then confirm load.</p>
+                  <p class="flow-step-desc-single">Enter rack data in the table, confirm load, then close the outer door.</p>
                   <div class="flow-step-inline-actions">
                     <button type="button" class="ant-btn ant-btn-primary" id="flow-step2-confirm" disabled>
                       <span class="flow-btn-batch-unload-icon" aria-hidden="true">
@@ -2097,39 +2240,22 @@
                       Confirm load
                     </button>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 4: Close outer door -->
-          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-4" data-flow-step="4">
-            <div class="ant-steps-item-container">
-              <div class="ant-steps-item-tail"></div>
-              <div class="ant-steps-item-icon">
-                <span class="ant-steps-icon" id="antd-step-4-icon"></span>
-              </div>
-              <div class="ant-steps-item-content">
-                <div class="ant-steps-item-title">
-                  <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Close outer door</span>
-                    <span class="ant-tag ant-tag-success" id="into-step-4-mode-tag">Auto</span>
-                  </div>
-                </div>
-                <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Confirm when the outer door is closed.</p>
-                  <div class="flow-step-inline-actions">
-                    <button type="button" class="ant-btn ant-btn-primary" id="flow-step4-close-door-confirm" disabled>
-                      Confirm
-                    </button>
+                  <div id="flow-step3-close-door-phase" class="flow-step3-close-door-phase" hidden>
+                    <p class="flow-step-desc-single">Confirm when the outer door is closed.</p>
+                    <div class="flow-step-inline-actions">
+                      <button type="button" class="ant-btn ant-btn-primary" id="flow-step4-close-door-confirm" disabled>
+                        Confirm
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Step 5: Inner purge before inner door -->
-          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-5" data-flow-step="5">
+
+          <!-- Step 4: Inner purge before inner door -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-5" data-flow-step="4">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon">
@@ -2174,8 +2300,8 @@
             </div>
           </div>
 
-          <!-- Step 6: Transfer into glovebox -->
-          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-6" data-flow-step="6">
+          <!-- Step 5: Transfer into glovebox -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-6" data-flow-step="5">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon">
@@ -2657,7 +2783,7 @@
                                           />
                                         </div>
                                       </div>
-                                      <span id="out-step2-vent-cycles-unit" class="flow-step-vent-duration-unit">N</span>
+                                      <span id="out-step2-vent-cycles-unit" class="flow-step-vent-duration-unit">Times</span>
                                       <button type="button" class="ant-btn ant-btn-primary flow-step-vent-apply-btn" disabled>Apply</button>
                                     </div>
                                   </div>
@@ -2665,27 +2791,54 @@
                               </div>
                               <div id="out-step2-vent-duration-popover" class="flow-step-vent-cycles-popover flow-step-vent-params-block" hidden>
                                 <div class="ant-form-item">
-                                  <div class="ant-form-item-label">
-                                    <label for="out-step2-vent-duration-pop">Duration</label>
-                                  </div>
                                   <div class="ant-form-item-control">
-                                    <div class="flow-step-vent-duration-row">
-                                      <div id="out-step2-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
-                                        <div class="ant-input-number-input-wrap">
-                                          <input
-                                            type="number"
-                                            class="ant-input-number-input"
-                                            id="out-step2-vent-duration-pop"
-                                            min="1"
-                                            max="120"
-                                            value="5"
-                                            inputmode="numeric"
-                                            disabled
-                                            aria-describedby="out-step2-vent-duration-pop-unit"
-                                          />
+                                    <div class="flow-step-vent-duration-row flow-step-vent-simultaneous-row">
+                                      <div class="flow-step-vent-param-field flow-step-vent-duration-field">
+                                        <label for="out-step2-vent-duration-pop" class="flow-step-vent-param-label">Duration</label>
+                                        <div class="flow-step-vent-param-control">
+                                          <div id="out-step2-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
+                                            <div class="ant-input-number-input-wrap">
+                                              <input
+                                                type="number"
+                                                class="ant-input-number-input"
+                                                id="out-step2-vent-duration-pop"
+                                                min="1"
+                                                max="120"
+                                                value="5"
+                                                inputmode="numeric"
+                                                disabled
+                                                aria-describedby="out-step2-vent-duration-pop-unit"
+                                              />
+                                            </div>
+                                          </div>
+                                          <span id="out-step2-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
                                         </div>
                                       </div>
-                                      <span id="out-step2-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
+                                      <div class="flow-step-vent-param-field flow-step-vent-gas-field">
+                                        <label for="out-step2-vent-gas-select" class="flow-step-vent-param-label">Gas</label>
+                                        <div class="flow-step-vent-param-control">
+                                          <div
+                                            id="out-step2-vent-gas-select-wrap"
+                                            class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-gas-select"
+                                          >
+                                            <div class="ant-select-selector">
+                                              <span class="ant-select-selection-search">
+                                                <select
+                                                  id="out-step2-vent-gas-select"
+                                                  class="flow-ant-select-native"
+                                                  disabled
+                                                  aria-label="Gas selection"
+                                                >
+                                                  <option value="N2">N2</option>
+                                                  <option value="CDA">CDA</option>
+                                                </select>
+                                              </span>
+                                              <span id="out-step2-vent-gas-select-label" class="ant-select-selection-item">N2</span>
+                                            </div>
+                                            <span class="ant-select-arrow" aria-hidden="true"></span>
+                                          </div>
+                                        </div>
+                                      </div>
                                       <button type="button" class="ant-btn ant-btn-primary flow-step-vent-apply-btn" disabled>Apply</button>
                                     </div>
                                   </div>
@@ -2752,7 +2905,7 @@
                                           />
                                         </div>
                                       </div>
-                                      <span id="out-step4-vent-cycles-unit" class="flow-step-vent-duration-unit">N</span>
+                                      <span id="out-step4-vent-cycles-unit" class="flow-step-vent-duration-unit">Times</span>
                                       <button type="button" class="ant-btn ant-btn-primary flow-step-vent-apply-btn" disabled>Apply</button>
                                     </div>
                                   </div>
@@ -2760,27 +2913,54 @@
                               </div>
                               <div id="out-step4-vent-duration-popover" class="flow-step-vent-cycles-popover flow-step-vent-params-block" hidden>
                                 <div class="ant-form-item">
-                                  <div class="ant-form-item-label">
-                                    <label for="out-step4-vent-duration-pop">Duration</label>
-                                  </div>
                                   <div class="ant-form-item-control">
-                                    <div class="flow-step-vent-duration-row">
-                                      <div id="out-step4-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
-                                        <div class="ant-input-number-input-wrap">
-                                          <input
-                                            type="number"
-                                            class="ant-input-number-input"
-                                            id="out-step4-vent-duration-pop"
-                                            min="1"
-                                            max="120"
-                                            value="5"
-                                            inputmode="numeric"
-                                            disabled
-                                            aria-describedby="out-step4-vent-duration-pop-unit"
-                                          />
+                                    <div class="flow-step-vent-duration-row flow-step-vent-simultaneous-row">
+                                      <div class="flow-step-vent-param-field flow-step-vent-duration-field">
+                                        <label for="out-step4-vent-duration-pop" class="flow-step-vent-param-label">Duration</label>
+                                        <div class="flow-step-vent-param-control">
+                                          <div id="out-step4-vent-duration-pop-wrap" class="ant-input-number ant-input-number-disabled">
+                                            <div class="ant-input-number-input-wrap">
+                                              <input
+                                                type="number"
+                                                class="ant-input-number-input"
+                                                id="out-step4-vent-duration-pop"
+                                                min="1"
+                                                max="120"
+                                                value="5"
+                                                inputmode="numeric"
+                                                disabled
+                                                aria-describedby="out-step4-vent-duration-pop-unit"
+                                              />
+                                            </div>
+                                          </div>
+                                          <span id="out-step4-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
                                         </div>
                                       </div>
-                                      <span id="out-step4-vent-duration-pop-unit" class="flow-step-vent-duration-unit">minute</span>
+                                      <div class="flow-step-vent-param-field flow-step-vent-gas-field">
+                                        <label for="out-step4-vent-gas-select" class="flow-step-vent-param-label">Gas</label>
+                                        <div class="flow-step-vent-param-control">
+                                          <div
+                                            id="out-step4-vent-gas-select-wrap"
+                                            class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-gas-select"
+                                          >
+                                            <div class="ant-select-selector">
+                                              <span class="ant-select-selection-search">
+                                                <select
+                                                  id="out-step4-vent-gas-select"
+                                                  class="flow-ant-select-native"
+                                                  disabled
+                                                  aria-label="Gas selection"
+                                                >
+                                                  <option value="N2">N2</option>
+                                                  <option value="CDA">CDA</option>
+                                                </select>
+                                              </span>
+                                              <span id="out-step4-vent-gas-select-label" class="ant-select-selection-item">N2</span>
+                                            </div>
+                                            <span class="ant-select-arrow" aria-hidden="true"></span>
+                                          </div>
+                                        </div>
+                                      </div>
                                       <button type="button" class="ant-btn ant-btn-primary flow-step-vent-apply-btn" disabled>Apply</button>
                                     </div>
                                   </div>
@@ -3982,6 +4162,11 @@
       var INTO_BATCH_DEFAULT_POSITIONS = ['B-1', 'B-2', 'B-3', 'B-4', 'A-1', 'A-2', 'A-3', 'A-4', 'A-5', 'A-6'];
       var INTO_VENT_CYCLES_DEFAULT = 3;
       var INTO_VENT_DURATION_DEFAULT = 5;
+      var VENT_GAS_DEFAULT = 'N2';
+      var VENT_GAS_META = {
+        N2: { display: 'N2' },
+        CDA: { display: 'CDA' }
+      };
       var intoVentStepConfigured = { '1': false, '5': false };
       var INTO_BATCH_ROW_COUNT = 10;
       var INTO_BATCH_TRAY_STATUS_META = {
@@ -4035,6 +4220,13 @@
         return String(num);
       }
 
+      /** Into flow: merged steps use display 1–5 (internal ids 5→4, 6→5). */
+      function intoStepDisplayNum(stepNum) {
+        if (stepNum === 5) return 4;
+        if (stepNum === 6) return 5;
+        return stepNum;
+      }
+
       function iconLoading() {
         return spinSvg;
       }
@@ -4052,6 +4244,7 @@
         var item = document.getElementById('antd-step-' + stepNum);
         var iconEl = document.getElementById('antd-step-' + stepNum + '-icon');
         if (!item || !iconEl) return;
+        var displayNum = intoStepDisplayNum(stepNum);
 
         item.classList.remove(
           'ant-steps-item-wait',
@@ -4062,13 +4255,13 @@
 
         if (state === 'wait') {
           item.classList.add('ant-steps-item-wait');
-          iconEl.innerHTML = iconDot(stepNum);
+          iconEl.innerHTML = iconDot(displayNum);
         } else if (state === 'process-loading') {
           item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
           iconEl.innerHTML = iconLoading();
         } else if (state === 'process-manual') {
           item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
-          iconEl.innerHTML = iconDot(stepNum);
+          iconEl.innerHTML = iconDot(displayNum);
         } else if (state === 'finish') {
           item.classList.add('ant-steps-item-finish');
           iconEl.innerHTML = iconFinish();
@@ -4102,6 +4295,65 @@
 
       function intoVentEl(stepKey, part) {
         return document.getElementById('into-step' + stepKey + '-vent-' + part);
+      }
+
+      function syncVentGasSelectLabelFor(ventElFn, stepKey) {
+        var select = ventElFn(stepKey, 'gas-select');
+        var label = ventElFn(stepKey, 'gas-select-label');
+        if (!select || !label) return;
+        var opt = select.options[select.selectedIndex];
+        var text = opt ? opt.textContent : '';
+        label.textContent = text;
+        label.setAttribute('title', text);
+      }
+
+      function resetVentGasSelectFor(ventElFn, stepKey) {
+        var select = ventElFn(stepKey, 'gas-select');
+        if (select) select.value = VENT_GAS_DEFAULT;
+        syncVentGasSelectLabelFor(ventElFn, stepKey);
+      }
+
+      function setVentGasSelectEditableFor(ventElFn, stepKey, editable) {
+        var wrap = ventElFn(stepKey, 'gas-select-wrap');
+        var select = ventElFn(stepKey, 'gas-select');
+        if (wrap) wrap.classList.toggle('ant-select-disabled', !editable);
+        if (select) select.disabled = !editable;
+      }
+
+      function readVentGasFor(ventElFn, stepKey) {
+        var select = ventElFn(stepKey, 'gas-select');
+        var v = select && select.value ? select.value : VENT_GAS_DEFAULT;
+        return VENT_GAS_META[v] ? v : VENT_GAS_DEFAULT;
+      }
+
+      function readIntoVentConfig(stepKey) {
+        var select = intoVentEl(stepKey, 'select');
+        var strategy = select ? select.value : 'standard';
+        return {
+          strategy: strategy,
+          cycles: getIntoVentCyclesMax(stepKey),
+          durationMinutes: clampInt(intoVentEl(stepKey, 'duration-pop') && intoVentEl(stepKey, 'duration-pop').value, 1, 120),
+          gas: readVentGasFor(intoVentEl, stepKey)
+        };
+      }
+
+      function bindVentGasSelectUi(ventElFn, unmarkFn, stepKey) {
+        var gasSelect = ventElFn(stepKey, 'gas-select');
+        if (gasSelect) {
+          gasSelect.addEventListener('change', function () {
+            syncVentGasSelectLabelFor(ventElFn, stepKey);
+            unmarkFn(stepKey);
+          });
+        }
+        var durationInput = ventElFn(stepKey, 'duration-pop');
+        if (durationInput) {
+          durationInput.addEventListener('change', function () {
+            unmarkFn(stepKey);
+          });
+          durationInput.addEventListener('input', function () {
+            unmarkFn(stepKey);
+          });
+        }
       }
 
       function getIntoVentCyclesMax(stepKey) {
@@ -4175,8 +4427,30 @@
         mw.classList.add('is-revealing');
       }
 
-      function resetIntoSteps456ConfirmState() {
+      function showIntoStep3CloseDoorPhase() {
+        var phase = document.getElementById('flow-step3-close-door-phase');
+        if (phase) phase.hidden = false;
+      }
+
+      function hideIntoStep3CloseDoorPhase() {
+        var phase = document.getElementById('flow-step3-close-door-phase');
+        if (phase) phase.hidden = true;
         if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
+      }
+
+      function isIntoFlowOnStep3PhaseB() {
+        var item = document.getElementById('antd-step-3');
+        var phase = document.getElementById('flow-step3-close-door-phase');
+        return !!(
+          item &&
+          item.classList.contains('ant-steps-item-process') &&
+          phase &&
+          !phase.hidden
+        );
+      }
+
+      function resetIntoSteps456ConfirmState() {
+        hideIntoStep3CloseDoorPhase();
         hideIntoStep5InnerMetrics();
         resetIntoStep5PurgeCycleDisplay();
       }
@@ -4263,7 +4537,7 @@
 
       function syncIntoStepLoopTags() {
         var text = 'loop ' + intoLoadCycleCurrent + '/' + intoLoadCycleTotal;
-        ['1', '2', '4', '5', '6'].forEach(function (s) {
+        ['1', '2', '5', '6'].forEach(function (s) {
           var el = document.getElementById('into-step-' + s + '-mode-tag');
           if (!el) return;
           el.classList.remove('ant-tag-success');
@@ -4274,13 +4548,19 @@
 
       function resetIntoStepModeTags() {
         intoStepTagsShowLoop = false;
-        ['1', '2', '4', '5', '6'].forEach(function (s) {
+        ['1', '2', '5', '6'].forEach(function (s) {
           var el = document.getElementById('into-step-' + s + '-mode-tag');
           if (!el) return;
           el.classList.remove('ant-tag-processing');
           el.classList.add('ant-tag-success');
           el.textContent = 'Auto';
         });
+        var tag3 = document.getElementById('into-step-3-mode-tag');
+        if (tag3) {
+          tag3.classList.remove('ant-tag-processing');
+          tag3.classList.add('ant-tag-warning');
+          tag3.textContent = 'Manual';
+        }
       }
 
       function resetIntoLoadCycleBarState() {
@@ -4347,6 +4627,7 @@
         if (durationPop) durationPop.disabled = !editable;
         if (cyclesWrap) cyclesWrap.classList.toggle('ant-input-number-disabled', !editable);
         if (cycles) cycles.disabled = !editable;
+        setVentGasSelectEditableFor(intoVentEl, stepKey, editable);
         if (panel) {
           panel.querySelectorAll('.flow-step-vent-apply-btn').forEach(function (btn) {
             btn.disabled = !editable;
@@ -4432,6 +4713,7 @@
         if (desc) desc.textContent = 'General consumables preset.';
         if (durationPop) durationPop.value = String(INTO_VENT_DURATION_DEFAULT);
         if (cycles) cycles.value = String(INTO_VENT_CYCLES_DEFAULT);
+        resetVentGasSelectFor(intoVentEl, stepKey);
         syncIntoVentParamsUi(stepKey);
         if (panel) panel.classList.remove('is-vent-configured');
         intoVentStepConfigured[stepKey] = false;
@@ -4455,6 +4737,7 @@
         if (select.value === 'simultaneous') {
           var durationInput = intoVentEl(stepKey, 'duration-pop');
           if (durationInput) durationInput.value = String(INTO_VENT_DURATION_DEFAULT);
+          resetVentGasSelectFor(intoVentEl, stepKey);
         }
         syncIntoVentSelectLabel(stepKey);
         syncIntoVentParamsUi(stepKey);
@@ -4532,7 +4815,6 @@
         setStepItemState(1, 'process-loading');
         setStepItemState(2, 'wait');
         setStepItemState(3, 'wait');
-        setStepItemState(4, 'wait');
         setStepItemState(5, 'wait');
         setStepItemState(6, 'wait');
         if (step2DoorConfirm) step2DoorConfirm.disabled = true;
@@ -4776,23 +5058,73 @@
         }
       }
 
+      function findOutBatchTablePositionTh(wrap) {
+        var theadRow = wrap && wrap.querySelector('thead tr');
+        if (!theadRow) return null;
+        var ths = theadRow.querySelectorAll('th');
+        for (var i = 0; i < ths.length; i++) {
+          var th = ths[i];
+          if (th.classList.contains('flow-batch-checkbox-th')) continue;
+          var inner = th.querySelector('.flow-batch-th-inner span');
+          if (inner && inner.textContent.trim() === 'Position') return th;
+          if (th.textContent.trim() === 'Position') return th;
+        }
+        return null;
+      }
+
+      function findOutBatchRowPositionTd(row) {
+        if (!row) return null;
+        var posEl = row.querySelector('.flow-batch-position-label');
+        return posEl ? posEl.closest('td') : null;
+      }
+
+      function applyOutBatchPostStartTableView() {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return;
+        for (var n = 1; n <= OUT_BATCH_ROW_COUNT; n++) {
+          var cb = document.getElementById('out-batch-select-' + n);
+          var tr = cb ? cb.closest('tr') : null;
+          if (!tr || tr.classList.contains('out-batch-row-peeled')) continue;
+          tr.classList.toggle('out-batch-row-unselected-hidden', !cb.checked);
+        }
+        wrap.classList.add('out-batch-post-start');
+      }
+
+      function clearOutBatchPostStartTableView() {
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return;
+        wrap.classList.remove('out-batch-post-start');
+        wrap.querySelectorAll('tbody tr.out-batch-row-unselected-hidden').forEach(function (tr) {
+          tr.classList.remove('out-batch-row-unselected-hidden');
+        });
+      }
+
       function ensureOutBatchTrayStatusColumn() {
         var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
-        if (!wrap || document.getElementById('out-batch-tray-status-th')) return;
-        var theadRow = wrap.querySelector('thead tr');
-        var detailTh = theadRow ? theadRow.querySelector('th:last-child') : null;
-        if (detailTh) {
-          var th = document.createElement('th');
+        if (!wrap) return;
+        var positionTh = findOutBatchTablePositionTh(wrap);
+        var th = document.getElementById('out-batch-tray-status-th');
+        if (!th && positionTh) {
+          th = document.createElement('th');
           th.id = 'out-batch-tray-status-th';
           th.className = 'flow-batch-tray-status-th';
           th.textContent = 'Tray status';
-          detailTh.parentNode.insertBefore(th, detailTh);
+          positionTh.parentNode.insertBefore(th, positionTh);
+        } else if (th && positionTh && th.nextElementSibling !== positionTh) {
+          positionTh.parentNode.insertBefore(th, positionTh);
         }
         for (var n = 1; n <= OUT_BATCH_ROW_COUNT; n++) {
-          var qtyEl = document.getElementById('out-batch-qty-' + n);
-          var row = qtyEl ? qtyEl.closest('tr') : null;
-          if (!row || row.querySelector('.flow-batch-tray-status-cell')) continue;
-          var detailTd = row.querySelector('.flow-batch-edit-cell, .flow-batch-detail-cell');
+          var row = document.getElementById('out-batch-select-' + n);
+          row = row ? row.closest('tr') : null;
+          if (!row) continue;
+          var posTd = findOutBatchRowPositionTd(row);
+          var existing = row.querySelector('.flow-batch-tray-status-cell');
+          if (existing) {
+            if (posTd && existing.nextElementSibling !== posTd) {
+              row.insertBefore(existing, posTd);
+            }
+            continue;
+          }
           var td = document.createElement('td');
           td.className = 'flow-batch-tray-status-cell';
           var span = document.createElement('span');
@@ -4800,7 +5132,7 @@
           span.className = 'out-batch-tray-status-empty';
           span.textContent = '—';
           td.appendChild(span);
-          if (detailTd) row.insertBefore(td, detailTd);
+          if (posTd) row.insertBefore(td, posTd);
           else row.appendChild(td);
         }
       }
@@ -4811,17 +5143,44 @@
         wrap.classList.toggle('out-batch-tray-status-visible', !!visible);
       }
 
+      function syncOutBatchPositionLabelForTrayStatus(rowNum, statusKey) {
+        var cb = document.getElementById('out-batch-select-' + rowNum);
+        var tr = cb ? cb.closest('tr') : null;
+        var posEl = tr ? tr.querySelector('.flow-batch-position-label') : null;
+        if (!posEl || !tr) return;
+        if (statusKey === 'removed') {
+          posEl.textContent = '——';
+          posEl.classList.add('out-batch-position-removed');
+          syncOutBatchRowFilterData(tr);
+          return;
+        }
+        posEl.classList.remove('out-batch-position-removed');
+        if (posEl.getAttribute('data-position-fixed') === '1') {
+          posEl.textContent = posEl.getAttribute('data-position-slot') || posEl.textContent.trim();
+        } else {
+          var raw = posEl.getAttribute('data-position-slot');
+          if (!raw) raw = outBatchPositionSlotFromDisplay(posEl.textContent);
+          if (raw) {
+            posEl.setAttribute('data-position-slot', raw);
+            posEl.textContent = formatOutBatchPosition(raw);
+          }
+        }
+        syncOutBatchRowFilterData(tr);
+      }
+
       function renderOutBatchTrayStatusTag(rowNum, statusKey) {
         var el = document.getElementById('out-batch-tray-status-' + rowNum);
         if (!el) return;
         if (!statusKey || !OUT_BATCH_TRAY_STATUS_META[statusKey]) {
           el.className = 'out-batch-tray-status-empty';
           el.textContent = '—';
+          syncOutBatchPositionLabelForTrayStatus(rowNum, null);
           return;
         }
         var meta = OUT_BATCH_TRAY_STATUS_META[statusKey];
         el.className = 'ant-tag out-batch-tray-status-tag ' + meta.cls;
         el.textContent = meta.label;
+        syncOutBatchPositionLabelForTrayStatus(rowNum, statusKey);
       }
 
       function clearOutBatchTrayStatusTags() {
@@ -4875,12 +5234,6 @@
         }
       }
 
-      function markOutBatchCurrentBatchPendingRemoval() {
-        outBatchCurrentProcessingRows.forEach(function (num) {
-          renderOutBatchTrayStatusTag(num, 'pendingRemoval');
-        });
-      }
-
       function markOutBatchCurrentBatchRemoved() {
         outBatchCurrentProcessingRows.forEach(function (num) {
           outBatchRowUsage[num] = 'used';
@@ -4910,6 +5263,7 @@
         }
         updateOutUnloadCycleBarNumbers();
         applyOutBatchTrayStatusesAfterProceed();
+        applyOutBatchPostStartTableView();
         setOutRightPanelMode('cyclePersist');
         setOutStepItemState(OUT_FLOW_STEP_INNER_PURGE, 'process-loading');
         resetOutStep2PurgeCycleDisplay();
@@ -4923,6 +5277,7 @@
 
       /** After partial/final-pass restart: Step 1 manual + Start, or loop 2/3|3/3 auto (3s, all checkboxes, no Start). */
       function scheduleOutStep1AfterOutRestart() {
+        clearOutBatchPostStartTableView();
         if (shouldOutAutoSkipStep1ForLoopBridge()) {
           setOutFlowStartVisible(false);
           ensureOutBatchAllCheckboxesCheckedAndSynced();
@@ -5141,6 +5496,7 @@
         if (durationPop) durationPop.disabled = !editable;
         if (cyclesWrap) cyclesWrap.classList.toggle('ant-input-number-disabled', !editable);
         if (cycles) cycles.disabled = !editable;
+        setVentGasSelectEditableFor(outVentEl, stepKey, editable);
         if (panel) {
           panel.querySelectorAll('.flow-step-vent-apply-btn').forEach(function (btn) {
             btn.disabled = !editable;
@@ -5149,6 +5505,17 @@
         syncOutVentParamsUi(stepKey);
         if (stepKey === '2') syncOutStep2PurgeCycleSuffix();
         if (stepKey === '4') syncOutStep4PurgeCycleSuffix();
+      }
+
+      function readOutVentConfig(stepKey) {
+        var select = outVentEl(stepKey, 'select');
+        var strategy = select ? select.value : 'standard';
+        return {
+          strategy: strategy,
+          cycles: getOutVentCyclesMax(stepKey),
+          durationMinutes: clampInt(outVentEl(stepKey, 'duration-pop') && outVentEl(stepKey, 'duration-pop').value, 1, 120),
+          gas: readVentGasFor(outVentEl, stepKey)
+        };
       }
 
       function updateOutVentStrategyDesc(stepKey) {
@@ -5163,6 +5530,7 @@
         if (select.value === 'simultaneous') {
           var durationInput = outVentEl(stepKey, 'duration-pop');
           if (durationInput) durationInput.value = String(OUT_VENT_DURATION_DEFAULT);
+          resetVentGasSelectFor(outVentEl, stepKey);
         }
         syncOutVentSelectLabel(stepKey);
         syncOutVentParamsUi(stepKey);
@@ -5179,6 +5547,7 @@
         if (desc) desc.textContent = 'General consumables preset.';
         if (durationPop) durationPop.value = String(OUT_VENT_DURATION_DEFAULT);
         if (cycles) cycles.value = String(OUT_VENT_CYCLES_DEFAULT);
+        resetVentGasSelectFor(outVentEl, stepKey);
         syncOutVentParamsUi(stepKey);
         if (panel) panel.classList.remove('is-vent-configured');
         outVentStepConfigured[stepKey] = false;
@@ -5336,7 +5705,6 @@
       var OUT_BATCH_TRAY_STATUS_META = {
         pending: { label: 'Pending', cls: 'ant-tag-default' },
         processing: { label: 'Processing', cls: 'ant-tag-processing' },
-        pendingRemoval: { label: 'Pending removal', cls: 'ant-tag-warning' },
         removed: { label: 'Removed', cls: 'ant-tag-success' }
       };
       /** 整次出料任务内是否已消耗；tip / hopper / spatula 架型在演示数据中默认 Used 并优先勾选。 */
@@ -5410,6 +5778,19 @@
           if (tr.classList.contains('out-batch-row-peeled')) return;
           var posEl = tr.querySelector('.flow-batch-position-label');
           if (!posEl) return;
+          var cb = tr.querySelector('.flow-batch-rack-checkbox');
+          var rowNum = cb && cb.id ? parseInt(cb.id.replace('out-batch-select-', ''), 10) : 0;
+          var statusEl = rowNum ? document.getElementById('out-batch-tray-status-' + rowNum) : null;
+          if (
+            statusEl &&
+            statusEl.textContent.trim() === OUT_BATCH_TRAY_STATUS_META.removed.label
+          ) {
+            posEl.textContent = '——';
+            posEl.classList.add('out-batch-position-removed');
+            syncOutBatchRowFilterData(tr);
+            return;
+          }
+          posEl.classList.remove('out-batch-position-removed');
           if (posEl.getAttribute('data-position-fixed') === '1') {
             var fixedLabel = posEl.getAttribute('data-position-slot') || posEl.textContent.trim();
             posEl.textContent = fixedLabel;
@@ -6489,6 +6870,7 @@
         clearOutBatchTrayStatusTags();
         var bout = document.getElementById('out-flow-step3-batch-table-wrap');
         if (bout) {
+          clearOutBatchPostStartTableView();
           clearOutBatchTableSubmittedState();
           resetOutBatchTableDisplayEmpty();
           bout.querySelectorAll('.flow-batch-rack-checkbox').forEach(function (el) {
@@ -6534,7 +6916,6 @@
       function onOutStep5OuterDoorConfirmed() {
         if (!outStep5OuterDoorConfirm || outStep5OuterDoorConfirm.disabled) return;
         outStep5OuterDoorConfirm.disabled = true;
-        markOutBatchCurrentBatchPendingRemoval();
         setOutStepItemState(OUT_FLOW_STEP_OUTER_OPEN, 'finish');
         setOutStepItemState(OUT_FLOW_STEP_BATCH, 'process-manual');
         if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = false;
@@ -6677,8 +7058,6 @@
       var INTO_BATCH_ICON_PATHS = {
         eye:
           'M942.2 486.2C847.4 286.5 704.1 186 512 186c-192.2 0-335.4 100.5-430.2 300.3a60.3 60.3 0 000 51.5C176.6 737.5 319.9 838 512 838c192.2 0 335.4-100.5 430.2-300.3 7.7-16.2 7.7-35 0-51.5zM512 766c-161.3 0-279.4-81.8-362.7-254C232.6 339.8 350.7 258 512 258c161.3 0 279.4 81.8 362.7 254C791.5 684.2 673.4 766 512 766zm-4-430c-97.2 0-176 78.8-176 176s78.8 176 176 176 176-78.8 176-176-78.8-176-176-176zm0 288c-61.9 0-112-50.1-112-112s50.1-112 112-112 112 50.1 112 112-50.1 112-112 112z',
-        edit:
-          'M257.7 752c2 0 4-.2 6-.5L431.9 722c2-.4 3.9-1.3 5.3-2.8l423.9-423.9a9.96 9.96 0 000-14.1L694.9 114.9c-1.9-1.9-4.4-2.9-7.1-2.9s-5.2 1-7.1 2.9L256.8 538.8c-1.5 1.5-2.4 3.3-2.8 5.3l-29.5 168.2a33.5 33.5 0 009.4 29.8c6.6 6.4 14.9 9.9 23.8 9.9zm67.4-174.4L687.8 215l73.3 73.3-362.7 362.6-88.9 15.7 15.6-89zM880 836H144c-17.7 0-32 14.3-32 32v36c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-36c0-17.7-14.3-32-32-32z',
         delete:
           'M360 184h-8c4.4 0 8-3.6 8-8v8h304v-8c0 4.4 3.6 8 8 8h-8v72h72v-80c0-35.3-28.7-64-64-64H352c-35.3 0-64 28.7-64 64v80h72v-72zm504 72H160c-17.7 0-32 14.3-32 32v32c0 4.4 3.6 8 8 8h60.4l24.7 523c1.6 34.1 29.8 61 63.9 61h454c34.2 0 62.3-26.8 63.9-61l24.7-523H888c4.4 0 8-3.6 8-8v-32c0-17.7-14.3-32-32-32zM731.3 840H292.7l-24.2-512h487l-24.2 512z'
       };
@@ -6710,7 +7089,6 @@
         return (
           '<div class="flow-batch-row-actions" role="group" aria-label="Row actions">' +
           intoBatchRowActionBtnHtml('view', 'eye-outlined', 'View details') +
-          intoBatchRowActionBtnHtml('edit', 'edit', 'Edit') +
           intoBatchRowActionBtnHtml('delete', 'delete-outlined', 'Delete') +
           '</div>'
         );
@@ -6758,25 +7136,35 @@
 
       function ensureIntoBatchTrayStatusColumn() {
         var wrap = document.getElementById('flow-step2-batch-table-wrap');
-        if (!wrap || document.getElementById('into-batch-tray-status-th')) return;
+        if (!wrap) return;
         var theadRow = wrap.querySelector('thead tr');
-        var qtyTh = theadRow
+        var positionTh = theadRow
           ? Array.prototype.find.call(theadRow.querySelectorAll('th'), function (th) {
-              return th.textContent.trim() === 'Consumable Quantity';
+              return th.textContent.trim() === 'Position';
             })
           : null;
-        if (qtyTh) {
-          var th = document.createElement('th');
+        var th = document.getElementById('into-batch-tray-status-th');
+        if (!th && positionTh) {
+          th = document.createElement('th');
           th.id = 'into-batch-tray-status-th';
           th.className = 'flow-batch-tray-status-th into-batch-tray-status-th';
           th.textContent = 'Tray status';
-          qtyTh.parentNode.insertBefore(th, qtyTh);
+          positionTh.parentNode.insertBefore(th, positionTh);
+        } else if (th && positionTh && th.nextElementSibling !== positionTh) {
+          positionTh.parentNode.insertBefore(th, positionTh);
         }
         for (var n = 1; n <= INTO_BATCH_ROW_COUNT; n++) {
-          var qtyEl = document.getElementById('flow-batch-qty-' + n);
-          var row = qtyEl ? qtyEl.closest('tr') : null;
-          if (!row || row.querySelector('.into-batch-tray-status-cell')) continue;
-          var qtyTd = qtyEl ? qtyEl.closest('td') : null;
+          var posIn = document.getElementById('flow-batch-position-' + n);
+          var row = posIn ? posIn.closest('tr') : null;
+          if (!row) continue;
+          var posTd = posIn ? posIn.closest('td') : null;
+          var existing = row.querySelector('.into-batch-tray-status-cell');
+          if (existing) {
+            if (posTd && existing.nextElementSibling !== posTd) {
+              row.insertBefore(existing, posTd);
+            }
+            continue;
+          }
           var td = document.createElement('td');
           td.className = 'flow-batch-tray-status-cell into-batch-tray-status-cell';
           var span = document.createElement('span');
@@ -6784,7 +7172,7 @@
           span.className = 'out-batch-tray-status-empty';
           span.textContent = '—';
           td.appendChild(span);
-          if (qtyTd) row.insertBefore(td, qtyTd);
+          if (posTd) row.insertBefore(td, posTd);
           else row.appendChild(td);
         }
       }
@@ -6830,11 +7218,6 @@
         return m ? parseInt(m[1], 10) : null;
       }
 
-      function isIntoFlowOnStep4() {
-        var item = document.getElementById('antd-step-4');
-        return !!(item && item.classList.contains('ant-steps-item-process'));
-      }
-
       function clearIntoBatchRow(rowNum) {
         if (rowNum < 1 || rowNum > INTO_BATCH_ROW_COUNT) return;
         var posIn = document.getElementById('flow-batch-position-' + rowNum);
@@ -6858,7 +7241,7 @@
         if (!wrap || !wrap.classList.contains('flow-batch-submitted')) return;
         intoBatchActiveRowNums = getIntoBatchActiveRowNums();
         applyIntoBatchTrayStatusesSubmitted();
-        if (wrap.classList.contains('into-batch-step4-persist') && isIntoFlowOnStep4()) {
+        if (wrap.classList.contains('into-batch-step4-persist') && isIntoFlowOnStep3PhaseB()) {
           applyIntoBatchTrayStatusesPendingTransfer();
         }
       }
@@ -6919,27 +7302,6 @@
         if (refBtn) refBtn.disabled = false;
       }
 
-      function returnToIntoStep3EditBatch() {
-        var wrap = document.getElementById('flow-step2-batch-table-wrap');
-        if (!wrap || !wrap.classList.contains('into-batch-step4-persist') || !isIntoFlowOnStep4()) return;
-        clearBatchTableSubmittedState();
-        wrap.classList.remove('into-batch-step4-persist');
-        stopIntoStep4TransferProgressAnim();
-        setStepItemState(3, 'process-manual');
-        setStepItemState(4, 'wait');
-        setStepItemState(5, 'wait');
-        setStepItemState(6, 'wait');
-        if (step2Confirm) {
-          step2Confirm.hidden = false;
-          step2Confirm.disabled = false;
-        }
-        resetIntoSteps456ConfirmState();
-        if (batchSplit) batchSplit.hidden = false;
-        syncIntoBatchTableLoop2RowVisibility();
-        clearIntoBatchTrayStatuses();
-        toast('Returned to step 3. Edit the table and confirm again.');
-      }
-
       function clearBatchTableSubmittedState() {
         var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
         if (!batchWrap) return;
@@ -6991,7 +7353,6 @@
         setStepItemState(1, 'wait');
         setStepItemState(2, 'wait');
         setStepItemState(3, 'wait');
-        setStepItemState(4, 'wait');
         setStepItemState(5, 'wait');
         setStepItemState(6, 'wait');
         if (step2DoorConfirm) step2DoorConfirm.disabled = true;
@@ -7154,7 +7515,6 @@
         setStepItemState(1, 'process-loading');
         setStepItemState(2, 'wait');
         setStepItemState(3, 'wait');
-        setStepItemState(4, 'wait');
         setStepItemState(5, 'wait');
         setStepItemState(6, 'wait');
         if (step2DoorConfirm) step2DoorConfirm.disabled = true;
@@ -7170,6 +7530,7 @@
       function onStep2DoorConfirmed() {
         if (!step2DoorConfirm || step2DoorConfirm.disabled) return;
         step2DoorConfirm.disabled = true;
+        hideIntoStep3CloseDoorPhase();
         setStepItemState(2, 'finish');
         setStepItemState(3, 'process-manual');
         step2Confirm.disabled = false;
@@ -7200,19 +7561,20 @@
         step2Confirm.disabled = true;
         applyBatchTableSubmittedState();
         if (batchSplit) batchSplit.hidden = false;
-        setStepItemState(3, 'finish');
-        setStepItemState(4, 'process-manual');
+        setStepItemState(3, 'process-manual');
         setStepItemState(5, 'wait');
         setStepItemState(6, 'wait');
         applyIntoBatchTrayStatusesPendingTransfer();
-        resetIntoSteps456ConfirmState();
+        setIntoBatchActionsAfterSubmit();
+        showIntoStep3CloseDoorPhase();
         if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = false;
       }
 
       function onStep4CloseDoorConfirmed() {
         if (!step4CloseDoorConfirm || step4CloseDoorConfirm.disabled) return;
         step4CloseDoorConfirm.disabled = true;
-        setStepItemState(4, 'finish');
+        hideIntoStep3CloseDoorPhase();
+        setStepItemState(3, 'finish');
         setStepItemState(5, 'process-loading');
         resetIntoStep5PurgeCycleDisplay();
         hideIntoStep5InnerMetrics();
@@ -7343,6 +7705,8 @@
             });
           });
         }
+        bindVentGasSelectUi(outVentEl, unmarkOutVentPanelConfigured, stepKey);
+        syncVentGasSelectLabelFor(outVentEl, stepKey);
         var cyclesInput = outVentEl(stepKey, 'cycles');
         if (cyclesInput) {
           cyclesInput.addEventListener('change', function () {
@@ -7396,6 +7760,8 @@
             });
           });
         }
+        bindVentGasSelectUi(intoVentEl, unmarkIntoVentPanelConfigured, stepKey);
+        syncVentGasSelectLabelFor(intoVentEl, stepKey);
         var cyclesInput = intoVentEl(stepKey, 'cycles');
         if (cyclesInput) {
           cyclesInput.addEventListener('change', function () {
@@ -7421,10 +7787,7 @@
         var posInput = tr && tr.querySelector('.flow-batch-position-input');
         var posLabel = posInput && posInput.value.trim() ? posInput.value.trim() : '—';
         if (action === 'view') toast('View details (preview): ' + posLabel);
-        else if (action === 'edit') {
-          if (isIntoFlowOnStep4()) returnToIntoStep3EditBatch();
-          else toast('Edit row (preview): ' + posLabel);
-        } else if (action === 'delete') {
+        else if (action === 'delete') {
           if (rowNum) {
             clearIntoBatchRow(rowNum);
             refreshIntoBatchTrayStatusesAfterRowChange();
