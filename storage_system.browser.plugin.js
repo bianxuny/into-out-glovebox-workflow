@@ -66,6 +66,8 @@
    * @param {function(string): void} [options.hooks.toast]
    * @param {function(): Promise<void>|void} [options.hooks.onIntoGeneral]
    * @param {function(): Promise<void>|void} [options.hooks.onOutGeneral]
+   * @param {function(): Promise<void>|void} [options.hooks.onOutOuterFlashFilter]
+   * @param {function(): Promise<void>|void} [options.hooks.onUnloadAnalyticalSamples]
    * @param {function(object): Promise<void>|void} [options.hooks.onSyncData]
    */
   function Plugin(options) {
@@ -217,6 +219,15 @@
         case 'out_general':
           if (this._hooks.onOutGeneral) await this._hooks.onOutGeneral()
           else this._toast('Demo: out_general (onOutGeneral hook not registered)')
+          break
+        case 'out_outer_flash_filter':
+          if (this._hooks.onOutOuterFlashFilter) await this._hooks.onOutOuterFlashFilter()
+          else this._toast('Demo: out_outer_flash_filter (onOutOuterFlashFilter hook not registered)')
+          break
+        case 'unload_analytical_samples':
+          if (this._hooks.onUnloadAnalyticalSamples) await this._hooks.onUnloadAnalyticalSamples()
+          else if (this._hooks.onOutOuterFlashFilter) await this._hooks.onOutOuterFlashFilter()
+          else this._toast('Demo: unload_analytical_samples (hook not registered)')
           break
         case 'out_open_loaded':
           this._toast('Demo: out_open_loaded')
