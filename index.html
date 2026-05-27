@@ -1034,7 +1034,10 @@
     #out-flow-step3-batch-table-wrap table {
       table-layout: fixed;
       width: 100%;
-      min-width: 640px;
+    }
+    #out-flow-step3-batch-table-wrap thead th[data-out-col="position"],
+    #out-flow-step3-batch-table-wrap tbody td[data-out-col="position"] {
+      min-width: 96px;
     }
     #out-flow-step3-batch-table-wrap thead th,
     #out-flow-step3-batch-table-wrap tbody td {
@@ -1256,7 +1259,6 @@
       display: none !important;
     }
     .flow-batch-tray-status-cell {
-      min-width: 118px;
       white-space: nowrap;
       vertical-align: middle;
     }
@@ -3540,15 +3542,7 @@
                     </div>
                     <div class="flow-batch-inner">
                       <table>
-                        <colgroup id="out-batch-table-colgroup">
-                          <col style="width:36px" />
-                          <col style="width:100px" />
-                          <col style="width:120px" />
-                          <col style="width:100px" />
-                          <col style="width:100px" />
-                          <col style="width:80px" />
-                          <col style="width:44px" />
-                        </colgroup>
+                        <colgroup id="out-batch-table-colgroup"></colgroup>
                         <thead>
                           <tr>
                             <th scope="col" class="flow-batch-checkbox-th" title="Select all racks">
@@ -5077,6 +5071,14 @@
         syncOutBatchTableRowVisibilityForPreset();
       }
 
+      function scheduleOutBatchTableLayoutRefresh() {
+        window.requestAnimationFrame(function () {
+          window.requestAnimationFrame(function () {
+            refreshOutBatchTableLayout();
+          });
+        });
+      }
+
       /** Inbound batch table: fixed 8 racks; extra HTML rows stay hidden. */
       function syncIntoBatchTableRowVisibility() {
         var wrap = document.getElementById('flow-step2-batch-table-wrap');
@@ -5570,7 +5572,7 @@
           tr.classList.toggle('out-batch-row-unselected-hidden', !cb.checked);
         }
         wrap.classList.add('out-batch-post-start');
-        syncOutBatchTableColgroup();
+        scheduleOutBatchTableLayoutRefresh();
       }
 
       function clearOutBatchPostStartTableView() {
@@ -5580,7 +5582,7 @@
         wrap.querySelectorAll('tbody tr.out-batch-row-unselected-hidden').forEach(function (tr) {
           tr.classList.remove('out-batch-row-unselected-hidden');
         });
-        syncOutBatchTableColgroup();
+        scheduleOutBatchTableLayoutRefresh();
       }
 
       function ensureOutBatchTrayStatusColumn() {
@@ -5597,7 +5599,6 @@
         } else if (th && positionTh && th.nextElementSibling !== positionTh) {
           positionTh.parentNode.insertBefore(th, positionTh);
         }
-        syncOutBatchTableColgroup();
         for (var n = 1; n <= OUT_BATCH_ROW_COUNT; n++) {
           var row = document.getElementById('out-batch-select-' + n);
           row = row ? row.closest('tr') : null;
@@ -5641,7 +5642,7 @@
         } else {
           removeOutBatchTrayStatusColumn();
         }
-        syncOutBatchTableColgroup();
+        scheduleOutBatchTableLayoutRefresh();
       }
 
       function syncOutBatchPositionLabelForTrayStatus(rowNum, statusKey) {
@@ -6272,47 +6273,73 @@
       }
 
       function getOutBatchTrayColWidthPx(wrap) {
-        if (!wrap) return '96px';
-        var w = getComputedStyle(wrap).getPropertyValue('--out-batch-tray-col-w').trim();
-        return w || '96px';
+        if (!wrap) return 96;
+        var w = parseInt(getComputedStyle(wrap).getPropertyValue('--out-batch-tray-col-w'), 10);
+        return isNaN(w) ? 96 : w;
       }
 
-      function getOutBatchColWidthForTh(th, wrap) {
-        if (!th || !wrap) return '10%';
+      /** @returns {{ kind: 'fixed', px: number } | { kind: 'flex', weight: number, key?: string }} */
+      function getOutBatchColSpec(th, wrap) {
         var postStart = wrap.classList.contains('out-batch-post-start');
-        var hasTray = wrap.classList.contains('out-batch-tray-status-visible');
         if (th.classList.contains('flow-batch-checkbox-th')) {
-          return postStart ? '0px' : '36px';
+          return { kind: 'fixed', px: postStart ? 0 : 36 };
         }
         if (th.id === 'out-batch-tray-status-th' || th.classList.contains('flow-batch-tray-status-th')) {
-          return hasTray ? getOutBatchTrayColWidthPx(wrap) : '0px';
+          return { kind: 'fixed', px: getOutBatchTrayColWidthPx(wrap) };
         }
         if (th.classList.contains('flow-batch-usage-th')) {
-          return '0px';
+          return { kind: 'fixed', px: 0 };
         }
         if (th.classList.contains('flow-batch-detail-th')) {
-          return '44px';
+          return { kind: 'fixed', px: 44 };
         }
         if (th.querySelector('[data-out-filter-key="position"]')) {
-          return '12%';
+          return { kind: 'flex', weight: 2.2, key: 'position' };
         }
         if (
           th.classList.contains('out-batch-col-data') &&
           !th.querySelector('[data-out-filter-key]') &&
           !th.querySelector('[data-out-sort-key]')
         ) {
-          return '18%';
+          return { kind: 'flex', weight: 2.6, key: 'barcode' };
         }
         if (th.querySelector('[data-out-filter-key="rack"]')) {
-          return '14%';
+          return { kind: 'flex', weight: 2.2, key: 'rack' };
         }
         if (th.querySelector('[data-out-filter-key="consumable"]')) {
-          return '18%';
+          return { kind: 'flex', weight: 2.6, key: 'consumable' };
         }
         if (th.querySelector('[data-out-sort-key="qty"]')) {
-          return '14%';
+          return { kind: 'flex', weight: 2.2, key: 'qty' };
         }
-        return '10%';
+        return { kind: 'flex', weight: 2, key: 'data' };
+      }
+
+      function measureOutBatchTableWidth(wrap, table) {
+        var inner = wrap && wrap.querySelector('.flow-batch-inner');
+        var w = 0;
+        if (inner) w = inner.clientWidth;
+        if (!w && wrap) w = wrap.clientWidth;
+        if (!w && table) w = table.clientWidth;
+        return Math.max(w, 640);
+      }
+
+      function tagOutBatchTableColCells(table, wrap) {
+        if (!table) return;
+        wrap = wrap || document.getElementById('out-flow-step3-batch-table-wrap');
+        var ths = table.querySelectorAll('thead tr th');
+        for (var i = 0; i < ths.length; i++) {
+          var spec = getOutBatchColSpec(ths[i], wrap);
+          var key = spec.key || (spec.kind === 'fixed' ? 'fixed' : 'data');
+          ths[i].setAttribute('data-out-col', key);
+        }
+        table.querySelectorAll('tbody tr').forEach(function (tr) {
+          if (!isOutBatchMainDataRow(tr) && !tr.classList.contains('out-batch-chemical-detail-row')) return;
+          var cells = tr.querySelectorAll('td');
+          for (var c = 0; c < cells.length && c < ths.length; c++) {
+            cells[c].setAttribute('data-out-col', ths[c].getAttribute('data-out-col') || '');
+          }
+        });
       }
 
       function getOutBatchTableColSpan() {
@@ -6331,10 +6358,21 @@
       }
 
       function syncOutBatchTableColgroup() {
-        var table = document.querySelector('#out-flow-step3-batch-table-wrap table');
-        if (!table) return;
         var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        var table = wrap && wrap.querySelector('table');
+        if (!table || !wrap) return;
         var ths = table.querySelectorAll('thead tr th');
+        var specs = [];
+        var fixedPx = 0;
+        var flexWeight = 0;
+        for (var i = 0; i < ths.length; i++) {
+          var spec = getOutBatchColSpec(ths[i], wrap);
+          specs.push(spec);
+          if (spec.kind === 'fixed') fixedPx += spec.px;
+          else flexWeight += spec.weight;
+        }
+        var tableW = measureOutBatchTableWidth(wrap, table);
+        var flexBudget = Math.max(tableW - fixedPx, flexWeight * 72);
         var cg = table.querySelector('colgroup');
         if (!cg) {
           cg = document.createElement('colgroup');
@@ -6342,11 +6380,30 @@
           table.insertBefore(cg, table.firstChild);
         }
         cg.innerHTML = '';
-        ths.forEach(function (th) {
+        var flexCols = [];
+        var usedPx = 0;
+        specs.forEach(function (spec) {
           var col = document.createElement('col');
-          col.style.width = getOutBatchColWidthForTh(th, wrap);
+          if (spec.kind === 'fixed') {
+            col.style.width = spec.px + 'px';
+            usedPx += spec.px;
+          } else {
+            flexCols.push({ col: col, weight: spec.weight });
+          }
           cg.appendChild(col);
         });
+        flexCols.forEach(function (item, idx) {
+          var w;
+          if (idx === flexCols.length - 1) {
+            w = Math.max(tableW - usedPx, 72);
+          } else {
+            w = Math.max(Math.floor((flexBudget * item.weight) / flexWeight), 72);
+            usedPx += w;
+          }
+          item.col.style.width = w + 'px';
+        });
+        table.style.width = '100%';
+        tagOutBatchTableColCells(table, wrap);
         syncOutBatchChemicalDetailColspans();
       }
 
@@ -7277,7 +7334,7 @@
         setOutFlowStartVisible(true);
         updateOutFlowRackSelectHint();
         updateOutStartButtonState();
-        refreshOutBatchTableLayout();
+        scheduleOutBatchTableLayoutRefresh();
         scheduleOutBatchFilterUiRefresh();
       }
 
@@ -7674,6 +7731,7 @@
         if (!modalOut) return;
         modalOut.classList.add('open');
         syncOutFlowHeaderChrome();
+        scheduleOutBatchTableLayoutRefresh();
       }
 
       function hideModalOut(opts) {
