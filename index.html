@@ -669,6 +669,91 @@
     .flow-step-vent-strategy-option-checked .flow-step-vent-strategy-option-title {
       color: #0958d9;
     }
+    .into-flow-config-panel .flow-step-vent-strategy-select.ant-select {
+      position: relative;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-height: 60px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .into-flow-config-panel .flow-step-vent-panel.is-editable .flow-step-vent-strategy-select:not(.ant-select-disabled) {
+      cursor: pointer;
+    }
+    .into-flow-config-panel .flow-step-vent-strategy-select.ant-select-disabled {
+      cursor: not-allowed;
+    }
+    .into-flow-config-panel .flow-step-vent-strategy-select .flow-step-vent-strategy-native {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .into-flow-config-panel .flow-step-vent-strategy-select .ant-select-selector {
+      position: relative;
+      z-index: 1;
+      min-height: 60px;
+      height: 100%;
+      width: 100%;
+      padding: 10px 36px 10px 12px;
+      align-items: flex-start;
+      border-radius: 8px !important;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      box-shadow: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .into-flow-config-panel
+      .flow-step-vent-panel.is-editable
+      .flow-step-vent-strategy-select:not(.ant-select-disabled)
+      .ant-select-selector:hover {
+      border-color: #4096ff;
+    }
+    .into-flow-config-panel
+      .flow-step-vent-panel.is-editable
+      .flow-step-vent-strategy-select:not(.ant-select-disabled):focus-within
+      .ant-select-selector {
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
+    }
+    .into-flow-config-panel .flow-step-vent-strategy-select.ant-select-disabled .ant-select-selector {
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+    .into-flow-config-panel .flow-step-vent-strategy-select .ant-select-arrow {
+      z-index: 2;
+      top: 50%;
+      right: 12px;
+      margin-top: 0;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .into-flow-config-panel .flow-step-vent-strategy-select-display {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+      pointer-events: none;
+    }
+    .into-flow-config-panel .flow-step-vent-strategy-select-title {
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(0, 0, 0, 0.88);
+    }
+    .into-flow-config-panel .flow-step-vent-strategy-select-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.45);
+    }
     .flow-step-vent-duration-row {
       display: flex;
       align-items: center;
@@ -1178,29 +1263,89 @@
       display: none !important;
     }
     #out-flow-step3-batch-table-wrap tbody tr.out-batch-chemical-detail-row td {
-      padding: 6px 16px 12px 40px;
+      padding: 0;
       background: #fafafa;
       border-bottom: 1px solid #f0f0f0;
       white-space: normal;
-      overflow: hidden;
+      overflow: visible;
+      vertical-align: top;
     }
-    .out-batch-chemical-list {
+    #out-flow-step3-batch-table-wrap tbody tr.out-batch-chemical-detail-row td.out-batch-chemical-detail-pad {
+      border-bottom: 1px solid #f0f0f0;
+    }
+    #out-flow-step3-batch-table-wrap tbody tr.out-batch-chemical-detail-row td.out-batch-chemical-detail-position {
+      padding: 2px var(--out-batch-cell-x) 10px;
+    }
+    #out-flow-step3-batch-table-wrap tbody tr.out-batch-chemical-detail-row td.out-batch-chemical-detail-consumable {
+      padding: 2px var(--out-batch-cell-x) 10px;
+      padding-left: calc(var(--out-batch-cell-x) + 18px);
+    }
+    #out-flow-step3-batch-table-wrap tbody tr.out-batch-chemical-detail-row td.out-batch-chemical-detail-role {
+      padding: 2px var(--out-batch-cell-x) 10px;
+    }
+    .out-batch-chemical-hole-list,
+    .out-batch-chemical-name-list,
+    .out-batch-chemical-role-list {
       margin: 0;
       padding: 0;
       list-style: none;
       min-width: 0;
     }
-    .out-batch-chemical-list li {
+    .out-batch-chemical-hole-list li,
+    .out-batch-chemical-name-list li,
+    .out-batch-chemical-role-list li {
       font-size: 14px;
-      line-height: 1.85;
-      color: #1677ff;
+      line-height: 1.5715;
+      padding: 5px 0;
+      min-height: 2.25em;
+      box-sizing: content-box;
     }
-    .out-batch-chemical-list .out-batch-chemical-hole {
-      display: inline-block;
-      min-width: 2.25em;
-      margin-right: 10px;
+    .out-batch-chemical-hole-list li:first-child,
+    .out-batch-chemical-name-list li:first-child,
+    .out-batch-chemical-role-list li:first-child {
+      padding-top: 2px;
+    }
+    .out-batch-chemical-hole-list li:last-child,
+    .out-batch-chemical-name-list li:last-child,
+    .out-batch-chemical-role-list li:last-child {
+      padding-bottom: 2px;
+    }
+    .out-batch-chemical-hole-list li {
       color: rgba(0, 0, 0, 0.45);
       font-variant-numeric: tabular-nums;
+    }
+    .out-batch-chemical-name-list li {
+      color: #1677ff;
+      word-break: break-word;
+    }
+    .out-batch-chemical-role-list li {
+      display: flex;
+      align-items: center;
+    }
+    .out-batch-chemical-role {
+      flex: 0 0 auto;
+      display: inline-block;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 22px;
+      border: 1px solid transparent;
+    }
+    .out-batch-chemical-role-substrate {
+      color: #ad4e00;
+      background: #fff7e6;
+      border-color: #ffd591;
+    }
+    .out-batch-chemical-role-catalyst {
+      color: #722ed1;
+      background: #f9f0ff;
+      border-color: #d3adf7;
+    }
+    .out-batch-chemical-role-base {
+      color: #874d00;
+      background: #faf6f0;
+      border-color: #e8d4b8;
     }
     .out-batch-consumable-expand {
       display: inline-flex;
@@ -2028,14 +2173,6 @@
     .into-flow-config-field input {
       width: 88px;
     }
-    .out-flow-status-hint {
-      font-size: 13px;
-      color: #389e0d;
-      line-height: 1.5;
-    }
-    .out-flow-status-hint[hidden] {
-      display: none !important;
-    }
     .flow-step-batch-unload-block {
       margin-top: 12px;
     }
@@ -2091,15 +2228,6 @@
         Storage
         <span class="diagram-nav-btn-sub">storage_system</span>
       </button>
-      <button
-        type="button"
-        class="diagram-nav-btn"
-        id="diagram-nav-liquid-handling"
-        data-diagram-key="liquid_handling"
-      >
-        Liquid handling
-        <span class="diagram-nav-btn-sub">reaction sampling</span>
-      </button>
     </nav>
     <main id="diagram-main">
       <div id="diagram-wrap" aria-busy="true"></div>
@@ -2134,62 +2262,31 @@
                     <form class="ant-form ant-form-vertical flow-step-vent-form" novalidate>
                       <div class="ant-form-item flow-step-vent-strategy-form-item">
                         <div class="ant-form-item-label">
-                          <label id="into-step1-vent-strategy-label" for="into-step1-vent-strategy-standard">Ventilation strategy</label>
+                          <label id="into-step1-vent-strategy-label" for="into-step1-vent-select">Ventilation strategy</label>
                         </div>
                         <div class="ant-form-item-control">
                           <div class="ant-form-item-control-input">
                             <div class="ant-form-item-control-input-content">
-                              <select id="into-step1-vent-select" hidden aria-hidden="true" tabindex="-1">
-                                <option value="standard">Standard vacuum ↔ fill (repeat)</option>
-                                <option value="simultaneous">Simultaneous exchange</option>
-                              </select>
                               <div
-                                id="into-step1-vent-strategy-group"
-                                class="ant-radio-group ant-radio-group-outline flow-step-vent-strategy-group is-disabled"
-                                role="radiogroup"
-                                aria-labelledby="into-step1-vent-strategy-label"
+                                id="into-step1-vent-select-wrap"
+                                class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-strategy-select"
                               >
-                                <label
-                                  class="ant-radio-wrapper ant-radio-wrapper-in-form-item flow-step-vent-strategy-option"
-                                  for="into-step1-vent-strategy-standard"
+                                <select
+                                  id="into-step1-vent-select"
+                                  class="flow-ant-select-native flow-step-vent-strategy-native"
+                                  disabled
+                                  aria-labelledby="into-step1-vent-strategy-label"
                                 >
-                                  <span class="ant-radio">
-                                    <input
-                                      type="radio"
-                                      class="ant-radio-input"
-                                      name="into-step1-vent-strategy"
-                                      id="into-step1-vent-strategy-standard"
-                                      value="standard"
-                                      disabled
-                                    />
-                                    <span class="ant-radio-inner"></span>
+                                  <option value="standard">Standard vacuum ↔ fill (repeat)</option>
+                                  <option value="simultaneous">Simultaneous exchange</option>
+                                </select>
+                                <div class="ant-select-selector">
+                                  <span class="flow-step-vent-strategy-select-display" aria-hidden="true">
+                                    <span id="into-step1-vent-select-label" class="flow-step-vent-strategy-select-title">Simultaneous exchange</span>
+                                    <span id="into-step1-vent-select-desc" class="flow-step-vent-strategy-select-desc">Duration: 1 minute · Gas: CDA</span>
                                   </span>
-                                  <span class="flow-step-vent-strategy-option-label">
-                                    <span class="flow-step-vent-strategy-option-title">Standard vacuum ↔ fill (repeat)</span>
-                                    <span id="into-step1-vent-strategy-standard-desc" class="flow-step-vent-strategy-option-desc">Cycles: 3 times</span>
-                                  </span>
-                                </label>
-                                <label
-                                  class="ant-radio-wrapper ant-radio-wrapper-in-form-item flow-step-vent-strategy-option flow-step-vent-strategy-option-checked"
-                                  for="into-step1-vent-strategy-simultaneous"
-                                >
-                                  <span class="ant-radio ant-radio-checked">
-                                    <input
-                                      type="radio"
-                                      class="ant-radio-input"
-                                      name="into-step1-vent-strategy"
-                                      id="into-step1-vent-strategy-simultaneous"
-                                      value="simultaneous"
-                                      checked
-                                      disabled
-                                    />
-                                    <span class="ant-radio-inner"></span>
-                                  </span>
-                                  <span class="flow-step-vent-strategy-option-label">
-                                    <span class="flow-step-vent-strategy-option-title">Simultaneous exchange</span>
-                                    <span id="into-step1-vent-strategy-simultaneous-desc" class="flow-step-vent-strategy-option-desc">Duration: 1 minute · Gas: CDA</span>
-                                  </span>
-                                </label>
+                                </div>
+                                <span class="ant-select-arrow" aria-hidden="true"></span>
                               </div>
                               <div id="into-step1-vent-params-row" class="flow-step-vent-params-row" hidden>
                               <div id="into-step1-vent-cycles-popover" class="flow-step-vent-cycles-popover flow-step-vent-params-block" hidden>
@@ -2286,62 +2383,31 @@
                     <form class="ant-form ant-form-vertical flow-step-vent-form" novalidate>
                       <div class="ant-form-item flow-step-vent-strategy-form-item">
                         <div class="ant-form-item-label">
-                          <label id="into-step5-vent-strategy-label" for="into-step5-vent-strategy-standard">Ventilation strategy</label>
+                          <label id="into-step5-vent-strategy-label" for="into-step5-vent-select">Ventilation strategy</label>
                         </div>
                         <div class="ant-form-item-control">
                           <div class="ant-form-item-control-input">
                             <div class="ant-form-item-control-input-content">
-                              <select id="into-step5-vent-select" hidden aria-hidden="true" tabindex="-1">
-                                <option value="standard">Standard vacuum ↔ fill (repeat)</option>
-                                <option value="simultaneous">Simultaneous exchange</option>
-                              </select>
                               <div
-                                id="into-step5-vent-strategy-group"
-                                class="ant-radio-group ant-radio-group-outline flow-step-vent-strategy-group is-disabled"
-                                role="radiogroup"
-                                aria-labelledby="into-step5-vent-strategy-label"
+                                id="into-step5-vent-select-wrap"
+                                class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-strategy-select"
                               >
-                                <label
-                                  class="ant-radio-wrapper ant-radio-wrapper-in-form-item flow-step-vent-strategy-option flow-step-vent-strategy-option-checked"
-                                  for="into-step5-vent-strategy-standard"
+                                <select
+                                  id="into-step5-vent-select"
+                                  class="flow-ant-select-native flow-step-vent-strategy-native"
+                                  disabled
+                                  aria-labelledby="into-step5-vent-strategy-label"
                                 >
-                                  <span class="ant-radio ant-radio-checked">
-                                    <input
-                                      type="radio"
-                                      class="ant-radio-input"
-                                      name="into-step5-vent-strategy"
-                                      id="into-step5-vent-strategy-standard"
-                                      value="standard"
-                                      checked
-                                      disabled
-                                    />
-                                    <span class="ant-radio-inner"></span>
+                                  <option value="standard">Standard vacuum ↔ fill (repeat)</option>
+                                  <option value="simultaneous">Simultaneous exchange</option>
+                                </select>
+                                <div class="ant-select-selector">
+                                  <span class="flow-step-vent-strategy-select-display" aria-hidden="true">
+                                    <span id="into-step5-vent-select-label" class="flow-step-vent-strategy-select-title">Standard vacuum ↔ fill (repeat)</span>
+                                    <span id="into-step5-vent-select-desc" class="flow-step-vent-strategy-select-desc">Cycles: 3 times</span>
                                   </span>
-                                  <span class="flow-step-vent-strategy-option-label">
-                                    <span class="flow-step-vent-strategy-option-title">Standard vacuum ↔ fill (repeat)</span>
-                                    <span id="into-step5-vent-strategy-standard-desc" class="flow-step-vent-strategy-option-desc">Cycles: 3 times</span>
-                                  </span>
-                                </label>
-                                <label
-                                  class="ant-radio-wrapper ant-radio-wrapper-in-form-item flow-step-vent-strategy-option"
-                                  for="into-step5-vent-strategy-simultaneous"
-                                >
-                                  <span class="ant-radio">
-                                    <input
-                                      type="radio"
-                                      class="ant-radio-input"
-                                      name="into-step5-vent-strategy"
-                                      id="into-step5-vent-strategy-simultaneous"
-                                      value="simultaneous"
-                                      disabled
-                                    />
-                                    <span class="ant-radio-inner"></span>
-                                  </span>
-                                  <span class="flow-step-vent-strategy-option-label">
-                                    <span class="flow-step-vent-strategy-option-title">Simultaneous exchange</span>
-                                    <span id="into-step5-vent-strategy-simultaneous-desc" class="flow-step-vent-strategy-option-desc">Duration: 1 minute · Gas: CDA</span>
-                                  </span>
-                                </label>
+                                </div>
+                                <span class="ant-select-arrow" aria-hidden="true"></span>
                               </div>
                               <div id="into-step5-vent-params-row" class="flow-step-vent-params-row" hidden>
                               <div id="into-step5-vent-cycles-popover" class="flow-step-vent-cycles-popover flow-step-vent-params-block" hidden>
@@ -3038,62 +3104,31 @@
                     <form class="ant-form ant-form-vertical flow-step-vent-form" novalidate>
                       <div class="ant-form-item flow-step-vent-strategy-form-item">
                         <div class="ant-form-item-label">
-                          <label id="out-step2-vent-strategy-label" for="out-step2-vent-strategy-standard">Ventilation strategy</label>
+                          <label id="out-step2-vent-strategy-label" for="out-step2-vent-select">Ventilation strategy</label>
                         </div>
                         <div class="ant-form-item-control">
                           <div class="ant-form-item-control-input">
                             <div class="ant-form-item-control-input-content">
-                              <select id="out-step2-vent-select" hidden aria-hidden="true" tabindex="-1">
-                                <option value="standard">Standard vacuum ↔ fill (repeat)</option>
-                                <option value="simultaneous">Simultaneous exchange</option>
-                              </select>
                               <div
-                                id="out-step2-vent-strategy-group"
-                                class="ant-radio-group ant-radio-group-outline flow-step-vent-strategy-group is-disabled"
-                                role="radiogroup"
-                                aria-labelledby="out-step2-vent-strategy-label"
+                                id="out-step2-vent-select-wrap"
+                                class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-strategy-select"
                               >
-                                <label
-                                  class="ant-radio-wrapper ant-radio-wrapper-in-form-item flow-step-vent-strategy-option flow-step-vent-strategy-option-checked"
-                                  for="out-step2-vent-strategy-standard"
+                                <select
+                                  id="out-step2-vent-select"
+                                  class="flow-ant-select-native flow-step-vent-strategy-native"
+                                  disabled
+                                  aria-labelledby="out-step2-vent-strategy-label"
                                 >
-                                  <span class="ant-radio ant-radio-checked">
-                                    <input
-                                      type="radio"
-                                      class="ant-radio-input"
-                                      name="out-step2-vent-strategy"
-                                      id="out-step2-vent-strategy-standard"
-                                      value="standard"
-                                      checked
-                                      disabled
-                                    />
-                                    <span class="ant-radio-inner"></span>
+                                  <option value="standard">Standard vacuum ↔ fill (repeat)</option>
+                                  <option value="simultaneous">Simultaneous exchange</option>
+                                </select>
+                                <div class="ant-select-selector">
+                                  <span class="flow-step-vent-strategy-select-display" aria-hidden="true">
+                                    <span id="out-step2-vent-select-label" class="flow-step-vent-strategy-select-title">Standard vacuum ↔ fill (repeat)</span>
+                                    <span id="out-step2-vent-select-desc" class="flow-step-vent-strategy-select-desc">Cycles: 3 times</span>
                                   </span>
-                                  <span class="flow-step-vent-strategy-option-label">
-                                    <span class="flow-step-vent-strategy-option-title">Standard vacuum ↔ fill (repeat)</span>
-                                    <span id="out-step2-vent-strategy-standard-desc" class="flow-step-vent-strategy-option-desc">Cycles: 3 times</span>
-                                  </span>
-                                </label>
-                                <label
-                                  class="ant-radio-wrapper ant-radio-wrapper-in-form-item flow-step-vent-strategy-option"
-                                  for="out-step2-vent-strategy-simultaneous"
-                                >
-                                  <span class="ant-radio">
-                                    <input
-                                      type="radio"
-                                      class="ant-radio-input"
-                                      name="out-step2-vent-strategy"
-                                      id="out-step2-vent-strategy-simultaneous"
-                                      value="simultaneous"
-                                      disabled
-                                    />
-                                    <span class="ant-radio-inner"></span>
-                                  </span>
-                                  <span class="flow-step-vent-strategy-option-label">
-                                    <span class="flow-step-vent-strategy-option-title">Simultaneous exchange</span>
-                                    <span id="out-step2-vent-strategy-simultaneous-desc" class="flow-step-vent-strategy-option-desc">Duration: 1 minute · Gas: CDA</span>
-                                  </span>
-                                </label>
+                                </div>
+                                <span class="ant-select-arrow" aria-hidden="true"></span>
                               </div>
                               <div id="out-step2-vent-params-row" class="flow-step-vent-params-row" hidden>
                               <div id="out-step2-vent-cycles-popover" class="flow-step-vent-cycles-popover flow-step-vent-params-block" hidden>
@@ -3190,62 +3225,31 @@
                     <form class="ant-form ant-form-vertical flow-step-vent-form" novalidate>
                       <div class="ant-form-item flow-step-vent-strategy-form-item">
                         <div class="ant-form-item-label">
-                          <label id="out-step4-vent-strategy-label" for="out-step4-vent-strategy-standard">Ventilation strategy</label>
+                          <label id="out-step4-vent-strategy-label" for="out-step4-vent-select">Ventilation strategy</label>
                         </div>
                         <div class="ant-form-item-control">
                           <div class="ant-form-item-control-input">
                             <div class="ant-form-item-control-input-content">
-                              <select id="out-step4-vent-select" hidden aria-hidden="true" tabindex="-1">
-                                <option value="standard">Standard vacuum ↔ fill (repeat)</option>
-                                <option value="simultaneous">Simultaneous exchange</option>
-                              </select>
                               <div
-                                id="out-step4-vent-strategy-group"
-                                class="ant-radio-group ant-radio-group-outline flow-step-vent-strategy-group is-disabled"
-                                role="radiogroup"
-                                aria-labelledby="out-step4-vent-strategy-label"
+                                id="out-step4-vent-select-wrap"
+                                class="ant-select ant-select-single ant-select-show-arrow ant-select-disabled flow-step-vent-strategy-select"
                               >
-                                <label
-                                  class="ant-radio-wrapper ant-radio-wrapper-in-form-item flow-step-vent-strategy-option"
-                                  for="out-step4-vent-strategy-standard"
+                                <select
+                                  id="out-step4-vent-select"
+                                  class="flow-ant-select-native flow-step-vent-strategy-native"
+                                  disabled
+                                  aria-labelledby="out-step4-vent-strategy-label"
                                 >
-                                  <span class="ant-radio">
-                                    <input
-                                      type="radio"
-                                      class="ant-radio-input"
-                                      name="out-step4-vent-strategy"
-                                      id="out-step4-vent-strategy-standard"
-                                      value="standard"
-                                      disabled
-                                    />
-                                    <span class="ant-radio-inner"></span>
+                                  <option value="standard">Standard vacuum ↔ fill (repeat)</option>
+                                  <option value="simultaneous">Simultaneous exchange</option>
+                                </select>
+                                <div class="ant-select-selector">
+                                  <span class="flow-step-vent-strategy-select-display" aria-hidden="true">
+                                    <span id="out-step4-vent-select-label" class="flow-step-vent-strategy-select-title">Simultaneous exchange</span>
+                                    <span id="out-step4-vent-select-desc" class="flow-step-vent-strategy-select-desc">Duration: 1 minute · Gas: CDA</span>
                                   </span>
-                                  <span class="flow-step-vent-strategy-option-label">
-                                    <span class="flow-step-vent-strategy-option-title">Standard vacuum ↔ fill (repeat)</span>
-                                    <span id="out-step4-vent-strategy-standard-desc" class="flow-step-vent-strategy-option-desc">Cycles: 3 times</span>
-                                  </span>
-                                </label>
-                                <label
-                                  class="ant-radio-wrapper ant-radio-wrapper-in-form-item flow-step-vent-strategy-option flow-step-vent-strategy-option-checked"
-                                  for="out-step4-vent-strategy-simultaneous"
-                                >
-                                  <span class="ant-radio ant-radio-checked">
-                                    <input
-                                      type="radio"
-                                      class="ant-radio-input"
-                                      name="out-step4-vent-strategy"
-                                      id="out-step4-vent-strategy-simultaneous"
-                                      value="simultaneous"
-                                      checked
-                                      disabled
-                                    />
-                                    <span class="ant-radio-inner"></span>
-                                  </span>
-                                  <span class="flow-step-vent-strategy-option-label">
-                                    <span class="flow-step-vent-strategy-option-title">Simultaneous exchange</span>
-                                    <span id="out-step4-vent-strategy-simultaneous-desc" class="flow-step-vent-strategy-option-desc">Duration: 1 minute · Gas: CDA</span>
-                                  </span>
-                                </label>
+                                </div>
+                                <span class="ant-select-arrow" aria-hidden="true"></span>
                               </div>
                               <div id="out-step4-vent-params-row" class="flow-step-vent-params-row" hidden>
                               <div id="out-step4-vent-cycles-popover" class="flow-step-vent-cycles-popover flow-step-vent-params-block" hidden>
@@ -3486,10 +3490,9 @@
                             </defs>
                           </svg>
                         </span>
-                        Confirm Batch Unload
+                        Confirm Unload
                       </button>
                     </div>
-                    <p id="out-flow-batch-unload-hint" class="out-flow-status-hint" hidden>Unloads the first 8 selected trays.</p>
                   </div>
                 </div>
               </div>
@@ -4510,11 +4513,6 @@
           label: 'Storage',
           src: 'storage_system (1).svg',
           pluginSvgId: 'storage'
-        },
-        liquid_handling: {
-          label: 'Liquid handling',
-          src: 'liquid_handling_reaction_sampling_zone.svg',
-          pluginSvgId: 'liquid-handling'
         }
       };
       var activeDiagramKey = 'storage';
@@ -4615,29 +4613,22 @@
       var outFlowPreset = 'general';
       /** SVG button id that opened the current out flow (for running highlight). */
       var outFlowEntryButton = null;
-      var OUT_FLOW_ENTRY_BUTTON_IDS = [
-        'out_general',
-        'out_outer_flash_filter',
-        'unload_analytical_samples'
-      ];
+      var OUT_FLOW_ENTRY_BUTTON_IDS = ['out_general', 'unload_analytical_samples'];
       var OUT_FLOW_PRESET_META = {
         general: {
           entryButton: 'out_general',
           subtitle: 'Consumables & well-seal chemicals',
           activeRowCount: 24,
-          batchUnloadHint: 'Unloads the first 8 selected trays.',
           seedTable: null
         },
         outer_flash_filter: {
           entryButton: 'unload_analytical_samples',
           subtitle: 'Analytical samples unload',
           subtitleByEntry: {
-            unload_analytical_samples: 'Analytical samples unload',
-            out_outer_flash_filter: 'Outer flash filter rack'
+            unload_analytical_samples: 'Analytical samples unload'
           },
           activeRowCount: 3,
           racksPerLoop: 1,
-          batchUnloadHint: 'Unloads 1 rack this loop (3 loops, 1 rack per loop).',
           seedTable: null
         }
       };
@@ -4770,7 +4761,37 @@
         );
       }
 
+      function usesVentStrategySelect(ventElFn) {
+        return ventElFn === intoVentEl || ventElFn === outVentEl;
+      }
+
+      function syncVentStrategySelectDisplay(ventElFn, stepKey) {
+        var select = ventElFn(stepKey, 'select');
+        if (!select) return;
+        var value = select.value || 'standard';
+        ['standard', 'simultaneous'].forEach(function (strategy) {
+          var opt = select.querySelector('option[value="' + strategy + '"]');
+          if (opt) opt.textContent = VENT_STRATEGY_BASE_LABEL[strategy] || strategy;
+        });
+        var titleEl = ventElFn(stepKey, 'select-label');
+        var descEl = ventElFn(stepKey, 'select-desc');
+        var title = VENT_STRATEGY_BASE_LABEL[value] || value;
+        var desc = formatVentStrategyParamSuffix(ventElFn, stepKey, value);
+        if (titleEl) {
+          titleEl.textContent = title;
+          titleEl.setAttribute('title', title);
+        }
+        if (descEl) {
+          descEl.textContent = desc;
+          descEl.setAttribute('title', desc);
+        }
+      }
+
       function readVentStrategyValue(ventElFn, stepKey) {
+        if (usesVentStrategySelect(ventElFn)) {
+          var selectOnly = ventElFn(stepKey, 'select');
+          return selectOnly && selectOnly.value ? selectOnly.value : 'standard';
+        }
         var group = ventElFn(stepKey, 'strategy-group');
         if (group) {
           var checked = group.querySelector('input[type="radio"]:checked');
@@ -4781,6 +4802,12 @@
       }
 
       function setVentStrategyValue(ventElFn, stepKey, value) {
+        if (usesVentStrategySelect(ventElFn)) {
+          var strategySelect = ventElFn(stepKey, 'select');
+          if (strategySelect) strategySelect.value = value;
+          syncVentStrategyOptionLabels(ventElFn, stepKey);
+          return;
+        }
         var group = ventElFn(stepKey, 'strategy-group');
         if (group) {
           var radio = group.querySelector('input[type="radio"][value="' + value + '"]');
@@ -4798,9 +4825,18 @@
       }
 
       function formatVentSimultaneousParamSuffix(ventElFn, stepKey) {
-        var duration = ventElFn(stepKey, 'duration-pop');
-        var mins = clampInt(duration && duration.value, 1, 120);
-        var gas = readVentGasFor(ventElFn, stepKey);
+        var mins;
+        var gas;
+        if (readVentStrategyValue(ventElFn, stepKey) === 'simultaneous') {
+          var duration = ventElFn(stepKey, 'duration-pop');
+          mins = clampInt(duration && duration.value, 1, 120);
+          gas = readVentGasFor(ventElFn, stepKey);
+        } else {
+          mins = VENT_SIMULTANEOUS_DURATION_MINUTES;
+          gas = VENT_GAS_META[VENT_SIMULTANEOUS_GAS]
+            ? VENT_GAS_META[VENT_SIMULTANEOUS_GAS].display
+            : VENT_SIMULTANEOUS_GAS;
+        }
         return 'Duration: ' + mins + ' ' + (mins === 1 ? 'minute' : 'minutes') + ' · Gas: ' + gas;
       }
 
@@ -4812,6 +4848,10 @@
       }
 
       function syncVentStrategyOptionLabels(ventElFn, stepKey) {
+        if (usesVentStrategySelect(ventElFn)) {
+          syncVentStrategySelectDisplay(ventElFn, stepKey);
+          return;
+        }
         ['standard', 'simultaneous'].forEach(function (strategy) {
           var descEl = ventStrategyDescEl(ventElFn, stepKey, strategy);
           if (descEl) {
@@ -5133,18 +5173,15 @@
 
       function setIntoVentStrategyEditable(stepKey, editable) {
         var panel = intoVentEl(stepKey, 'panel');
-        var group = intoVentEl(stepKey, 'strategy-group');
+        var selectWrap = intoVentEl(stepKey, 'select-wrap');
+        var strategySelect = intoVentEl(stepKey, 'select');
         var durationPopWrap = intoVentEl(stepKey, 'duration-pop-wrap');
         var durationPop = intoVentEl(stepKey, 'duration-pop');
         var cyclesWrap = intoVentEl(stepKey, 'cycles-wrap');
         var cycles = intoVentEl(stepKey, 'cycles');
         if (panel) panel.classList.toggle('is-editable', editable);
-        if (group) {
-          group.classList.toggle('is-disabled', !editable);
-          group.querySelectorAll('input[type="radio"]').forEach(function (radio) {
-            radio.disabled = !editable;
-          });
-        }
+        if (selectWrap) selectWrap.classList.toggle('ant-select-disabled', !editable);
+        if (strategySelect) strategySelect.disabled = !editable;
         if (durationPopWrap) durationPopWrap.classList.toggle('ant-input-number-disabled', !editable);
         if (durationPop) durationPop.disabled = !editable;
         if (cyclesWrap) cyclesWrap.classList.toggle('ant-input-number-disabled', !editable);
@@ -5960,18 +5997,15 @@
 
       function setOutVentStrategyEditable(stepKey, editable) {
         var panel = outVentEl(stepKey, 'panel');
-        var group = outVentEl(stepKey, 'strategy-group');
+        var selectWrap = outVentEl(stepKey, 'select-wrap');
+        var strategySelect = outVentEl(stepKey, 'select');
         var durationPopWrap = outVentEl(stepKey, 'duration-pop-wrap');
         var durationPop = outVentEl(stepKey, 'duration-pop');
         var cyclesWrap = outVentEl(stepKey, 'cycles-wrap');
         var cycles = outVentEl(stepKey, 'cycles');
         if (panel) panel.classList.toggle('is-editable', editable);
-        if (group) {
-          group.classList.toggle('is-disabled', !editable);
-          group.querySelectorAll('input[type="radio"]').forEach(function (radio) {
-            radio.disabled = !editable;
-          });
-        }
+        if (selectWrap) selectWrap.classList.toggle('ant-select-disabled', !editable);
+        if (strategySelect) strategySelect.disabled = !editable;
         if (durationPopWrap) durationPopWrap.classList.toggle('ant-input-number-disabled', !editable);
         if (durationPop) durationPop.disabled = !editable;
         if (cyclesWrap) cyclesWrap.classList.toggle('ant-input-number-disabled', !editable);
@@ -6161,20 +6195,25 @@
       };
       var OUT_BATCH_HRA1_SOLID_RACK_CODE = '5300';
       var OUT_BATCH_D1_LIQUID_RACK_CODE = '5203';
+      var OUT_BATCH_CHEMICAL_ROLE_META = {
+        Substrate: { cls: 'out-batch-chemical-role-substrate', label: 'Substrate' },
+        Catalyst: { cls: 'out-batch-chemical-role-catalyst', label: 'Catalyst' },
+        Base: { cls: 'out-batch-chemical-role-base', label: 'Base' }
+      };
       var OUT_BATCH_HRA1_SOLID_CHEMICALS = [
-        { hole: 'A-1', name: 'aniline' },
-        { hole: 'A-2', name: 'BrettPhos Pd G4_beads_0.05mmol/g' },
-        { hole: 'A-3', name: 'BrettPhos Pd G4_beads_0.05mmol/g' },
-        { hole: 'A-4', name: 'BrettPhos Pd G4_beads_0.05mmol/g' },
-        { hole: 'A-5', name: 'RuPhos Pd G4' },
-        { hole: 'A-6', name: 't-BuXPhos Pd G4' },
-        { hole: 'B-1', name: 'XantPhos Pd G4' },
-        { hole: 'B-2', name: 'Cs2CO3' },
-        { hole: 'B-3', name: 'Cs2CO3' },
-        { hole: 'B-4', name: 't-BuONa' }
+        { hole: 'A-1', name: 'aniline', role: 'Substrate' },
+        { hole: 'A-2', name: 'BrettPhos Pd G4_beads_0.05mmol/g', role: 'Catalyst' },
+        { hole: 'A-3', name: 'BrettPhos Pd G4_beads_0.05mmol/g', role: 'Catalyst' },
+        { hole: 'A-4', name: 'BrettPhos Pd G4_beads_0.05mmol/g', role: 'Catalyst' },
+        { hole: 'A-5', name: 'RuPhos Pd G4', role: 'Catalyst' },
+        { hole: 'A-6', name: 't-BuXPhos Pd G4', role: 'Catalyst' },
+        { hole: 'B-1', name: 'XantPhos Pd G4', role: 'Catalyst' },
+        { hole: 'B-2', name: 'Cs2CO3', role: 'Base' },
+        { hole: 'B-3', name: 'Cs2CO3', role: 'Base' },
+        { hole: 'B-4', name: 't-BuONa', role: 'Base' }
       ];
       var OUT_BATCH_D1_LIQUID_CHEMICALS = [
-        { hole: 'A-1', name: '1-bromo-4-fluorobenzene_in_0.9M_dioxane' }
+        { hole: 'A-1', name: '1-bromo-4-fluorobenzene_in_0.9M_dioxane', role: 'Substrate' }
       ];
       var OUT_BATCH_CHEMICAL_CHEVRON_SVG =
         '<svg viewBox="0 0 1024 1024" focusable="false" fill="currentColor" aria-hidden="true">' +
@@ -6349,12 +6388,37 @@
       }
 
       function syncOutBatchChemicalDetailColspans() {
-        var span = getOutBatchTableColSpan();
-        document
-          .querySelectorAll('#out-flow-step3-batch-table-wrap tr.out-batch-chemical-detail-row td')
-          .forEach(function (td) {
-            td.colSpan = span;
-          });
+        /* Detail rows use per-column cells aligned under Consumables Type. */
+      }
+
+      function getOutBatchConsumableColIndex() {
+        var table = document.querySelector('#out-flow-step3-batch-table-wrap table');
+        if (!table) return 4;
+        var ths = table.querySelectorAll('thead tr th');
+        for (var i = 0; i < ths.length; i++) {
+          if (ths[i].querySelector('[data-out-filter-key="consumable"]')) return i;
+        }
+        return 4;
+      }
+
+      function getOutBatchPositionColIndex() {
+        var table = document.querySelector('#out-flow-step3-batch-table-wrap table');
+        if (!table) return 1;
+        var ths = table.querySelectorAll('thead tr th');
+        for (var i = 0; i < ths.length; i++) {
+          if (ths[i].querySelector('[data-out-filter-key="position"]')) return i;
+        }
+        return 1;
+      }
+
+      function getOutBatchQtyColIndex() {
+        var table = document.querySelector('#out-flow-step3-batch-table-wrap table');
+        if (!table) return 5;
+        var ths = table.querySelectorAll('thead tr th');
+        for (var i = 0; i < ths.length; i++) {
+          if (ths[i].querySelector('[data-out-sort-key="qty"]')) return i;
+        }
+        return 5;
       }
 
       function syncOutBatchTableColgroup() {
@@ -6415,18 +6479,64 @@
       function normalizeOutBatchChemicalEntries(chemicals) {
         return (chemicals || []).map(function (c) {
           if (c && typeof c === 'object' && c.name != null) {
-            return { hole: c.hole ? String(c.hole) : '', name: String(c.name) };
+            return {
+              hole: c.hole ? String(c.hole) : '',
+              name: String(c.name),
+              role: c.role ? String(c.role) : ''
+            };
           }
-          return { hole: '', name: String(c) };
+          return { hole: '', name: String(c), role: '' };
         });
       }
 
-      function buildOutBatchChemicalListItemHtml(entry) {
-        var hole =
-          entry.hole
-            ? '<span class="out-batch-chemical-hole">' + escapeHtmlText(entry.hole) + '</span>'
-            : '';
-        return '<li>' + hole + escapeHtmlText(entry.name) + '</li>';
+      function buildOutBatchChemicalRoleTagHtml(role) {
+        var meta = role && OUT_BATCH_CHEMICAL_ROLE_META[role];
+        if (!meta) return '';
+        return (
+          '<span class="out-batch-chemical-role ' +
+          meta.cls +
+          '">' +
+          escapeHtmlText(meta.label) +
+          '</span>'
+        );
+      }
+
+      function buildOutBatchChemicalHoleListHtml(entries) {
+        return (
+          '<ul class="out-batch-chemical-hole-list" role="list">' +
+          entries
+            .map(function (entry) {
+              var holeText = entry.hole ? escapeHtmlText(entry.hole) : '\u00a0';
+              return '<li>' + holeText + '</li>';
+            })
+            .join('') +
+          '</ul>'
+        );
+      }
+
+      function buildOutBatchChemicalNameListHtml(entries) {
+        return (
+          '<ul class="out-batch-chemical-name-list" role="list">' +
+          entries
+            .map(function (entry) {
+              return '<li>' + escapeHtmlText(entry.name) + '</li>';
+            })
+            .join('') +
+          '</ul>'
+        );
+      }
+
+      function buildOutBatchChemicalRoleListHtml(entries) {
+        return (
+          '<ul class="out-batch-chemical-role-list" role="list">' +
+          entries
+            .map(function (entry) {
+              var tag = buildOutBatchChemicalRoleTagHtml(entry.role);
+              return '<li>' + (tag || '\u00a0') + '</li>';
+            })
+            .join('') +
+          '</ul>'
+        );
       }
 
       function buildOutBatchChemicalDetailRow(rowNum, chemicals, expanded) {
@@ -6436,13 +6546,35 @@
         tr.className =
           'out-batch-chemical-detail-row' + (expanded ? '' : ' out-batch-chemical-collapsed');
         tr.setAttribute('data-parent-row', String(rowNum));
-        var td = document.createElement('td');
-        td.colSpan = getOutBatchTableColSpan();
-        td.innerHTML =
-          '<ul class="out-batch-chemical-list" role="list">' +
-          entries.map(buildOutBatchChemicalListItemHtml).join('') +
-          '</ul>';
-        tr.appendChild(td);
+        var table = document.querySelector('#out-flow-step3-batch-table-wrap table');
+        var ths = table ? table.querySelectorAll('thead tr th') : [];
+        var positionIdx = getOutBatchPositionColIndex();
+        var consumableIdx = getOutBatchConsumableColIndex();
+        var roleIdx = getOutBatchQtyColIndex();
+        var colCount = ths.length || getOutBatchTableColSpan();
+        var holeListHtml = buildOutBatchChemicalHoleListHtml(entries);
+        var nameListHtml = buildOutBatchChemicalNameListHtml(entries);
+        var roleListHtml = buildOutBatchChemicalRoleListHtml(entries);
+        for (var i = 0; i < colCount; i++) {
+          var td = document.createElement('td');
+          if (i === positionIdx) {
+            td.className = 'out-batch-chemical-detail-position';
+            td.setAttribute('data-out-col', 'position');
+            td.innerHTML = holeListHtml;
+          } else if (i === consumableIdx) {
+            td.className = 'out-batch-chemical-detail-consumable';
+            td.setAttribute('data-out-col', 'consumable');
+            td.innerHTML = nameListHtml;
+          } else if (i === roleIdx) {
+            td.className = 'out-batch-chemical-detail-role';
+            td.setAttribute('data-out-col', 'qty');
+            td.innerHTML = roleListHtml;
+          } else {
+            td.className = 'out-batch-chemical-detail-pad';
+            if (ths[i]) td.setAttribute('data-out-col', ths[i].getAttribute('data-out-col') || '');
+          }
+          tr.appendChild(td);
+        }
         return tr;
       }
 
@@ -6480,6 +6612,9 @@
         tr.setAttribute('data-out-consumable', chemicals.length + ' chemicals');
         syncOutBatchRowFilterData(tr);
         syncOutBatchChemicalDetailRowVisibility(rowNum);
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        var table = wrap && wrap.querySelector('table');
+        if (table) tagOutBatchTableColCells(table, wrap);
       }
 
       function syncOutBatchChemicalDetailRowVisibility(rowNum) {
@@ -7300,18 +7435,6 @@
         }
       }
 
-      function showOutFlowBatchUnloadHint() {
-        var hint = document.getElementById('out-flow-batch-unload-hint');
-        if (!hint) return;
-        hint.textContent = getOutFlowPresetMeta().batchUnloadHint;
-        hint.hidden = false;
-      }
-
-      function hideOutFlowBatchUnloadHint() {
-        var hint = document.getElementById('out-flow-batch-unload-hint');
-        if (hint) hint.hidden = true;
-      }
-
       function showOutBatchUnloadGuideModal() {
         var guideModal = document.getElementById('out-batch-unload-guide-modal');
         if (!guideModal) return;
@@ -7752,7 +7875,6 @@
         outAwaitingFooterAfterFirstOneOfThreeStep4 = false;
         outAwaitingCompletionFooter = false;
         hideOutStep4FinalConfirmUi();
-        hideOutFlowBatchUnloadHint();
         closeOutBatchUnloadGuideModal();
         resetOutStep2PurgeCycleDisplay();
         resetOutStep4PurgeCycleDisplay();
@@ -7826,7 +7948,6 @@
         setOutStepItemState(OUT_FLOW_STEP_OUTER_OPEN, 'finish');
         setOutStepItemState(OUT_FLOW_STEP_BATCH, 'process-manual');
         if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = false;
-        showOutFlowBatchUnloadHint();
         showOutBatchUnloadGuideModal();
       }
 
@@ -7845,7 +7966,6 @@
         for (var j = 1; j <= OUT_FLOW_STEP_COUNT; j++) setOutStepItemState(j, 'wait');
         if (outStep5OuterDoorConfirm) outStep5OuterDoorConfirm.disabled = true;
         if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = true;
-        hideOutFlowBatchUnloadHint();
         closeOutBatchUnloadGuideModal();
         if (footerCloseOut) footerCloseOut.classList.remove('visible');
 
@@ -7868,7 +7988,6 @@
         for (var j = 1; j <= OUT_FLOW_STEP_COUNT; j++) setOutStepItemState(j, 'wait');
         if (outStep5OuterDoorConfirm) outStep5OuterDoorConfirm.disabled = true;
         if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = true;
-        hideOutFlowBatchUnloadHint();
         closeOutBatchUnloadGuideModal();
         if (footerCloseOut) footerCloseOut.classList.remove('visible');
 
@@ -7878,7 +7997,6 @@
       function onOutStep3BatchConfirmed() {
         if (!outStep3BatchConfirm || outStep3BatchConfirm.disabled) return;
         outStep3BatchConfirm.disabled = true;
-        hideOutFlowBatchUnloadHint();
         closeOutBatchUnloadGuideModal();
         markOutBatchCurrentBatchRemoved();
         setOutStepItemState(OUT_FLOW_STEP_BATCH, 'finish');
@@ -8642,10 +8760,6 @@
             openModalOut('general');
             return Promise.resolve();
           },
-          onOutOuterFlashFilter: function () {
-            openModalOut('outer_flash_filter', 'out_outer_flash_filter');
-            return Promise.resolve();
-          },
           onUnloadAnalyticalSamples: function () {
             openModalOut('outer_flash_filter', 'unload_analytical_samples');
             return Promise.resolve();
@@ -8665,16 +8779,12 @@
       if (outFlowModalStart) outFlowModalStart.addEventListener('click', onOutFlowStart);
       if (outStep5OuterDoorConfirm) outStep5OuterDoorConfirm.addEventListener('click', onOutStep5OuterDoorConfirmed);
       function bindOutVentPanelUi(stepKey) {
-        var group = outVentEl(stepKey, 'strategy-group');
-        if (group) {
-          group.querySelectorAll('input[type="radio"]').forEach(function (radio) {
-            radio.addEventListener('change', function () {
-              var select = outVentEl(stepKey, 'select');
-              if (select) select.value = radio.value;
-              unmarkOutVentPanelConfigured(stepKey);
-              updateOutVentStrategyDesc(stepKey);
-              syncOutVentPanelConfiguredFromUi(stepKey);
-            });
+        var strategySelect = outVentEl(stepKey, 'select');
+        if (strategySelect) {
+          strategySelect.addEventListener('change', function () {
+            unmarkOutVentPanelConfigured(stepKey);
+            updateOutVentStrategyDesc(stepKey);
+            syncOutVentPanelConfiguredFromUi(stepKey);
           });
         }
         bindVentGasSelectUi(outVentEl, stepKey);
@@ -8726,16 +8836,12 @@
         });
       }
       function bindIntoVentPanelUi(stepKey) {
-        var group = intoVentEl(stepKey, 'strategy-group');
-        if (group) {
-          group.querySelectorAll('input[type="radio"]').forEach(function (radio) {
-            radio.addEventListener('change', function () {
-              var select = intoVentEl(stepKey, 'select');
-              if (select) select.value = radio.value;
-              unmarkIntoVentPanelConfigured(stepKey);
-              updateIntoVentStrategyDesc(stepKey);
-              syncIntoVentPanelConfiguredFromUi(stepKey);
-            });
+        var strategySelect = intoVentEl(stepKey, 'select');
+        if (strategySelect) {
+          strategySelect.addEventListener('change', function () {
+            unmarkIntoVentPanelConfigured(stepKey);
+            updateIntoVentStrategyDesc(stepKey);
+            syncIntoVentPanelConfiguredFromUi(stepKey);
           });
         }
         bindVentGasSelectUi(intoVentEl, stepKey);
