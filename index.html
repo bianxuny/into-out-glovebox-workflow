@@ -1802,15 +1802,6 @@
     #flow-step2-batch-table-wrap.into-batch-step4-persist #flow-step2-confirm {
       display: none;
     }
-    .flow-step3-close-door-phase {
-      margin-top: 12px;
-    }
-    .flow-step3-close-door-phase[hidden] {
-      display: none !important;
-    }
-    .flow-step3-close-door-phase .flow-step-desc-single {
-      margin-bottom: 8px;
-    }
     .flow-batch-checkbox-th,
     .flow-batch-checkbox-cell {
       width: 44px;
@@ -2572,7 +2563,7 @@
             </div>
           </div>
 
-          <!-- Step 3: Load racks & close outer door (phase A: load, phase B: close door) -->
+          <!-- Step 3: Load racks -->
           <div class="ant-steps-item ant-steps-item-wait" id="antd-step-3" data-flow-step="2">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
@@ -2582,12 +2573,12 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Load racks &amp; close outer door</span>
+                    <span class="flow-step-title-text">Load racks into airlock shelf</span>
                     <span class="ant-tag ant-tag-warning" id="into-step-3-mode-tag">Manual</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Enter rack data in the table, confirm load, then close the outer door.</p>
+                  <p class="flow-step-desc-single">Enter rack data in the table, then confirm load.</p>
                   <div class="flow-step-inline-actions">
                     <button type="button" class="ant-btn ant-btn-primary" id="flow-step2-confirm" disabled>
                       <span class="flow-btn-batch-unload-icon" aria-hidden="true">
@@ -2609,21 +2600,38 @@
                       Confirm load
                     </button>
                   </div>
-                  <div id="flow-step3-close-door-phase" class="flow-step3-close-door-phase" hidden>
-                    <p class="flow-step-desc-single">Confirm when the outer door is closed.</p>
-                    <div class="flow-step-inline-actions">
-                      <button type="button" class="ant-btn ant-btn-primary" id="flow-step4-close-door-confirm" disabled>
-                        Confirm
-                      </button>
-                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Close outer door -->
+          <div class="ant-steps-item ant-steps-item-wait" id="antd-step-4" data-flow-step="3">
+            <div class="ant-steps-item-container">
+              <div class="ant-steps-item-tail"></div>
+              <div class="ant-steps-item-icon">
+                <span class="ant-steps-icon" id="antd-step-4-icon"></span>
+              </div>
+              <div class="ant-steps-item-content">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Close outer door</span>
+                    <span class="ant-tag ant-tag-success" id="into-step-4-mode-tag">Auto</span>
+                  </div>
+                </div>
+                <div class="ant-steps-item-description">
+                  <p class="flow-step-desc-single">Confirm when the outer door is closed.</p>
+                  <div class="flow-step-inline-actions">
+                    <button type="button" class="ant-btn ant-btn-primary" id="flow-step4-close-door-confirm" disabled>
+                      Confirm
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-
-          <!-- Step 4: Inner purge before inner door -->
+          <!-- Step 5: Inner purge before inner door -->
           <div class="ant-steps-item ant-steps-item-wait" id="antd-step-5" data-flow-step="4">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
@@ -2669,7 +2677,7 @@
             </div>
           </div>
 
-          <!-- Step 5: Transfer into glovebox -->
+          <!-- Step 6: Transfer into glovebox -->
           <div class="ant-steps-item ant-steps-item-wait" id="antd-step-6" data-flow-step="5">
             <div class="ant-steps-item-container">
               <div class="ant-steps-item-tail"></div>
@@ -4645,13 +4653,6 @@
         return String(num);
       }
 
-      /** Into flow: merged steps use display 1–5 (internal ids 5→4, 6→5). */
-      function intoStepDisplayNum(stepNum) {
-        if (stepNum === 5) return 4;
-        if (stepNum === 6) return 5;
-        return stepNum;
-      }
-
       function iconLoading() {
         return spinSvg;
       }
@@ -4669,7 +4670,6 @@
         var item = document.getElementById('antd-step-' + stepNum);
         var iconEl = document.getElementById('antd-step-' + stepNum + '-icon');
         if (!item || !iconEl) return;
-        var displayNum = intoStepDisplayNum(stepNum);
 
         item.classList.remove(
           'ant-steps-item-wait',
@@ -4680,13 +4680,13 @@
 
         if (state === 'wait') {
           item.classList.add('ant-steps-item-wait');
-          iconEl.innerHTML = iconDot(displayNum);
+          iconEl.innerHTML = iconDot(stepNum);
         } else if (state === 'process-loading') {
           item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
           iconEl.innerHTML = iconLoading();
         } else if (state === 'process-manual') {
           item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
-          iconEl.innerHTML = iconDot(displayNum);
+          iconEl.innerHTML = iconDot(stepNum);
         } else if (state === 'finish') {
           item.classList.add('ant-steps-item-finish');
           iconEl.innerHTML = iconFinish();
@@ -4980,30 +4980,13 @@
         mw.classList.add('is-revealing');
       }
 
-      function showIntoStep3CloseDoorPhase() {
-        var phase = document.getElementById('flow-step3-close-door-phase');
-        if (phase) phase.hidden = false;
-      }
-
-      function hideIntoStep3CloseDoorPhase() {
-        var phase = document.getElementById('flow-step3-close-door-phase');
-        if (phase) phase.hidden = true;
-        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
-      }
-
-      function isIntoFlowOnStep3PhaseB() {
-        var item = document.getElementById('antd-step-3');
-        var phase = document.getElementById('flow-step3-close-door-phase');
-        return !!(
-          item &&
-          item.classList.contains('ant-steps-item-process') &&
-          phase &&
-          !phase.hidden
-        );
+      function isIntoFlowOnStep4CloseDoor() {
+        var item = document.getElementById('antd-step-4');
+        return !!(item && item.classList.contains('ant-steps-item-process'));
       }
 
       function resetIntoSteps456ConfirmState() {
-        hideIntoStep3CloseDoorPhase();
+        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
         hideIntoStep5InnerMetrics();
         resetIntoStep5PurgeCycleDisplay();
       }
@@ -5133,7 +5116,7 @@
       }
 
       function resetIntoStepModeTags() {
-        ['1', '2', '5', '6'].forEach(function (s) {
+        ['1', '2', '4', '5', '6'].forEach(function (s) {
           var el = document.getElementById('into-step-' + s + '-mode-tag');
           if (!el) return;
           el.classList.remove('ant-tag-processing');
@@ -8280,7 +8263,7 @@
         if (!wrap || !wrap.classList.contains('flow-batch-submitted')) return;
         intoBatchActiveRowNums = getIntoBatchActiveRowNums();
         applyIntoBatchTrayStatusesSubmitted();
-        if (wrap.classList.contains('into-batch-step4-persist') && isIntoFlowOnStep3PhaseB()) {
+        if (wrap.classList.contains('into-batch-step4-persist') && isIntoFlowOnStep4CloseDoor()) {
           applyIntoBatchTrayStatusesPendingTransfer();
         }
       }
@@ -8392,6 +8375,7 @@
         setStepItemState(1, 'wait');
         setStepItemState(2, 'wait');
         setStepItemState(3, 'wait');
+        setStepItemState(4, 'wait');
         setStepItemState(5, 'wait');
         setStepItemState(6, 'wait');
         if (step2DoorConfirm) step2DoorConfirm.disabled = true;
@@ -8531,10 +8515,12 @@
         setStepItemState(1, 'process-loading');
         setStepItemState(2, 'wait');
         setStepItemState(3, 'wait');
+        setStepItemState(4, 'wait');
         setStepItemState(5, 'wait');
         setStepItemState(6, 'wait');
         if (step2DoorConfirm) step2DoorConfirm.disabled = true;
         step2Confirm.disabled = true;
+        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
         footerClose.classList.remove('visible');
 
         flowTimers.tStep1Prep = setTimeout(function () {
@@ -8546,10 +8532,11 @@
       function onStep2DoorConfirmed() {
         if (!step2DoorConfirm || step2DoorConfirm.disabled) return;
         step2DoorConfirm.disabled = true;
-        hideIntoStep3CloseDoorPhase();
         setStepItemState(2, 'finish');
         setStepItemState(3, 'process-manual');
+        setStepItemState(4, 'wait');
         step2Confirm.disabled = false;
+        if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = true;
         var batchWrap = document.getElementById('flow-step2-batch-table-wrap');
         if (batchSplit) batchSplit.hidden = false;
         if (batchWrap) {
@@ -8574,20 +8561,19 @@
         step2Confirm.disabled = true;
         applyBatchTableSubmittedState();
         if (batchSplit) batchSplit.hidden = false;
-        setStepItemState(3, 'process-manual');
+        setStepItemState(3, 'finish');
+        setStepItemState(4, 'process-manual');
         setStepItemState(5, 'wait');
         setStepItemState(6, 'wait');
         applyIntoBatchTrayStatusesPendingTransfer();
         setIntoBatchActionsAfterSubmit();
-        showIntoStep3CloseDoorPhase();
         if (step4CloseDoorConfirm) step4CloseDoorConfirm.disabled = false;
       }
 
       function onStep4CloseDoorConfirmed() {
         if (!step4CloseDoorConfirm || step4CloseDoorConfirm.disabled) return;
         step4CloseDoorConfirm.disabled = true;
-        hideIntoStep3CloseDoorPhase();
-        setStepItemState(3, 'finish');
+        setStepItemState(4, 'finish');
         setStepItemState(5, 'process-loading');
         resetIntoStep5PurgeCycleDisplay();
         hideIntoStep5InnerMetrics();
