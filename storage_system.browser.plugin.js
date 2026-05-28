@@ -66,7 +66,6 @@
    * @param {function(string): void} [options.hooks.toast]
    * @param {function(): Promise<void>|void} [options.hooks.onIntoGeneral]
    * @param {function(): Promise<void>|void} [options.hooks.onOutGeneral]
-   * @param {function(): Promise<void>|void} [options.hooks.onOutOuterFlashFilter]
    * @param {function(): Promise<void>|void} [options.hooks.onUnloadAnalyticalSamples]
    * @param {function(object): Promise<void>|void} [options.hooks.onSyncData]
    */
@@ -98,20 +97,35 @@
     this._svgRoot = svg || null
   }
 
-  Plugin.prototype.findButtonGroup = function (action) {
-    if (!this._svgRoot || !action) return null
+  Plugin.prototype.findButtonGroups = function (action) {
+    if (!this._svgRoot || !action) return []
     var key = String(action).toLowerCase()
+    var groups = []
+    var seen = []
     var nodes = this._svgRoot.querySelectorAll('[data-flow-action]')
     var i
     for (i = 0; i < nodes.length; i++) {
-      if (nodes[i].getAttribute('data-flow-action') === key) return nodes[i]
+      if (nodes[i].getAttribute('data-flow-action') === key) {
+        groups.push(nodes[i])
+        seen.push(nodes[i])
+      }
     }
     var all = this._svgRoot.getElementsByTagName('*')
     for (i = 0; i < all.length; i++) {
-      var lab = getInkscapeLabel(all[i])
-      if (lab === BUTTON_PREFIX + key) return all[i]
+      var el = all[i]
+      if (seen.indexOf(el) !== -1) continue
+      var lab = getInkscapeLabel(el)
+      if (lab === BUTTON_PREFIX + key) {
+        groups.push(el)
+        seen.push(el)
+      }
     }
-    return null
+    return groups
+  }
+
+  Plugin.prototype.findButtonGroup = function (action) {
+    var groups = this.findButtonGroups(action)
+    return groups.length ? groups[0] : null
   }
 
   function patchStyleProp(style, prop, value) {
@@ -169,16 +183,20 @@
 
   /** @param {'default'|'running'} state */
   Plugin.prototype.setButtonState = function (action, state) {
-    var group = this.findButtonGroup(action)
-    if (!group) return
-    if (state === 'running') {
-      group.classList.add('svg-button-running')
-      group.setAttribute('data-button-state', 'running')
-      applyRunningStylesToButtonGroup(group)
-    } else {
-      group.classList.remove('svg-button-running')
-      group.removeAttribute('data-button-state')
-      restoreDefaultStylesFromButtonGroup(group)
+    var groups = this.findButtonGroups(action)
+    if (!groups.length) return
+    var i
+    for (i = 0; i < groups.length; i++) {
+      var group = groups[i]
+      if (state === 'running') {
+        group.classList.add('svg-button-running')
+        group.setAttribute('data-button-state', 'running')
+        applyRunningStylesToButtonGroup(group)
+      } else {
+        group.classList.remove('svg-button-running')
+        group.removeAttribute('data-button-state')
+        restoreDefaultStylesFromButtonGroup(group)
+      }
     }
   }
 
@@ -220,13 +238,8 @@
           if (this._hooks.onOutGeneral) await this._hooks.onOutGeneral()
           else this._toast('Demo: out_general (onOutGeneral hook not registered)')
           break
-        case 'out_outer_flash_filter':
-          if (this._hooks.onOutOuterFlashFilter) await this._hooks.onOutOuterFlashFilter()
-          else this._toast('Demo: out_outer_flash_filter (onOutOuterFlashFilter hook not registered)')
-          break
         case 'unload_analytical_samples':
           if (this._hooks.onUnloadAnalyticalSamples) await this._hooks.onUnloadAnalyticalSamples()
-          else if (this._hooks.onOutOuterFlashFilter) await this._hooks.onOutOuterFlashFilter()
           else this._toast('Demo: unload_analytical_samples (hook not registered)')
           break
         case 'out_open_loaded':
