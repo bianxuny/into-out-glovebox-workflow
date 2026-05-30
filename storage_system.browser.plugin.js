@@ -67,6 +67,7 @@
    * @param {function(): Promise<void>|void} [options.hooks.onIntoGeneral]
    * @param {function(): Promise<void>|void} [options.hooks.onOutGeneral]
    * @param {function(): Promise<void>|void} [options.hooks.onUnloadAnalyticalSamples]
+   * @param {function(): Promise<void>|void} [options.hooks.onUnloadReactionRacks]
    * @param {function(object): Promise<void>|void} [options.hooks.onSyncData]
    */
   function Plugin(options) {
@@ -241,6 +242,10 @@
         case 'unload_analytical_samples':
           if (this._hooks.onUnloadAnalyticalSamples) await this._hooks.onUnloadAnalyticalSamples()
           else this._toast('Demo: unload_analytical_samples (hook not registered)')
+          break
+        case 'unload_reaction_racks':
+          if (this._hooks.onUnloadReactionRacks) await this._hooks.onUnloadReactionRacks()
+          else this._toast('Demo: unload_reaction_racks (hook not registered)')
           break
         case 'out_open_loaded':
           this._toast('Demo: out_open_loaded')
