@@ -2086,6 +2086,28 @@
     #into-flow-config-panel.is-done .into-purge-setting-wrap {
       border-top-color: rgba(0, 0, 0, 0.06);
     }
+    #out-flow-steps.is-reaction-mode .out-flow-step-standard-only {
+      display: none !important;
+    }
+    #out-flow-steps:not(.is-reaction-mode) .out-flow-step-reaction-only {
+      display: none !important;
+    }
+    #out-flow-steps.is-reaction-mode #antd-out-step-3,
+    #out-flow-steps.is-reaction-mode #antd-out-step-5,
+    #out-flow-steps.is-reaction-mode #antd-out-step-7 {
+      display: none !important;
+    }
+    #out-flow-steps.is-reaction-mode #antd-out-step-6 .ant-steps-item-tail {
+      display: none !important;
+    }
+    /* Nested title blocks (reaction/standard variants) are not direct children — hide Ant horizontal connector line */
+    #out-flow-steps .out-flow-step-reaction-only .ant-steps-item-title::after,
+    #out-flow-steps .out-flow-step-standard-only .ant-steps-item-title::after {
+      display: none !important;
+    }
+    #out-flow-config-panel[hidden] {
+      display: none !important;
+    }
     #out-flow-config-panel {
       margin-bottom: 12px;
       padding: 12px 14px;
@@ -3360,14 +3382,25 @@
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-1-icon"></span></div>
               <div class="ant-steps-item-content">
+                <div class="out-flow-step-standard-only">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
                     <span class="flow-step-title-text">Select unload racks</span>
                     <span class="ant-tag ant-tag-warning">Manual</span>
                   </div>
                 </div>
+                </div>
+                <div class="out-flow-step-reaction-only">
+                <div class="ant-steps-item-title">
+                  <div class="flow-step-title-row">
+                    <span class="flow-step-title-text">Select unload racks &amp; transfer</span>
+                    <span class="ant-tag ant-tag-warning">Manual</span>
+                  </div>
+                </div>
+                </div>
                 <div class="ant-steps-item-description">
                   <p class="flow-step-desc-single" id="out-flow-rack-select-hint">Loading unload plan…</p>
+                  <p class="flow-step-desc-single out-flow-step-reaction-only" id="out-flow-rack-transfer-note">After Start, the robotic arm will automatically move the selected trays to the transfer position.</p>
                 </div>
               </div>
             </div>
@@ -3378,6 +3411,7 @@
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-2-icon"></span></div>
               <div class="ant-steps-item-content">
+                <div class="out-flow-step-standard-only">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
                     <span class="flow-step-title-text">Purge: before open inner door</span>
@@ -3396,6 +3430,18 @@
                     </table>
                   </div>
                 </div>
+                </div>
+                <div class="out-flow-step-reaction-only">
+                  <div class="ant-steps-item-title">
+                    <div class="flow-step-title-row">
+                      <span class="flow-step-title-text">Open inner door</span>
+                      <span class="ant-tag ant-tag-warning">Manual</span>
+                    </div>
+                  </div>
+                  <div class="ant-steps-item-description">
+                    <p class="flow-step-desc-single">Open the glovebox inner door when interlocks allow.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -3405,6 +3451,7 @@
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-3-icon"></span></div>
               <div class="ant-steps-item-content">
+                <div class="out-flow-step-standard-only">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
                     <span class="flow-step-title-text">Open inner door &amp; transfer racks</span>
@@ -3413,6 +3460,7 @@
                 </div>
                 <div class="ant-steps-item-description">
                   <p class="flow-step-desc-single">Inner door opens; racks transfer to the airlock.</p>
+                </div>
                 </div>
               </div>
             </div>
@@ -3423,6 +3471,7 @@
               <div class="ant-steps-item-tail"></div>
               <div class="ant-steps-item-icon"><span class="ant-steps-icon" id="antd-out-step-4-icon"></span></div>
               <div class="ant-steps-item-content">
+                <div class="out-flow-step-standard-only">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
                     <span class="flow-step-title-text">Purge: before open outer door</span>
@@ -3439,6 +3488,18 @@
                       </tr></thead>
                       <tbody><tr><td>4.5mbar</td><td id="out-step4-purge-cycle-wrap" class="flow-step2-purge-cycle-cell"><span class="flow-step2-purge-cycle-inner"><span id="out-step4-purge-cycle-num" class="flow-step2-purge-cycle-num">1</span><span id="out-step4-purge-cycle-suffix" class="flow-step2-purge-cycle-suffix">/3</span></span></td></tr></tbody>
                     </table>
+                  </div>
+                </div>
+                </div>
+                <div class="out-flow-step-reaction-only">
+                  <div class="ant-steps-item-title">
+                    <div class="flow-step-title-row">
+                      <span class="flow-step-title-text">Open outer door, manual transfer &amp; close door</span>
+                      <span class="ant-tag ant-tag-warning">Manual</span>
+                    </div>
+                  </div>
+                  <div class="ant-steps-item-description">
+                    <p class="flow-step-desc-single">Open the exchange-shelf outer door, transfer the reaction racks out, then close the outer door.</p>
                   </div>
                 </div>
               </div>
@@ -3473,12 +3534,12 @@
               <div class="ant-steps-item-content">
                 <div class="ant-steps-item-title">
                   <div class="flow-step-title-row">
-                    <span class="flow-step-title-text">Batch unload</span>
-                    <span class="ant-tag ant-tag-warning">Manual</span>
+                    <span class="flow-step-title-text" id="out-flow-step-batch-title">Batch unload</span>
+                    <span class="ant-tag ant-tag-warning" id="out-flow-step-batch-mode-tag">Manual</span>
                   </div>
                 </div>
                 <div class="ant-steps-item-description">
-                  <p class="flow-step-desc-single">Complete physical unload and unload rack data.</p>
+                  <p class="flow-step-desc-single" id="out-flow-step-batch-desc">Complete physical unload and unload rack data.</p>
                   <div class="flow-step-batch-unload-block">
                     <div class="flow-step-inline-actions">
                       <button type="button" class="ant-btn ant-btn-primary" id="out-flow-step3-confirm" disabled>
@@ -4495,6 +4556,7 @@
       </div>
       <div class="out-batch-unload-guide-media">
         <img
+          id="out-batch-unload-guide-img"
           src="Physical unload guide.gif"
           alt="Guide animation showing how to pull the sample rack out of the airlock chamber"
         />
@@ -4535,6 +4597,20 @@
       var terminateConfirmOk = document.getElementById('terminate-confirm-ok');
       var outBatchUnloadGuideModal = document.getElementById('out-batch-unload-guide-modal');
       var outBatchUnloadGuideClose = document.getElementById('out-batch-unload-guide-close');
+      var outBatchUnloadGuideTitle = document.getElementById('out-batch-unload-guide-title');
+      var outBatchUnloadGuideImg = document.getElementById('out-batch-unload-guide-img');
+      var OUT_FLOW_GUIDE_PRESETS = {
+        physicalUnload: {
+          title: 'Physical unload guide',
+          src: 'Physical unload guide.gif',
+          alt: 'Guide animation showing how to pull the sample rack out of the airlock chamber'
+        },
+        packaging: {
+          title: 'Open inner door guide',
+          src: 'Packaging.gif',
+          alt: 'Guide animation for opening the inner door before manual transfer'
+        }
+      };
       var startBtn = document.getElementById('flow-modal-start');
       var step2DoorConfirm = document.getElementById('flow-step2-door-confirm');
       var step2Confirm = document.getElementById('flow-step2-confirm');
@@ -4545,6 +4621,8 @@
       var footerCloseOut = document.getElementById('modal-out-footer-close');
       var terminateBtnOut = document.getElementById('out-flow-modal-terminate');
       var outStep5OuterDoorConfirm = document.getElementById('out-step5-outer-door-confirm');
+      var outReactionAwaitingInnerGuideDismiss = false;
+      var outReactionAwaitingOuterGuideDismiss = false;
       var outStep3BatchConfirm = document.getElementById('out-flow-step3-confirm');
       var outFlowModalStart = document.getElementById('out-flow-modal-start');
       var toastEl = document.getElementById('toast');
@@ -4593,6 +4671,7 @@
         tStep3InnerPrep: null,
         tStep4OuterPrep: null,
         tStep5OuterDoorPrep: null,
+        tReactionCeramicTransfer: null,
         purgeCycleIv: null
       };
       var outUnloadCycleTotal = 3;
@@ -4617,11 +4696,15 @@
       var terminateTargetIsOut = false;
       /** Outbound flow started (Start clicked) until reset / terminate / completion. */
       var outFlowSessionActive = false;
-      /** @type {'general'|'outer_flash_filter'} */
+      /** @type {'general'|'outer_flash_filter'|'reaction_racks'} */
       var outFlowPreset = 'general';
       /** SVG button id that opened the current out flow (for running highlight). */
       var outFlowEntryButton = null;
-      var OUT_FLOW_ENTRY_BUTTON_IDS = ['out_general', 'unload_analytical_samples'];
+      var OUT_FLOW_ENTRY_BUTTON_IDS = [
+        'out_general',
+        'unload_analytical_samples',
+        'unload_reaction_racks'
+      ];
       var OUT_FLOW_PRESET_META = {
         general: {
           entryButton: 'out_general',
@@ -4637,6 +4720,15 @@
           },
           activeRowCount: 3,
           racksPerLoop: 1,
+          seedTable: null
+        },
+        reaction_racks: {
+          entryButton: 'unload_reaction_racks',
+          subtitle: 'Reaction racks unload',
+          subtitleByEntry: {
+            unload_reaction_racks: 'Reaction racks unload'
+          },
+          activeRowCount: 2,
           seedTable: null
         }
       };
@@ -5053,11 +5145,99 @@
 
       function getOutUnloadRacksPerLoop() {
         var meta = getOutFlowPresetMeta();
+        if (outFlowIsReactionRacksPreset()) {
+          return meta.activeRowCount;
+        }
         return meta.racksPerLoop > 0 ? meta.racksPerLoop : 8;
+      }
+
+      function outFlowUsesOneRackPerLoop() {
+        return outFlowPreset === 'outer_flash_filter' && getOutUnloadRacksPerLoop() === 1;
+      }
+
+      function resolveOutFlowPresetFromArg(preset) {
+        if (preset === 'outer_flash_filter' || preset === 'reaction_racks') return preset;
+        return 'general';
+      }
+
+      function outFlowIsReactionRacksPreset() {
+        return outFlowPreset === 'reaction_racks';
+      }
+
+      function outFlowSkipsPurgeSetup() {
+        return outFlowIsReactionRacksPreset();
+      }
+
+      function outFlowSkipsLoopUi() {
+        return outFlowIsReactionRacksPreset();
+      }
+
+      function syncOutFlowConfigPanelVisibility() {
+        var cfgPan = document.getElementById('out-flow-config-panel');
+        if (!cfgPan) return;
+        cfgPan.hidden = outFlowSkipsPurgeSetup();
+      }
+
+      function syncOutFlowStepsLayout() {
+        var stepsWrap = document.getElementById('out-flow-steps');
+        if (stepsWrap) {
+          stepsWrap.classList.toggle('is-reaction-mode', outFlowIsReactionRacksPreset());
+        }
+        var batchTitle = document.getElementById('out-flow-step-batch-title');
+        var batchDesc = document.getElementById('out-flow-step-batch-desc');
+        var batchModeTag = document.getElementById('out-flow-step-batch-mode-tag');
+        if (batchTitle) {
+          batchTitle.textContent = outFlowIsReactionRacksPreset() ? 'Unload data' : 'Batch unload';
+        }
+        if (batchDesc) {
+          batchDesc.textContent = outFlowIsReactionRacksPreset()
+            ? 'Release rack data from the system.'
+            : 'Complete physical unload and unload rack data.';
+        }
+        if (batchModeTag) {
+          if (outFlowIsReactionRacksPreset()) {
+            batchModeTag.textContent = 'Auto';
+            batchModeTag.classList.remove('ant-tag-warning');
+            batchModeTag.classList.add('ant-tag-success');
+          } else {
+            batchModeTag.textContent = 'Manual';
+            batchModeTag.classList.remove('ant-tag-success');
+            batchModeTag.classList.add('ant-tag-warning');
+          }
+        }
+        syncOutReactionStepDisplayNums();
+      }
+
+      /** Reaction mode: re-apply step circle numbers (e.g. internal step 6 → display 4). */
+      function syncOutReactionStepDisplayNums() {
+        if (!outFlowIsReactionRacksPreset()) return;
+        for (var s = 1; s <= OUT_FLOW_STEP_COUNT; s++) {
+          var item = document.getElementById('antd-out-step-' + s);
+          var iconEl = document.getElementById('antd-out-step-' + s + '-icon');
+          if (!item || !iconEl || item.classList.contains('ant-steps-item-finish')) continue;
+          if (item.classList.contains('ant-steps-item-process') && iconEl.querySelector('.flow-ad-spin')) continue;
+          if (
+            item.classList.contains('ant-steps-item-wait') ||
+            item.classList.contains('ant-steps-item-process')
+          ) {
+            iconEl.innerHTML = iconDot(outOutStepDisplayNum(s));
+          }
+        }
+      }
+
+      function outOutStepDisplayNum(stepNum) {
+        if (!outFlowIsReactionRacksPreset()) return stepNum;
+        if (stepNum === OUT_FLOW_STEP_RACK) return 1;
+        if (stepNum === OUT_FLOW_STEP_INNER_PURGE) return 2;
+        if (stepNum === OUT_FLOW_STEP_OUTER_PURGE) return 3;
+        if (stepNum === OUT_FLOW_STEP_BATCH) return 4;
+        return stepNum;
       }
 
       function syncOutFlowModalChrome() {
         var sub = document.getElementById('flow-modal-out-subtitle');
+        syncOutFlowConfigPanelVisibility();
+        syncOutFlowStepsLayout();
         if (!sub) return;
         var meta = getOutFlowPresetMeta();
         if (meta.subtitleByEntry && outFlowEntryButton && meta.subtitleByEntry[outFlowEntryButton]) {
@@ -5092,6 +5272,7 @@
       function refreshOutBatchTableLayout() {
         syncOutBatchTableColgroup();
         syncOutBatchTableRowVisibilityForPreset();
+        updateOutFlowRackSelectHint();
       }
 
       function scheduleOutBatchTableLayoutRefresh() {
@@ -5331,7 +5512,7 @@
       }
 
       function clearOutFlowTimers() {
-        ['t2', 'tStep1Prep', 'tStep1PurgePrep', 'tStep3InnerPrep', 'tStep4OuterPrep', 'tStep5OuterDoorPrep', 'purgeCycleIv'].forEach(function (k) {
+        ['t2', 'tStep1Prep', 'tStep1PurgePrep', 'tStep3InnerPrep', 'tStep4OuterPrep', 'tStep5OuterDoorPrep', 'tReactionCeramicTransfer', 'purgeCycleIv'].forEach(function (k) {
           if (outFlowTimers[k]) {
             if (k === 'purgeCycleIv') clearInterval(outFlowTimers[k]);
             else clearTimeout(outFlowTimers[k]);
@@ -5401,7 +5582,7 @@
       }
 
       function outBatchVisibleRowCheckboxSelector() {
-        return 'tbody tr:not(.out-batch-row-peeled):not(.out-batch-row-filter-hidden) .flow-batch-rack-checkbox';
+        return 'tbody tr:not(.out-batch-row-peeled):not(.out-batch-row-filter-hidden):not([hidden]) .flow-batch-rack-checkbox';
       }
 
       function isOutBatchPriorityRackCode(rackCode) {
@@ -5777,10 +5958,51 @@
         syncOutBatchSelectAllState();
       }
 
+      function runOutReactionFlowAfterStart() {
+        outBatchCurrentProcessingRows = getOutBatchCheckedRowNumsInOrder();
+        applyOutBatchTrayStatusesAfterProceed();
+        applyOutBatchPostStartTableView();
+        setOutRightPanelMode('preview');
+        setOutStepItemState(OUT_FLOW_STEP_RACK, 'finish');
+        setOutStepItemState(OUT_FLOW_STEP_INNER_PURGE, 'process-manual');
+        outReactionAwaitingInnerGuideDismiss = true;
+        showOutFlowGuideModal('packaging');
+      }
+
+      function advanceReactionAfterInnerGuide() {
+        outReactionAwaitingInnerGuideDismiss = false;
+        setOutStepItemState(OUT_FLOW_STEP_INNER_PURGE, 'finish');
+        setOutStepItemState(OUT_FLOW_STEP_OUTER_PURGE, 'process-loading');
+        outFlowTimers.tReactionCeramicTransfer = setTimeout(function () {
+          outFlowTimers.tReactionCeramicTransfer = null;
+          setOutStepItemState(OUT_FLOW_STEP_OUTER_PURGE, 'process-manual');
+          outReactionAwaitingOuterGuideDismiss = true;
+          showOutFlowGuideModal('physicalUnload');
+        }, STEP_AUTO_MS);
+      }
+
+      function advanceReactionAfterOuterGuide() {
+        outReactionAwaitingOuterGuideDismiss = false;
+        setOutStepItemState(OUT_FLOW_STEP_OUTER_PURGE, 'finish');
+        setOutStepItemState(OUT_FLOW_STEP_BATCH, 'process-manual');
+        if (outStep3BatchConfirm) outStep3BatchConfirm.disabled = false;
+      }
+
+      function completeReactionOutUnload() {
+        applyOutRightPanelHiddenDom();
+        if (footerCloseOut) {
+          footerCloseOut.classList.add('visible');
+          footerCloseOut.focus();
+          outAwaitingCompletionFooter = true;
+        }
+      }
+
       /** First transition off Step 1 (Start click or loop 2/3|3/3 auto): step tags switch Auto → loop N/M. */
       function runOutStep1CompletionIntoStep2() {
-        if (!outStepTagsShowLoop) {
-          outStepTagsShowLoop = true;
+        if (!outFlowSkipsLoopUi()) {
+          if (!outStepTagsShowLoop) {
+            outStepTagsShowLoop = true;
+          }
         }
         updateOutUnloadCycleBarNumbers();
         applyOutBatchTrayStatusesAfterProceed();
@@ -5930,6 +6152,15 @@
         var item = document.getElementById('antd-out-step-' + stepNum);
         var iconEl = document.getElementById('antd-out-step-' + stepNum + '-icon');
         if (!item || !iconEl) return;
+        if (
+          outFlowIsReactionRacksPreset() &&
+          (stepNum === OUT_FLOW_STEP_INNER_OPEN ||
+            stepNum === OUT_FLOW_STEP_OUTER_OPEN ||
+            stepNum === OUT_FLOW_STEP_CLOSE)
+        ) {
+          return;
+        }
+        var displayNum = outOutStepDisplayNum(stepNum);
         item.classList.remove(
           'ant-steps-item-wait',
           'ant-steps-item-process',
@@ -5938,13 +6169,13 @@
         );
         if (state === 'wait') {
           item.classList.add('ant-steps-item-wait');
-          iconEl.innerHTML = iconDot(stepNum);
+          iconEl.innerHTML = iconDot(displayNum);
         } else if (state === 'process-loading') {
           item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
           iconEl.innerHTML = iconLoading();
         } else if (state === 'process-manual') {
           item.classList.add('ant-steps-item-process', 'ant-steps-item-active');
-          iconEl.innerHTML = iconDot(stepNum);
+          iconEl.innerHTML = iconDot(displayNum);
         } else if (state === 'finish') {
           item.classList.add('ant-steps-item-finish');
           iconEl.innerHTML = iconFinish();
@@ -6056,6 +6287,7 @@
       }
 
       function isOutSetupReady() {
+        if (outFlowSkipsPurgeSetup()) return true;
         return !!(outVentStepConfigured['2'] && outVentStepConfigured['4']);
       }
 
@@ -6101,6 +6333,7 @@
         setOutVentStrategyEditable('4', true);
         var cfgPan = document.getElementById('out-flow-config-panel');
         if (cfgPan) cfgPan.classList.remove('is-done');
+        syncOutFlowConfigPanelVisibility();
         resetOutVentConfiguredFlags();
         ['2', '4'].forEach(function (k) {
           syncOutVentParamsUi(k);
@@ -6111,6 +6344,7 @@
       }
 
       function lockOutSetupPanel() {
+        if (outFlowSkipsPurgeSetup()) return;
         setOutVentStrategyEditable('2', false);
         setOutVentStrategyEditable('4', false);
         var cfgPan = document.getElementById('out-flow-config-panel');
@@ -6147,9 +6381,7 @@
         var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
         var allCb = document.getElementById('out-batch-select-all');
         if (!wrap || !allCb || allCb.disabled) return;
-        var rows = wrap.querySelectorAll(
-          'tbody tr:not(.out-batch-row-peeled):not(.out-batch-row-filter-hidden) .flow-batch-rack-checkbox'
-        );
+        var rows = wrap.querySelectorAll(outBatchVisibleRowCheckboxSelector());
         var n = rows.length;
         if (n === 0) return;
         var c = 0;
@@ -7274,6 +7506,10 @@
 
       /** Outbound right column: step1 | step1+loop+table | cyclePersist | hidden. Call setOutRightPanelMode('hidden') only from resetOutFlowUi; completion uses applyOutRightPanelHiddenDom + modal width instead. */
       function setOutRightPanelMode(mode) {
+        if (outFlowSkipsLoopUi()) {
+          if (mode === 'step1WithCycle') mode = 'step1';
+          else if (mode === 'cyclePersist') mode = 'preview';
+        }
         var split = document.getElementById('out-flow-modal-batch-split');
         var act1 = document.getElementById('out-flow-step1-actions');
         var cycleBar = document.getElementById('out-batch-cycle-bar');
@@ -7381,7 +7617,10 @@
 
       /** General: 1–8 → 1 loop; 9–16 → 2; 17–24 → 3. Outer flash: 1 rack per loop → N racks = N loops. */
       function estimateOutUnloadLoopCount(selectedRackCount) {
-        if (outFlowPreset === 'outer_flash_filter') {
+        if (outFlowIsReactionRacksPreset()) {
+          return selectedRackCount >= 1 ? 1 : 0;
+        }
+        if (outFlowUsesOneRackPerLoop()) {
           return selectedRackCount >= 1 ? selectedRackCount : 0;
         }
         if (selectedRackCount >= 17) return 3;
@@ -7393,12 +7632,17 @@
       function buildOutFlowRackSelectHintHtml(selectedRackCount) {
         var rackLabel =
           selectedRackCount === 1 ? '1 unload rack' : selectedRackCount + ' unload racks';
+        if (outFlowIsReactionRacksPreset()) {
+          return (
+            '<span class="out-flow-rack-select-hint-em">' + rackLabel + '</span> selected.'
+          );
+        }
         var html =
           '<span class="out-flow-rack-select-hint-em">' +
           rackLabel +
           '</span> selected.';
         var loops = estimateOutUnloadLoopCount(selectedRackCount);
-        if (loops) {
+        if (loops && !outFlowSkipsLoopUi()) {
           var loopLabel = loops === 1 ? 'Estimated 1 loop' : 'Estimated ' + loops + ' loops';
           html +=
             ' <span class="out-flow-rack-select-hint-em">' + loopLabel + '.</span>';
@@ -7418,16 +7662,30 @@
         }
       }
 
+      function showOutFlowGuideModal(presetKey) {
+        var preset = OUT_FLOW_GUIDE_PRESETS[presetKey] || OUT_FLOW_GUIDE_PRESETS.physicalUnload;
+        if (outBatchUnloadGuideTitle) outBatchUnloadGuideTitle.textContent = preset.title;
+        if (outBatchUnloadGuideImg) {
+          outBatchUnloadGuideImg.src = preset.src;
+          outBatchUnloadGuideImg.alt = preset.alt;
+        }
+        if (outBatchUnloadGuideModal) outBatchUnloadGuideModal.classList.add('open');
+      }
+
       function showOutBatchUnloadGuideModal() {
-        var guideModal = document.getElementById('out-batch-unload-guide-modal');
-        if (!guideModal) return;
-        guideModal.classList.add('open');
+        showOutFlowGuideModal('physicalUnload');
       }
 
       function closeOutBatchUnloadGuideModal() {
         var guideModal = document.getElementById('out-batch-unload-guide-modal');
         if (!guideModal) return;
         guideModal.classList.remove('open');
+        if (!outFlowIsReactionRacksPreset()) return;
+        if (outReactionAwaitingInnerGuideDismiss) {
+          advanceReactionAfterInnerGuide();
+        } else if (outReactionAwaitingOuterGuideDismiss) {
+          advanceReactionAfterOuterGuide();
+        }
       }
 
       /** Show table, check Used (tip/hopper/spatula) racks, enable footer Start / Refresh (step 1 rack selection). */
@@ -7655,7 +7913,7 @@
       }
 
       function ensureOutBatchActiveRowsCheckedForPreset() {
-        if (outFlowPreset !== 'outer_flash_filter') return;
+        if (!outFlowUsesOneRackPerLoop()) return;
         var activeCount = getOutFlowPresetMeta().activeRowCount;
         for (var n = 1; n <= activeCount; n++) {
           var cb = document.getElementById('out-batch-select-' + n);
@@ -7664,16 +7922,82 @@
         syncOutBatchSelectAllState();
       }
 
+      /** 2× ceramic racks — #BUTTON:unload_reaction_racks 专用演示数据。 */
+      function seedOutBatchTableReactionRackRows(opts) {
+        opts = opts || {};
+        if (!opts.preservePeel) {
+          resetOutBatchTableDisplayEmpty();
+          resetOutBatchRowPeelState();
+          resetOutBatchTableRowVisibility();
+        }
+        var specs = [
+          ['consumable', 'CR20260511L5A01', '5001', '', '48', '208:1/A-1'],
+          ['consumable', 'CR20260511L5A02', '5001', '', '48', '208:1/B-1']
+        ];
+        for (var i = 0; i < specs.length; i++) {
+          var n = i + 1;
+          var cb = document.getElementById('out-batch-select-' + n);
+          var bc = document.getElementById('out-batch-barcode-' + n);
+          var rackEl = document.getElementById('out-batch-rack-' + n);
+          var ct = document.getElementById('out-batch-consumable-type-' + n);
+          var qty = document.getElementById('out-batch-qty-' + n);
+          var rowEl = cb ? cb.closest('tr') : null;
+          if (opts.preservePeel && rowEl && rowEl.classList.contains('out-batch-row-peeled')) continue;
+          var s = specs[i];
+          if (rowEl) rowEl.setAttribute('data-out-tray', s[0]);
+          if (bc) bc.textContent = s[1];
+          if (rackEl) {
+            rackEl.textContent = outBatchRackLabel(s[2]);
+            rackEl.setAttribute('data-code', s[2] || '');
+          }
+          if (ct && !getOutBatchRackExpandChemicals(s[2])) {
+            ct.textContent = outBatchConsumableDisplay(s[2], s[3]);
+            ct.setAttribute('data-code', s[3] || '');
+          }
+          if (qty) qty.textContent = s[4] || '';
+          initOutBatchRowUsageForRow(n, s[2]);
+          var expandChems = getOutBatchRackExpandChemicals(s[2]);
+          if (expandChems) {
+            setupOutBatchRowChemicalExpand(n, expandChems, n === 1 || n === 2);
+          } else {
+            clearOutBatchChemicalExpandUi(n);
+          }
+          if (rowEl && s[5]) {
+            var posElSeed = rowEl.querySelector('.flow-batch-position-label');
+            if (posElSeed) {
+              posElSeed.setAttribute('data-position-fixed', '1');
+              posElSeed.setAttribute('data-position-slot', s[5]);
+            }
+          }
+          if (cb) cb.checked = true;
+          if (rowEl) syncOutBatchRowFilterData(rowEl);
+        }
+        applyOutBatchPositionLabels();
+        applyOutBatchUsageAndCheckboxToAllRows();
+        applyOutBatchTableDataFieldsLocked();
+        if (!document.getElementById('out-flow-step3-batch-table-wrap').classList.contains('out-batch-tray-status-visible')) {
+          for (var ri = 1; ri <= OUT_BATCH_ROW_COUNT; ri++) {
+            renderOutBatchTrayStatusTag(ri, null);
+          }
+        }
+        refreshOutBatchTableLayout();
+        if (!opts.preservePeel) {
+          ensureOutBatchActiveRowsCheckedForPreset();
+        }
+      }
+
       function seedOutBatchTableForCurrentPreset(opts) {
         if (outFlowPreset === 'outer_flash_filter') {
           seedOutBatchTableOuterFlashFilterRows(opts);
+        } else if (outFlowPreset === 'reaction_racks') {
+          seedOutBatchTableReactionRackRows(opts);
         } else {
           seedOutBatchTableDemoRows();
         }
       }
 
       function outFlowSeedOptsForLoopRestart() {
-        return outFlowPreset === 'outer_flash_filter' ? { preservePeel: true } : undefined;
+        return outFlowUsesOneRackPerLoop() ? { preservePeel: true } : undefined;
       }
 
       function seedOutBatchTableDemoRows() {
@@ -7858,6 +8182,8 @@
         outAwaitingFooterAfterFirstOneOfThreeStep4 = false;
         outAwaitingCompletionFooter = false;
         hideOutStep4FinalConfirmUi();
+        outReactionAwaitingInnerGuideDismiss = false;
+        outReactionAwaitingOuterGuideDismiss = false;
         closeOutBatchUnloadGuideModal();
         resetOutStep2PurgeCycleDisplay();
         resetOutStep4PurgeCycleDisplay();
@@ -7874,6 +8200,7 @@
         if (footerCloseOut) footerCloseOut.classList.remove('visible');
         hideOutPurgeMetricsWraps();
         initOutSetupPanel();
+        syncOutFlowStepsLayout();
         setOutRightPanelMode('hidden');
         resetOutStepModeTags();
         resetOutUnloadCycleBarState();
@@ -7922,7 +8249,11 @@
         lockOutSetupPanel();
         outFlowModalStart.disabled = true;
         markOutFlowRunning();
-        runOutStep1CompletionIntoStep2();
+        if (outFlowIsReactionRacksPreset()) {
+          runOutReactionFlowAfterStart();
+        } else {
+          runOutStep1CompletionIntoStep2();
+        }
       }
 
       function onOutStep5OuterDoorConfirmed() {
@@ -7984,6 +8315,11 @@
         markOutBatchCurrentBatchRemoved();
         setOutStepItemState(OUT_FLOW_STEP_BATCH, 'finish');
 
+        if (outFlowIsReactionRacksPreset()) {
+          completeReactionOutUnload();
+          return;
+        }
+
         if (outUnloadCycleCurrent === outUnloadCycleTotal && outUnloadFinalPassSequencesRemaining === 0) {
           outUnloadFinalPassSequencesRemaining = outUnloadCycleTotal;
         }
@@ -8001,12 +8337,12 @@
           return;
         }
         if (modalOut.classList.contains('open')) return;
-        var nextPreset = preset === 'outer_flash_filter' ? 'outer_flash_filter' : 'general';
-        resetOutFlowUi();
+        var nextPreset = resolveOutFlowPresetFromArg(preset);
         outFlowPreset = nextPreset;
+        resetOutFlowUi();
         if (entryButton) {
           outFlowEntryButton = entryButton;
-        } else if (outFlowPreset === 'outer_flash_filter') {
+        } else if (outFlowUsesOneRackPerLoop()) {
           outFlowEntryButton = getOutFlowPresetMeta().entryButton;
         } else {
           outFlowEntryButton = 'out_general';
@@ -8749,6 +9085,10 @@
           onUnloadAnalyticalSamples: function () {
             openModalOut('outer_flash_filter', 'unload_analytical_samples');
             return Promise.resolve();
+          },
+          onUnloadReactionRacks: function () {
+            openModalOut('reaction_racks', 'unload_reaction_racks');
+            return Promise.resolve();
           }
         }
       });
@@ -8900,9 +9240,7 @@
           if (t && t.id === 'out-batch-select-all') {
             var on = t.checked;
             outBatchWrapEl
-              .querySelectorAll(
-                'tbody tr:not(.out-batch-row-peeled):not(.out-batch-row-filter-hidden) .flow-batch-rack-checkbox'
-              )
+              .querySelectorAll(outBatchVisibleRowCheckboxSelector())
               .forEach(function (cb) {
                 cb.checked = on;
               });
