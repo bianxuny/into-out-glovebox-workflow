@@ -1283,7 +1283,13 @@
     #out-flow-step3-batch-table-wrap tbody tr.out-batch-chemical-detail-row td.out-batch-chemical-detail-role {
       padding: 2px var(--out-batch-cell-x) 10px;
     }
+    #out-flow-step3-batch-table-wrap tbody tr.out-batch-chemical-detail-row td.out-batch-chemical-detail-barcode,
+    #out-flow-step3-batch-table-wrap tbody tr.out-batch-chemical-detail-row td.out-batch-chemical-detail-rack {
+      padding: 2px var(--out-batch-cell-x) 10px;
+    }
     .out-batch-chemical-hole-list,
+    .out-batch-chemical-barcode-list,
+    .out-batch-chemical-rack-list,
     .out-batch-chemical-name-list,
     .out-batch-chemical-role-list {
       margin: 0;
@@ -1292,6 +1298,8 @@
       min-width: 0;
     }
     .out-batch-chemical-hole-list li,
+    .out-batch-chemical-barcode-list li,
+    .out-batch-chemical-rack-list li,
     .out-batch-chemical-name-list li,
     .out-batch-chemical-role-list li {
       font-size: 14px;
@@ -1301,17 +1309,26 @@
       box-sizing: content-box;
     }
     .out-batch-chemical-hole-list li:first-child,
+    .out-batch-chemical-barcode-list li:first-child,
+    .out-batch-chemical-rack-list li:first-child,
     .out-batch-chemical-name-list li:first-child,
     .out-batch-chemical-role-list li:first-child {
       padding-top: 2px;
     }
     .out-batch-chemical-hole-list li:last-child,
+    .out-batch-chemical-barcode-list li:last-child,
+    .out-batch-chemical-rack-list li:last-child,
     .out-batch-chemical-name-list li:last-child,
     .out-batch-chemical-role-list li:last-child {
       padding-bottom: 2px;
     }
     .out-batch-chemical-hole-list li {
       color: rgba(0, 0, 0, 0.45);
+      font-variant-numeric: tabular-nums;
+    }
+    .out-batch-chemical-barcode-list li,
+    .out-batch-chemical-rack-list li {
+      color: rgba(0, 0, 0, 0.88);
       font-variant-numeric: tabular-nums;
     }
     .out-batch-chemical-name-list li {
@@ -1321,31 +1338,25 @@
     .out-batch-chemical-role-list li {
       display: flex;
       align-items: center;
+      gap: 16px;
     }
-    .out-batch-chemical-role {
+    .out-batch-chemical-role-list li.out-batch-chemical-amount-single {
+      justify-content: flex-start;
+    }
+    .out-batch-chemical-role-list li.out-batch-chemical-amount-both .out-batch-chemical-amount-mg,
+    .out-batch-chemical-role-list li.out-batch-chemical-amount-both .out-batch-chemical-amount-ul {
+      flex: 1 1 0;
+    }
+    .out-batch-chemical-role-list li.out-batch-chemical-amount-single .out-batch-chemical-amount-mg,
+    .out-batch-chemical-role-list li.out-batch-chemical-amount-single .out-batch-chemical-amount-ul {
       flex: 0 0 auto;
-      display: inline-block;
-      padding: 0 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 22px;
-      border: 1px solid transparent;
     }
-    .out-batch-chemical-role-substrate {
-      color: #ad4e00;
-      background: #fff7e6;
-      border-color: #ffd591;
-    }
-    .out-batch-chemical-role-catalyst {
-      color: #722ed1;
-      background: #f9f0ff;
-      border-color: #d3adf7;
-    }
-    .out-batch-chemical-role-base {
-      color: #874d00;
-      background: #faf6f0;
-      border-color: #e8d4b8;
+    .out-batch-chemical-amount-mg,
+    .out-batch-chemical-amount-ul {
+      min-width: 4.5em;
+      font-variant-numeric: tabular-nums;
+      color: rgba(0, 0, 0, 0.88);
+      white-space: nowrap;
     }
     .out-batch-consumable-expand {
       display: inline-flex;
@@ -1383,6 +1394,24 @@
       width: 12px;
       height: 12px;
     }
+    .out-batch-consumable-expand-all-btn {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .out-batch-consumable-expand-all-btn:hover .out-batch-consumable-expand-chevron {
+      color: #1677ff;
+    }
+    #out-flow-step3-batch-table-wrap .flow-batch-th-inner .out-batch-consumable-expand-all-btn {
+      margin-right: 2px;
+    }
+
     #out-flow-step3-batch-table-wrap .flow-batch-usage-th,
     #out-flow-step3-batch-table-wrap .flow-batch-usage-cell {
       display: none !important;
@@ -2050,6 +2079,204 @@
       width: 100%;
       height: auto;
       vertical-align: top;
+    }
+
+    /* Into Step 3 — consumable detail overlay (eye icon) */
+    #into-batch-detail-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      background: rgba(0, 0, 0, 0.55);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #into-batch-detail-modal.open {
+      display: flex;
+    }
+    .into-batch-detail-panel {
+      position: relative;
+      width: 100%;
+      max-width: 920px;
+      max-height: min(80vh, 640px);
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+        0 9px 28px 8px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    .into-batch-detail-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .into-batch-detail-header h2 {
+      margin: 0;
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.88);
+      line-height: 1.35;
+    }
+    .into-batch-detail-header .flow-modal-close {
+      margin: -6px -6px 0 0;
+    }
+    .into-batch-detail-table-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 16px 16px;
+    }
+    .into-batch-detail-table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .into-batch-detail-table-wrap thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.88);
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      white-space: nowrap;
+      box-shadow: 0 1px 0 #f0f0f0;
+    }
+    .into-batch-detail-table-wrap tbody td {
+      padding: 10px 12px;
+      vertical-align: middle;
+      color: rgba(0, 0, 0, 0.88);
+      background: #fff;
+    }
+    .into-batch-detail-table-wrap tbody tr + tr td {
+      border-top: 1px solid #f0f0f0;
+    }
+
+    /* Out Step 1 — resource detail overlay (eye icon) */
+    #out-batch-detail-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      background: rgba(0, 0, 0, 0.55);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #out-batch-detail-modal.open {
+      display: flex;
+    }
+    .out-batch-detail-panel {
+      position: relative;
+      width: 100%;
+      max-width: 1080px;
+      max-height: min(85vh, 720px);
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+        0 9px 28px 8px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    .out-batch-detail-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .out-batch-detail-header h2 {
+      margin: 0;
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.88);
+      line-height: 1.35;
+    }
+    .out-batch-detail-header .flow-modal-close {
+      margin: -6px -6px 0 0;
+    }
+    .out-batch-detail-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 16px 16px;
+    }
+    .out-batch-detail-meta {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 8px 16px;
+      margin: 12px 0 0;
+      padding: 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .out-batch-detail-meta dt {
+      margin: 0;
+      text-align: right;
+      color: rgba(0, 0, 0, 0.45);
+      white-space: nowrap;
+    }
+    .out-batch-detail-meta dd {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.88);
+      word-break: break-word;
+    }
+    .out-batch-detail-subheading {
+      margin: 16px 0 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.88);
+      line-height: 1.5;
+    }
+    .out-batch-detail-table-wrap {
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .out-batch-detail-table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .out-batch-detail-table-wrap thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      text-align: left;
+      padding: 8px 10px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.88);
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      white-space: nowrap;
+      box-shadow: 0 1px 0 #f0f0f0;
+    }
+    .out-batch-detail-table-wrap tbody td {
+      padding: 8px 10px;
+      vertical-align: middle;
+      color: rgba(0, 0, 0, 0.88);
+      background: #fff;
+      white-space: nowrap;
+    }
+    .out-batch-detail-table-wrap tbody tr + tr td {
+      border-top: 1px solid #f0f0f0;
     }
 
     .hint {
@@ -3636,11 +3863,11 @@
                                 </div>
                               </div>
                             </th>
-                            <th class="out-batch-col-data">Rack Barcode</th>
+                            <th class="out-batch-col-data">Barcode</th>
                             <th class="flow-batch-th-filterable out-batch-col-data">
                               <span class="flow-batch-th-inner">
-                                <span>Rack</span>
-                                <button type="button" class="flow-batch-filter-trigger" data-out-filter-key="rack" aria-label="Filter Rack" aria-haspopup="true" aria-expanded="false">
+                                <span>Type</span>
+                                <button type="button" class="flow-batch-filter-trigger" data-out-filter-key="rack" aria-label="Filter Type" aria-haspopup="true" aria-expanded="false">
                                   <svg class="flow-batch-col-icon-svg flow-batch-filter-icon-svg" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round" stroke-linecap="round"><path d="M2.75 5.25h14.5L11.25 11.75v5.25l-2.5-1.25v-4L2.75 5.25z"/></svg>
                                 </button>
                               </span>
@@ -3655,8 +3882,25 @@
                             </th>
                             <th class="flow-batch-th-filterable out-batch-col-data">
                               <span class="flow-batch-th-inner">
-                                <span>Consumables Type</span>
-                                <button type="button" class="flow-batch-filter-trigger" data-out-filter-key="consumable" aria-label="Filter Consumables Type" aria-haspopup="true" aria-expanded="false">
+                                <button
+                                  type="button"
+                                  class="out-batch-consumable-expand-all-btn"
+                                  id="out-batch-consumable-expand-all-btn"
+                                  aria-label="Expand or collapse all consumables"
+                                  aria-expanded="true"
+                                >
+                                  <span
+                                    class="out-batch-consumable-expand-chevron is-expanded"
+                                    id="out-batch-consumable-expand-all-chevron"
+                                    aria-hidden="true"
+                                  >
+                                    <svg viewBox="0 0 1024 1024" focusable="false" fill="currentColor" aria-hidden="true">
+                                      <path d="M512 654L256 398l60-60 196 196 196-196 60 60z" />
+                                    </svg>
+                                  </span>
+                                </button>
+                                <span>Substance Type</span>
+                                <button type="button" class="flow-batch-filter-trigger" data-out-filter-key="consumable" aria-label="Filter Substance Type" aria-haspopup="true" aria-expanded="false">
                                   <svg class="flow-batch-col-icon-svg flow-batch-filter-icon-svg" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round" stroke-linecap="round"><path d="M2.75 5.25h14.5L11.25 11.75v5.25l-2.5-1.25v-4L2.75 5.25z"/></svg>
                                 </button>
                               </span>
@@ -3671,12 +3915,12 @@
                             </th>
                             <th class="flow-batch-th-sortable out-batch-col-data">
                               <span class="flow-batch-th-inner">
-                                <span>Consumable Quantity</span>
+                                <span>Quantity</span>
                                 <button
                                   type="button"
                                   class="flow-batch-sort-trigger"
                                   data-out-sort-key="qty"
-                                  aria-label="Sort Consumable Quantity"
+                                  aria-label="Sort Quantity"
                                   aria-haspopup="true"
                                   aria-expanded="false"
                                   aria-sort="none"
@@ -4564,6 +4808,83 @@
     </div>
   </div>
 
+  <!-- Into Step 3 — consumable detail (Edit column eye icon) -->
+  <div
+    id="into-batch-detail-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="into-batch-detail-title"
+  >
+    <div class="into-batch-detail-panel">
+      <div class="into-batch-detail-header">
+        <h2 id="into-batch-detail-title">Consumable details</h2>
+        <button type="button" class="flow-modal-close" id="into-batch-detail-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="into-batch-detail-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Barcode</th>
+              <th>Slot</th>
+              <th>Model_id</th>
+              <th>Chemical_name</th>
+              <th>Amount</th>
+              <th>Unit</th>
+            </tr>
+          </thead>
+          <tbody id="into-batch-detail-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Out Step 1 — resource detail (Edit column eye icon) -->
+  <div
+    id="out-batch-detail-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="out-batch-detail-title"
+  >
+    <div class="out-batch-detail-panel">
+      <div class="out-batch-detail-header">
+        <h2 id="out-batch-detail-title">Resource details</h2>
+        <button type="button" class="flow-modal-close" id="out-batch-detail-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="out-batch-detail-body">
+        <dl class="out-batch-detail-meta">
+          <dt>Resource Name:</dt>
+          <dd id="out-batch-detail-resource-name">—</dd>
+          <dt>Position:</dt>
+          <dd id="out-batch-detail-position">—</dd>
+          <dt>Attributes:</dt>
+          <dd id="out-batch-detail-attributes">—</dd>
+          <dt>Update Time:</dt>
+          <dd id="out-batch-detail-update-time">—</dd>
+        </dl>
+        <h3 class="out-batch-detail-subheading">Sub-Resource</h3>
+        <div class="out-batch-detail-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Slot</th>
+                <th>Resource</th>
+                <th>Amount_mg</th>
+                <th>Amount_ul</th>
+                <th>Barcode</th>
+                <th>Cap_pos</th>
+                <th>With_cap</th>
+                <th>Chemical_name</th>
+                <th>Compound_mw</th>
+                <th>Used</th>
+              </tr>
+            </thead>
+            <tbody id="out-batch-detail-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="storage_system.browser.plugin.js"></script>
   <script>
     (function () {
@@ -4599,6 +4920,18 @@
       var outBatchUnloadGuideClose = document.getElementById('out-batch-unload-guide-close');
       var outBatchUnloadGuideTitle = document.getElementById('out-batch-unload-guide-title');
       var outBatchUnloadGuideImg = document.getElementById('out-batch-unload-guide-img');
+      var intoBatchDetailModal = document.getElementById('into-batch-detail-modal');
+      var intoBatchDetailClose = document.getElementById('into-batch-detail-close');
+      var intoBatchDetailTitle = document.getElementById('into-batch-detail-title');
+      var intoBatchDetailTbody = document.getElementById('into-batch-detail-tbody');
+      var outBatchDetailModal = document.getElementById('out-batch-detail-modal');
+      var outBatchDetailClose = document.getElementById('out-batch-detail-close');
+      var outBatchDetailTitle = document.getElementById('out-batch-detail-title');
+      var outBatchDetailResourceName = document.getElementById('out-batch-detail-resource-name');
+      var outBatchDetailPosition = document.getElementById('out-batch-detail-position');
+      var outBatchDetailAttributes = document.getElementById('out-batch-detail-attributes');
+      var outBatchDetailUpdateTime = document.getElementById('out-batch-detail-update-time');
+      var outBatchDetailTbody = document.getElementById('out-batch-detail-tbody');
       var OUT_FLOW_GUIDE_PRESETS = {
         physicalUnload: {
           title: 'Physical unload guide',
@@ -6410,25 +6743,32 @@
       };
       var OUT_BATCH_HRA1_SOLID_RACK_CODE = '5300';
       var OUT_BATCH_D1_LIQUID_RACK_CODE = '5203';
-      var OUT_BATCH_CHEMICAL_ROLE_META = {
-        Substrate: { cls: 'out-batch-chemical-role-substrate', label: 'Substrate' },
-        Catalyst: { cls: 'out-batch-chemical-role-catalyst', label: 'Catalyst' },
-        Base: { cls: 'out-batch-chemical-role-base', label: 'Base' }
-      };
+      var OUT_BATCH_DETAIL_SUB_BARCODES = [
+        'ACA002601',
+        'ACA002602',
+        'ACA002603',
+        'ACA002604',
+        'ACA002605',
+        'ACA002606',
+        'ACA002607',
+        'ACA002608',
+        'ACA002609',
+        'ACA002610'
+      ];
       var OUT_BATCH_HRA1_SOLID_CHEMICALS = [
-        { hole: 'A-1', name: 'aniline', role: 'Substrate' },
-        { hole: 'A-2', name: 'BrettPhos Pd G4_beads_0.05mmol/g', role: 'Catalyst' },
-        { hole: 'A-3', name: 'BrettPhos Pd G4_beads_0.05mmol/g', role: 'Catalyst' },
-        { hole: 'A-4', name: 'BrettPhos Pd G4_beads_0.05mmol/g', role: 'Catalyst' },
-        { hole: 'A-5', name: 'RuPhos Pd G4', role: 'Catalyst' },
-        { hole: 'A-6', name: 't-BuXPhos Pd G4', role: 'Catalyst' },
-        { hole: 'B-1', name: 'XantPhos Pd G4', role: 'Catalyst' },
-        { hole: 'B-2', name: 'Cs2CO3', role: 'Base' },
-        { hole: 'B-3', name: 'Cs2CO3', role: 'Base' },
-        { hole: 'B-4', name: 't-BuONa', role: 'Base' }
+        { hole: 'A-1', name: 'aniline', role: 'Substrate', amountMg: null, amountUl: null, barcode: 'ACA002601' },
+        { hole: 'A-2', name: 'BrettPhos Pd G4_beads_0.05mmol/g', role: 'Catalyst', amountMg: 342.84, amountUl: null, barcode: 'ACA002602' },
+        { hole: 'A-3', name: 'BrettPhos Pd G4_beads_0.05mmol/g', role: 'Catalyst', amountMg: null, amountUl: 3800, barcode: 'ACA002603' },
+        { hole: 'A-4', name: 'BrettPhos Pd G4_beads_0.05mmol/g', role: 'Catalyst', amountMg: 342.84, amountUl: 2000, barcode: 'ACA002604' },
+        { hole: 'A-5', name: 'RuPhos Pd G4', role: 'Catalyst', amountMg: 43.6, amountUl: null, barcode: 'ACA002605' },
+        { hole: 'A-6', name: 't-BuXPhos Pd G4', role: 'Catalyst', amountMg: 41.43, amountUl: null, barcode: 'ACA002606' },
+        { hole: 'B-1', name: 'XantPhos Pd G4', role: 'Catalyst', amountMg: 47.4, amountUl: null, barcode: 'ACA002607' },
+        { hole: 'B-2', name: 'Cs2CO3', role: 'Base', amountMg: 370.19, amountUl: null, barcode: 'ACA002608' },
+        { hole: 'B-3', name: 'Cs2CO3', role: 'Base', amountMg: 370.19, amountUl: null, barcode: 'ACA002609' },
+        { hole: 'B-4', name: 't-BuONa', role: 'Base', amountMg: 296.54, amountUl: null, barcode: 'ACA002610' }
       ];
       var OUT_BATCH_D1_LIQUID_CHEMICALS = [
-        { hole: 'A-1', name: '1-bromo-4-fluorobenzene_in_0.9M_dioxane', role: 'Substrate' }
+        { hole: 'A-1', name: '1-bromo-4-fluorobenzene_in_0.9M_dioxane', role: 'Substrate', amountMg: null, amountUl: 3800, barcode: 'ACA002601' }
       ];
       var OUT_BATCH_CHEMICAL_CHEVRON_SVG =
         '<svg viewBox="0 0 1024 1024" focusable="false" fill="currentColor" aria-hidden="true">' +
@@ -6636,6 +6976,31 @@
         return 5;
       }
 
+      function getOutBatchBarcodeColIndex() {
+        var table = document.querySelector('#out-flow-step3-batch-table-wrap table');
+        if (!table) return 2;
+        var ths = table.querySelectorAll('thead tr th');
+        for (var i = 0; i < ths.length; i++) {
+          if (!ths[i].classList.contains('out-batch-col-data')) continue;
+          if (ths[i].querySelector('[data-out-filter-key]') || ths[i].querySelector('[data-out-sort-key]')) {
+            continue;
+          }
+          var label = ths[i].textContent.replace(/\s+/g, ' ').trim();
+          if (label === 'Barcode') return i;
+        }
+        return 2;
+      }
+
+      function getOutBatchRackColIndex() {
+        var table = document.querySelector('#out-flow-step3-batch-table-wrap table');
+        if (!table) return 3;
+        var ths = table.querySelectorAll('thead tr th');
+        for (var i = 0; i < ths.length; i++) {
+          if (ths[i].querySelector('[data-out-filter-key="rack"]')) return i;
+        }
+        return 3;
+      }
+
       function syncOutBatchTableColgroup() {
         var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
         var table = wrap && wrap.querySelector('table');
@@ -6697,22 +7062,106 @@
             return {
               hole: c.hole ? String(c.hole) : '',
               name: String(c.name),
-              role: c.role ? String(c.role) : ''
+              role: c.role ? String(c.role) : '',
+              amountMg: c.amountMg != null && c.amountMg !== '' ? c.amountMg : null,
+              amountUl: c.amountUl != null && c.amountUl !== '' ? c.amountUl : null,
+              barcode: c.barcode ? String(c.barcode) : '',
+              rack: c.rack ? String(c.rack) : 'HRA1'
             };
           }
-          return { hole: '', name: String(c), role: '' };
+          return { hole: '', name: String(c), role: '', amountMg: null, amountUl: null, barcode: '', rack: 'HRA1' };
         });
       }
 
-      function buildOutBatchChemicalRoleTagHtml(role) {
-        var meta = role && OUT_BATCH_CHEMICAL_ROLE_META[role];
-        if (!meta) return '';
+      function prepareOutBatchChemicalEntriesForDetail(entries) {
+        return entries.map(function (entry, idx) {
+          return {
+            hole: entry.hole || '',
+            name: entry.name || '\u00a0',
+            role: entry.role || '',
+            amountMg: entry.amountMg != null && entry.amountMg !== '' ? entry.amountMg : null,
+            amountUl: entry.amountUl != null && entry.amountUl !== '' ? entry.amountUl : null,
+            barcode: entry.barcode || OUT_BATCH_DETAIL_SUB_BARCODES[idx] || '',
+            rack: 'HRA1'
+          };
+        });
+      }
+
+      function outBatchChemicalAmountHasValue(value) {
+        return value != null && value !== '';
+      }
+
+      function formatOutBatchChemicalAmount(value, unit) {
+        return String(value) + ' ' + unit;
+      }
+
+      function buildOutBatchChemicalAmountItemHtml(entry) {
+        var hasMg = outBatchChemicalAmountHasValue(entry.amountMg);
+        var hasUl = outBatchChemicalAmountHasValue(entry.amountUl);
+        var parts = [];
+        var liClass = 'out-batch-chemical-amount-both';
+
+        if (hasMg && hasUl) {
+          parts.push(
+            '<span class="out-batch-chemical-amount-mg">' +
+              escapeHtmlText(formatOutBatchChemicalAmount(entry.amountMg, 'mg')) +
+              '</span>' +
+              '<span class="out-batch-chemical-amount-ul">' +
+              escapeHtmlText(formatOutBatchChemicalAmount(entry.amountUl, 'ul')) +
+              '</span>'
+          );
+        } else if (hasMg) {
+          liClass = 'out-batch-chemical-amount-single';
+          parts.push(
+            '<span class="out-batch-chemical-amount-mg">' +
+              escapeHtmlText(formatOutBatchChemicalAmount(entry.amountMg, 'mg')) +
+              '</span>'
+          );
+        } else if (hasUl) {
+          liClass = 'out-batch-chemical-amount-single';
+          parts.push(
+            '<span class="out-batch-chemical-amount-ul">' +
+              escapeHtmlText(formatOutBatchChemicalAmount(entry.amountUl, 'ul')) +
+              '</span>'
+          );
+        } else {
+          liClass = 'out-batch-chemical-amount-single out-batch-chemical-amount-empty';
+          parts.push('<span class="out-batch-chemical-amount-mg">' + escapeHtmlText('- mg') + '</span>');
+        }
+
+        return '<li class="' + liClass + '">' + parts.join('') + '</li>';
+      }
+
+      function buildOutBatchChemicalRoleListHtml(entries) {
         return (
-          '<span class="out-batch-chemical-role ' +
-          meta.cls +
-          '">' +
-          escapeHtmlText(meta.label) +
-          '</span>'
+          '<ul class="out-batch-chemical-role-list" role="list">' +
+          entries.map(buildOutBatchChemicalAmountItemHtml).join('') +
+          '</ul>'
+        );
+      }
+
+      function buildOutBatchChemicalBarcodeListHtml(entries) {
+        return (
+          '<ul class="out-batch-chemical-barcode-list" role="list">' +
+          entries
+            .map(function (entry) {
+              var text = entry.barcode ? escapeHtmlText(entry.barcode) : '\u00a0';
+              return '<li>' + text + '</li>';
+            })
+            .join('') +
+          '</ul>'
+        );
+      }
+
+      function buildOutBatchChemicalRackListHtml(entries) {
+        return (
+          '<ul class="out-batch-chemical-rack-list" role="list">' +
+          entries
+            .map(function () {
+              return '<li>HRA1</li>';
+            })
+            .join('') +
+          '</ul>'
         );
       }
 
@@ -6741,21 +7190,8 @@
         );
       }
 
-      function buildOutBatchChemicalRoleListHtml(entries) {
-        return (
-          '<ul class="out-batch-chemical-role-list" role="list">' +
-          entries
-            .map(function (entry) {
-              var tag = buildOutBatchChemicalRoleTagHtml(entry.role);
-              return '<li>' + (tag || '\u00a0') + '</li>';
-            })
-            .join('') +
-          '</ul>'
-        );
-      }
-
       function buildOutBatchChemicalDetailRow(rowNum, chemicals, expanded) {
-        var entries = normalizeOutBatchChemicalEntries(chemicals);
+        var entries = prepareOutBatchChemicalEntriesForDetail(normalizeOutBatchChemicalEntries(chemicals));
         var tr = document.createElement('tr');
         tr.id = 'out-batch-chemical-detail-' + rowNum;
         tr.className =
@@ -6764,10 +7200,14 @@
         var table = document.querySelector('#out-flow-step3-batch-table-wrap table');
         var ths = table ? table.querySelectorAll('thead tr th') : [];
         var positionIdx = getOutBatchPositionColIndex();
+        var barcodeIdx = getOutBatchBarcodeColIndex();
+        var rackIdx = getOutBatchRackColIndex();
         var consumableIdx = getOutBatchConsumableColIndex();
         var roleIdx = getOutBatchQtyColIndex();
         var colCount = ths.length || getOutBatchTableColSpan();
         var holeListHtml = buildOutBatchChemicalHoleListHtml(entries);
+        var barcodeListHtml = buildOutBatchChemicalBarcodeListHtml(entries);
+        var rackListHtml = buildOutBatchChemicalRackListHtml(entries);
         var nameListHtml = buildOutBatchChemicalNameListHtml(entries);
         var roleListHtml = buildOutBatchChemicalRoleListHtml(entries);
         for (var i = 0; i < colCount; i++) {
@@ -6776,6 +7216,14 @@
             td.className = 'out-batch-chemical-detail-position';
             td.setAttribute('data-out-col', 'position');
             td.innerHTML = holeListHtml;
+          } else if (i === barcodeIdx) {
+            td.className = 'out-batch-chemical-detail-barcode';
+            td.setAttribute('data-out-col', 'barcode');
+            td.innerHTML = barcodeListHtml;
+          } else if (i === rackIdx) {
+            td.className = 'out-batch-chemical-detail-rack';
+            td.setAttribute('data-out-col', 'rack');
+            td.innerHTML = rackListHtml;
           } else if (i === consumableIdx) {
             td.className = 'out-batch-chemical-detail-consumable';
             td.setAttribute('data-out-col', 'consumable');
@@ -6821,15 +7269,17 @@
         var ct = document.getElementById('out-batch-consumable-type-' + rowNum);
         if (!tr || !ct) return;
         clearOutBatchChemicalExpandUi(rowNum);
+        var entries = prepareOutBatchChemicalEntriesForDetail(normalizeOutBatchChemicalEntries(chemicals));
         tr.setAttribute('data-out-chemical-expandable', '1');
-        ct.innerHTML = buildOutBatchConsumableExpandTriggerHtml(rowNum, chemicals.length, expanded);
+        ct.innerHTML = buildOutBatchConsumableExpandTriggerHtml(rowNum, entries.length, expanded);
         tr.insertAdjacentElement('afterend', buildOutBatchChemicalDetailRow(rowNum, chemicals, expanded));
-        tr.setAttribute('data-out-consumable', chemicals.length + ' chemicals');
+        tr.setAttribute('data-out-consumable', entries.length + ' chemicals');
         syncOutBatchRowFilterData(tr);
         syncOutBatchChemicalDetailRowVisibility(rowNum);
         var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
         var table = wrap && wrap.querySelector('table');
         if (table) tagOutBatchTableColCells(table, wrap);
+        syncOutBatchConsumableHeaderChevron();
       }
 
       function syncOutBatchChemicalDetailRowVisibility(rowNum) {
@@ -6846,13 +7296,66 @@
       function toggleOutBatchRowChemicalExpand(rowNum) {
         rowNum = parseInt(rowNum, 10);
         var detail = document.getElementById('out-batch-chemical-detail-' + rowNum);
+        if (!detail) return;
+        var expanded = detail.classList.contains('out-batch-chemical-collapsed');
+        setOutBatchRowChemicalExpanded(rowNum, expanded);
+        syncOutBatchConsumableHeaderChevron();
+      }
+
+      function setOutBatchRowChemicalExpanded(rowNum, expanded) {
+        rowNum = parseInt(rowNum, 10);
+        var detail = document.getElementById('out-batch-chemical-detail-' + rowNum);
         var btn = document.querySelector('[data-out-chemical-toggle="' + rowNum + '"]');
         if (!detail || !btn) return;
-        var expanded = detail.classList.toggle('out-batch-chemical-collapsed');
-        expanded = !expanded;
+        detail.classList.toggle('out-batch-chemical-collapsed', !expanded);
         btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
         var chev = btn.querySelector('.out-batch-consumable-expand-chevron');
         if (chev) chev.classList.toggle('is-expanded', expanded);
+      }
+
+      function getOutBatchExpandableRowNums() {
+        var nums = [];
+        var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
+        if (!wrap) return nums;
+        wrap.querySelectorAll('tr[data-out-chemical-expandable="1"]').forEach(function (tr) {
+          if (tr.classList.contains('out-batch-row-peeled')) return;
+          var cb = tr.querySelector('.flow-batch-rack-checkbox');
+          if (!cb || !cb.id) return;
+          var m = cb.id.match(/out-batch-select-(\d+)/);
+          if (m) nums.push(parseInt(m[1], 10));
+        });
+        return nums;
+      }
+
+      function syncOutBatchConsumableHeaderChevron() {
+        var headerBtn = document.getElementById('out-batch-consumable-expand-all-btn');
+        var headerChev = document.getElementById('out-batch-consumable-expand-all-chevron');
+        var rowNums = getOutBatchExpandableRowNums();
+        if (!headerBtn || !headerChev) return;
+        if (!rowNums.length) {
+          headerChev.classList.remove('is-expanded');
+          headerBtn.setAttribute('aria-expanded', 'false');
+          headerBtn.disabled = true;
+          return;
+        }
+        headerBtn.disabled = false;
+        var allExpanded = rowNums.every(function (n) {
+          var detail = document.getElementById('out-batch-chemical-detail-' + n);
+          return detail && !detail.classList.contains('out-batch-chemical-collapsed');
+        });
+        headerChev.classList.toggle('is-expanded', allExpanded);
+        headerBtn.setAttribute('aria-expanded', allExpanded ? 'true' : 'false');
+      }
+
+      function toggleOutBatchAllChemicalExpand() {
+        var headerChev = document.getElementById('out-batch-consumable-expand-all-chevron');
+        var rowNums = getOutBatchExpandableRowNums();
+        if (!rowNums.length) return;
+        var expandAll = !(headerChev && headerChev.classList.contains('is-expanded'));
+        rowNums.forEach(function (n) {
+          setOutBatchRowChemicalExpanded(n, expandAll);
+        });
+        syncOutBatchConsumableHeaderChevron();
       }
 
       function outBatchPositionSlotFromDisplay(text) {
@@ -7254,6 +7757,12 @@
         var wrap = document.getElementById('out-flow-step3-batch-table-wrap');
         if (!wrap || wrap.getAttribute('data-out-filters-ready') === '1') return;
         wrap.addEventListener('click', function (e) {
+          var expandAllBtn = e.target.closest('#out-batch-consumable-expand-all-btn');
+          if (expandAllBtn && !expandAllBtn.disabled) {
+            e.preventDefault();
+            toggleOutBatchAllChemicalExpand();
+            return;
+          }
           var chemBtn = e.target.closest('[data-out-chemical-toggle]');
           if (chemBtn && !chemBtn.disabled) {
             e.preventDefault();
@@ -7994,6 +8503,7 @@
         } else {
           seedOutBatchTableDemoRows();
         }
+        syncOutBatchConsumableHeaderChevron();
       }
 
       function outFlowSeedOptsForLoopRestart() {
@@ -8458,6 +8968,130 @@
           intoBatchRowActionBtnHtml('view', 'eye-outlined', 'View details') +
           '</div>'
         );
+      }
+
+      /** Demo consumable-well rows for into-flow detail modal (8 slots). */
+      var INTO_BATCH_DETAIL_DEMO_ROWS = [
+        { barcode: 'ACA002602', slot: 'A-1', modelId: '5210', chemicalName: 'Piperidinium acetate_S1', amount: '1000', unit: 'ul' },
+        { barcode: 'ACA002603', slot: 'A-2', modelId: '5210', chemicalName: 'Piperidine_S1', amount: '500', unit: 'ul' },
+        { barcode: 'ACA002604', slot: 'A-3', modelId: '5210', chemicalName: 'Acetic acid_S1', amount: '750', unit: 'ul' },
+        { barcode: 'ACA002605', slot: 'A-4', modelId: '5210', chemicalName: 'DMAc_S2', amount: '200', unit: 'ul' },
+        { barcode: 'ACA002606', slot: 'B-1', modelId: '5210', chemicalName: 'Et3N_S1', amount: '300', unit: 'ul' },
+        { barcode: 'ACA002607', slot: 'B-2', modelId: '5210', chemicalName: 'DMSO_S1', amount: '1500', unit: 'ul' },
+        { barcode: 'ACA002608', slot: 'B-3', modelId: '5210', chemicalName: 'THF_S1', amount: '800', unit: 'ul' },
+        { barcode: 'ACA002609', slot: 'B-4', modelId: '5210', chemicalName: 'MeOH_S1', amount: '600', unit: 'ul' }
+      ];
+
+      function renderIntoBatchDetailTableRows() {
+        if (!intoBatchDetailTbody) return;
+        intoBatchDetailTbody.innerHTML = INTO_BATCH_DETAIL_DEMO_ROWS.map(function (row) {
+          return (
+            '<tr>' +
+            '<td>' + row.barcode + '</td>' +
+            '<td>' + row.slot + '</td>' +
+            '<td>' + row.modelId + '</td>' +
+            '<td>' + row.chemicalName + '</td>' +
+            '<td>' + row.amount + '</td>' +
+            '<td>' + row.unit + '</td>' +
+            '</tr>'
+          );
+        }).join('');
+      }
+
+      function openIntoBatchDetailModal(positionLabel) {
+        if (!intoBatchDetailModal) return;
+        if (intoBatchDetailTitle) {
+          intoBatchDetailTitle.textContent =
+            'Consumable details' + (positionLabel && positionLabel !== '—' ? ' — ' + positionLabel : '');
+        }
+        renderIntoBatchDetailTableRows();
+        intoBatchDetailModal.classList.add('open');
+      }
+
+      function closeIntoBatchDetailModal() {
+        if (intoBatchDetailModal) intoBatchDetailModal.classList.remove('open');
+      }
+
+      /** Demo sub-resource rows for out-flow detail modal (8 slots). */
+      var OUT_BATCH_DETAIL_DEMO_ROWS = [
+        { slot: 'A-1', resource: 'HRA1', amountMg: '0', amountUl: '1000', barcode: '--', capPos: '--', withCap: 'true', chemicalName: 'Piperidinium acetate_S1', compoundMw: '0', used: 'false' },
+        { slot: 'A-2', resource: 'HRA1', amountMg: '0', amountUl: '1200', barcode: '--', capPos: '--', withCap: 'false', chemicalName: 'Piperidine_S1', compoundMw: '0', used: 'true' },
+        { slot: 'A-3', resource: 'HRA1', amountMg: '0', amountUl: '1800', barcode: '--', capPos: '--', withCap: 'true', chemicalName: '460-10-8_0.5M_in_DMF', compoundMw: '0', used: 'false' },
+        { slot: 'A-4', resource: 'HRA1', amountMg: '0', amountUl: '2500', barcode: '--', capPos: '--', withCap: 'true', chemicalName: '460-00-4_0.9M_in_Toluene', compoundMw: '0', used: 'false' },
+        { slot: 'B-1', resource: 'HRA1', amountMg: '50', amountUl: '0', barcode: 'ACA002601', capPos: '1', withCap: 'true', chemicalName: 'aniline', compoundMw: '93.13', used: 'false' },
+        { slot: 'B-2', resource: 'HRA1', amountMg: '25', amountUl: '0', barcode: 'ACA002602', capPos: '2', withCap: 'false', chemicalName: 'Cs2CO3', compoundMw: '325.82', used: 'true' },
+        { slot: 'B-3', resource: 'HRA1', amountMg: '0', amountUl: '800', barcode: '--', capPos: '--', withCap: 'true', chemicalName: 'THF_S1', compoundMw: '0', used: 'false' },
+        { slot: 'B-4', resource: 'HRA1', amountMg: '0', amountUl: '600', barcode: '--', capPos: '--', withCap: 'true', chemicalName: 'MeOH_S1', compoundMw: '0', used: 'false' }
+      ];
+
+      function getOutBatchRowNumFromTr(tr) {
+        if (!tr) return null;
+        var cb = tr.querySelector('.flow-batch-rack-checkbox');
+        if (!cb || !cb.id) return null;
+        var m = cb.id.match(/out-batch-select-(\d+)/);
+        return m ? parseInt(m[1], 10) : null;
+      }
+
+      function getOutBatchDetailMetaFromTr(tr) {
+        var rowNum = getOutBatchRowNumFromTr(tr);
+        var posEl = tr && tr.querySelector('.flow-batch-position-label');
+        var posRaw = posEl
+          ? posEl.getAttribute('data-position-slot') || posEl.textContent.trim()
+          : '';
+        var posSlot = outBatchPositionSlotFromDisplay(posRaw);
+        var position =
+          posSlot.indexOf('Automated HTE glovebox/') === 0
+            ? posSlot
+            : 'Automated HTE glovebox/' + posSlot;
+        var rackEl = rowNum ? document.getElementById('out-batch-rack-' + rowNum) : null;
+        var resourceName = rackEl && rackEl.textContent.trim() ? rackEl.textContent.trim() : '—';
+        var bcEl = rowNum ? document.getElementById('out-batch-barcode-' + rowNum) : null;
+        var rackBarcode = bcEl && bcEl.textContent.trim() ? bcEl.textContent.trim() : 'HRA100001';
+        return {
+          resourceName: resourceName,
+          position: position || '—',
+          attributes: 'barcode: ' + rackBarcode + ', direction: long',
+          updateTime: '2026-06-02 15:29:26'
+        };
+      }
+
+      function renderOutBatchDetailTableRows() {
+        if (!outBatchDetailTbody) return;
+        outBatchDetailTbody.innerHTML = OUT_BATCH_DETAIL_DEMO_ROWS.map(function (row) {
+          return (
+            '<tr>' +
+            '<td>' + escapeHtmlText(row.slot) + '</td>' +
+            '<td>' + escapeHtmlText(row.resource) + '</td>' +
+            '<td>' + escapeHtmlText(row.amountMg) + '</td>' +
+            '<td>' + escapeHtmlText(row.amountUl) + '</td>' +
+            '<td>' + escapeHtmlText(row.barcode) + '</td>' +
+            '<td>' + escapeHtmlText(row.capPos) + '</td>' +
+            '<td>' + escapeHtmlText(row.withCap) + '</td>' +
+            '<td>' + escapeHtmlText(row.chemicalName) + '</td>' +
+            '<td>' + escapeHtmlText(row.compoundMw) + '</td>' +
+            '<td>' + escapeHtmlText(row.used) + '</td>' +
+            '</tr>'
+          );
+        }).join('');
+      }
+
+      function openOutBatchDetailModal(tr) {
+        if (!outBatchDetailModal) return;
+        var meta = getOutBatchDetailMetaFromTr(tr);
+        if (outBatchDetailTitle) {
+          outBatchDetailTitle.textContent =
+            'Resource details' + (meta.resourceName && meta.resourceName !== '—' ? ' — ' + meta.resourceName : '');
+        }
+        if (outBatchDetailResourceName) outBatchDetailResourceName.textContent = meta.resourceName;
+        if (outBatchDetailPosition) outBatchDetailPosition.textContent = meta.position;
+        if (outBatchDetailAttributes) outBatchDetailAttributes.textContent = meta.attributes;
+        if (outBatchDetailUpdateTime) outBatchDetailUpdateTime.textContent = meta.updateTime;
+        renderOutBatchDetailTableRows();
+        outBatchDetailModal.classList.add('open');
+      }
+
+      function closeOutBatchDetailModal() {
+        if (outBatchDetailModal) outBatchDetailModal.classList.remove('open');
       }
 
       function upgradeOutBatchTableEditColumn() {
@@ -9161,6 +9795,22 @@
           if (e.target === outBatchUnloadGuideModal) closeOutBatchUnloadGuideModal();
         });
       }
+      if (intoBatchDetailClose) {
+        intoBatchDetailClose.addEventListener('click', closeIntoBatchDetailModal);
+      }
+      if (intoBatchDetailModal) {
+        intoBatchDetailModal.addEventListener('click', function (e) {
+          if (e.target === intoBatchDetailModal) closeIntoBatchDetailModal();
+        });
+      }
+      if (outBatchDetailClose) {
+        outBatchDetailClose.addEventListener('click', closeOutBatchDetailModal);
+      }
+      if (outBatchDetailModal) {
+        outBatchDetailModal.addEventListener('click', function (e) {
+          if (e.target === outBatchDetailModal) closeOutBatchDetailModal();
+        });
+      }
       function bindIntoVentPanelUi(stepKey) {
         var strategySelect = intoVentEl(stepKey, 'select');
         if (strategySelect) {
@@ -9208,7 +9858,7 @@
         var rowNum = getIntoBatchRowNumFromTr(tr);
         var posInput = tr && tr.querySelector('.flow-batch-position-input');
         var posLabel = posInput && posInput.value.trim() ? posInput.value.trim() : '—';
-        if (action === 'view') toast('View details (preview): ' + posLabel);
+        if (action === 'view') openIntoBatchDetailModal(posLabel);
         else if (action === 'delete') {
           if (rowNum) {
             clearIntoBatchRow(rowNum);
@@ -9257,9 +9907,7 @@
           var viewBtn = e.target.closest('.flow-batch-row-action-btn[data-action="view"]');
           if (viewBtn && !viewBtn.disabled) {
             var tr = viewBtn.closest('tr');
-            var posEl = tr && tr.querySelector('.flow-batch-position-label');
-            var posLabel = posEl && posEl.textContent.trim() ? posEl.textContent.trim() : '—';
-            toast('View details (preview): ' + posLabel);
+            if (tr) openOutBatchDetailModal(tr);
           }
         });
       }
@@ -9289,6 +9937,16 @@
       }
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
+        if (outBatchDetailModal && outBatchDetailModal.classList.contains('open')) {
+          e.preventDefault();
+          closeOutBatchDetailModal();
+          return;
+        }
+        if (intoBatchDetailModal && intoBatchDetailModal.classList.contains('open')) {
+          e.preventDefault();
+          closeIntoBatchDetailModal();
+          return;
+        }
         if (outBatchUnloadGuideModal && outBatchUnloadGuideModal.classList.contains('open')) {
           e.preventDefault();
           closeOutBatchUnloadGuideModal();
